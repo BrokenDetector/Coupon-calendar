@@ -5,6 +5,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import { useBonds } from "@/context/BondContext";
 import { Bond } from "@/types/bond";
 import { addMonths, format, getYear, isSameDay, parseISO, startOfYear } from "date-fns";
+import { ru } from "date-fns/locale";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { FC, useCallback, useState } from "react";
 import MonthCalendar from "./MoutCalendar";
@@ -98,13 +99,15 @@ const CouponCalendar: FC = () => {
 							highlightedDates={parsedHighlightedDates}
 							onDayClick={handleDayClick}
 						/>
-						<h5 className="text-sm font-bold pb-4">
+						<h5 className="text-sm font-bold px-4 pb-4 text-balance">
 							Сумма купонов за месяц: {calculateMonthlyCouponTotal(month).toFixed(2)} ₽
 						</h5>
 					</div>
 				))}
 			</div>
-			<span className="text-xs text-muted-foreground italic">Все платежи указаны без вычета налогов и брокерских комиссий.</span>
+			<span className="text-xs text-muted-foreground italic p-4">
+				* Все платежи указаны без вычета налогов и брокерских комиссий.
+			</span>
 
 			<Dialog
 				open={isModalOpen}
@@ -112,7 +115,9 @@ const CouponCalendar: FC = () => {
 			>
 				<DialogContent>
 					<DialogHeader>
-						<DialogTitle>Купоны на {selectedDate ? format(selectedDate, "MMMM d, yyyy") : ""}</DialogTitle>
+						<DialogTitle>
+							Купоны на {selectedDate ? format(selectedDate, "d MMMM, yyyy", { locale: ru }) : ""}
+						</DialogTitle>
 					</DialogHeader>
 					<div className="grid gap-4 py-4">
 						{bondsForSelectedDate.length > 0 ? (
