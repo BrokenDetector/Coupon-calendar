@@ -1,10 +1,13 @@
-// pages/api/bonds.ts
 import { cacheBonds, getCachedBonds } from "@/lib/redis";
 import { Bond, BondResponse } from "@/types/bond";
 
 const fetchBondDataFromMoex = async (): Promise<Bond[]> => {
 	const response = await fetch(
-		"https://iss.moex.com/iss/engines/stock/markets/bonds/securities.json?iss.json=extended&iss.meta=off&iss.only=securities&securities.columns=SECID,SHORTNAME,ISIN"
+		"https://iss.moex.com/iss/engines/stock/markets/bonds/securities.json?iss.json=extended&iss.meta=off&iss.only=securities&securities.columns=SECID,SHORTNAME,ISIN",
+		{
+			// This tells Next.js to cache the data for 1 hour (3600 seconds)
+			next: { revalidate: 3600 },
+		}
 	);
 
 	if (!response.ok) {
@@ -30,7 +33,9 @@ export async function GET(req: Request) {
 		const cachedBonds = await getCachedBonds();
 		if (cachedBonds) {
 			// console.log("Returning cached bond data from Redis");
-			return new Response(JSON.stringify(cachedBonds));
+			return new Response(JSON.stringify(cachedBonds), {
+				headers: { "Cache-Control": "s-maxage=3600, stale-while-revalidate" },
+			});
 		}
 
 		// If no cache, fetch fresh data from MOEX
@@ -40,7 +45,9 @@ export async function GET(req: Request) {
 		// Save fresh data to Redis cache
 		await cacheBonds(bonds);
 
-		return new Response(JSON.stringify(bonds));
+		return new Response(JSON.stringify(bonds), {
+			headers: { "Cache-Control": "s-maxage=3600, stale-while-revalidate" },
+		});
 	} catch (error) {
 		console.log("ERROR on all-bonds: ", error);
 		return new Response("Internal server error", { status: 500 });

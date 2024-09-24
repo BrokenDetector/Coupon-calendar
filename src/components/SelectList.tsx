@@ -80,7 +80,7 @@ const SelectList: FC<SelectListProps> = ({ options }) => {
 						value={searchTerm}
 						onChange={handleInputChange}
 						placeholder="Поиск облигаций..."
-						className="w-full p-2 pl-10 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
+						className="min-w-60 p-2 pl-10 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
 						aria-label="Search bonds"
 						onClick={(e) => e.stopPropagation()}
 						onFocus={() => setIsListVisible(true)}
