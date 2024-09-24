@@ -5,7 +5,7 @@ import { Bond } from "@/types/bond";
 export default async function Home() {
 	const allBonds = async () => {
 		try {
-			const response = await fetch("http://localhost:3000/api/all-bonds", {
+			const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ""}/api/all-bonds`, {
 				headers: {
 					"Content-Type": "application/json",
 				},
