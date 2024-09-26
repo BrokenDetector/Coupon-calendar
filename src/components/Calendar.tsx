@@ -106,7 +106,7 @@ const CouponCalendar: FC = () => {
 				))}
 			</div>
 			<span className="text-xs text-muted-foreground italic p-4">
-				* Все платежи указаны без вычета налогов и брокерских комиссий.
+				*Все платежи указаны без вычета налогов и брокерских комиссий.
 			</span>
 
 			<Dialog

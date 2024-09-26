@@ -3,9 +3,8 @@ import { Bond, BondResponse } from "@/types/bond";
 
 const fetchBondDataFromMoex = async (): Promise<Bond[]> => {
 	const response = await fetch(
-		"https://iss.moex.com/iss/engines/stock/markets/bonds/securities.json?iss.json=extended&iss.meta=off&iss.only=securities&securities.columns=SECID,SHORTNAME,ISIN",
+		"https://iss.moex.com/iss/engines/stock/markets/bonds/securities.json?marketprice_board=1&iss.json=extended&iss.meta=off&iss.only=securities&securities.columns=SECID,SHORTNAME,ISIN",
 		{
-			// This tells Next.js to cache the data for 1 hour (3600 seconds)
 			next: { revalidate: 3600 },
 		}
 	);
