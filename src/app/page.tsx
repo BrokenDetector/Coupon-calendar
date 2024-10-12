@@ -1,8 +1,16 @@
 import CouponCalendar from "@/components/Calendar";
+import Header from "@/components/Header";
 import Portfolio from "@/components/Portfolio";
-import { Bond } from "@/types/bond";
+import { fetchRedis } from "@/helpers/redis";
+import { authOptions } from "@/lib/auth";
+import { getServerSession } from "next-auth";
 
 export default async function Home() {
+	const session = await getServerSession(authOptions);
+
+	const userData = (await fetchRedis("get", `user:${session?.user.id}`)) as string | null;
+	const user = userData ? JSON.parse(userData) : null;
+
 	const allBonds = async () => {
 		try {
 			const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ""}/api/all-bonds`, {
@@ -13,7 +21,7 @@ export default async function Home() {
 			const data: Bond[] = await response.json();
 			return data;
 		} catch (error) {
-			console.log("ERROR: ", error);
+			console.error("❗ERROR: ", error);
 			return [];
 		}
 	};
@@ -21,7 +29,8 @@ export default async function Home() {
 	const bondsList = await allBonds();
 
 	return (
-		<main className="flex min-h-screen flex-col items-center gap-3 p-10 px-5  min-w-[1000px] ">
+		<main className="flex min-h-screen flex-col items-center gap-3 min-w-[1000px] ">
+			<Header user={user} />
 			<div className="flex flex-row justify-between gap-5">
 				<CouponCalendar />
 				<Portfolio allBonds={bondsList} />

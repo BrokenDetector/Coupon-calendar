@@ -1,20 +1,17 @@
-"use client";
-
 import { fetchBondCoupons } from "@/actions/fetch-bond";
-import { useBonds } from "@/context/BondContext";
 import { ChevronDown, ChevronUp, Search } from "lucide-react";
 import { FC, useEffect, useRef, useState } from "react";
 
 interface SelectListProps {
 	options: Bond[];
+	onBondUpdate: (bond: Bond) => void;
+	quantities: { [SECID: string]: number };
 }
 
-const SelectList: FC<SelectListProps> = ({ options }) => {
+const SelectList: FC<SelectListProps> = ({ options, onBondUpdate, quantities }) => {
 	const [searchTerm, setSearchTerm] = useState("");
 	const [isListVisible, setIsListVisible] = useState(false);
 	const dropdownRef = useRef<HTMLDivElement>(null);
-
-	const { setBonds } = useBonds();
 
 	const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 		setSearchTerm(event.target.value);
@@ -23,32 +20,14 @@ const SelectList: FC<SelectListProps> = ({ options }) => {
 	const filteredOptions = options.filter((option) =>
 		option.SHORTNAME.toLowerCase().includes(searchTerm.toLowerCase())
 	);
-	const handleSelect = async (secid: string, quantity: number = 1) => {
+
+	const handleSelect = async (secid: string) => {
 		const selectedBond = await fetchBondCoupons(secid);
+		const quantity = quantities[secid] ? (quantities[secid] += 1) : 1;
 		const bondWithQuantity = { ...selectedBond, quantity };
 
-		const oldLocalStorage = localStorage.getItem("BONDSECIDS");
-		if (oldLocalStorage) {
-			const data = JSON.parse(oldLocalStorage);
-
-			const updatedData = Array.isArray(data) ? data : [];
-			const existingBond = updatedData.find((bond: any) => bond.secid === secid);
-			if (existingBond) {
-				existingBond.quantity += quantity;
-			} else {
-				// if (data.length > 20) {
-				// 	return toast.error("Максимум 20 облигаций");
-				// }
-				updatedData.push({ SECID: secid, quantity });
-			}
-
-			localStorage.setItem("BONDSECIDS", JSON.stringify(updatedData));
-		} else {
-			localStorage.setItem("BONDSECIDS", JSON.stringify([{ SECID: secid, quantity }]));
-		}
-
 		setIsListVisible(false);
-		setBonds((prev) => [...prev, bondWithQuantity]);
+		onBondUpdate(bondWithQuantity);
 	};
 
 	useEffect(() => {

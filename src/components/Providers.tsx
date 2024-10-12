@@ -1,5 +1,6 @@
 "use client";
 import { BondProvider } from "@/context/BondContext";
+import { SessionProvider } from "next-auth/react";
 import { FC, ReactNode } from "react";
 import { Toaster } from "react-hot-toast";
 
@@ -14,7 +15,9 @@ const Providers: FC<ProvidersProps> = ({ children }) => {
 				position="top-center"
 				reverseOrder={false}
 			/>
-			<BondProvider>{children}</BondProvider>
+			<SessionProvider>
+				<BondProvider>{children}</BondProvider>
+			</SessionProvider>
 		</>
 	);
 };

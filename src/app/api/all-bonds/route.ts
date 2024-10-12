@@ -1,12 +1,24 @@
-import { cacheBonds, getCachedBonds } from "@/lib/redis";
-import { Bond, BondResponse } from "@/types/bond";
+"use server";
+
+import { db } from "@/lib/db";
+
+const CACHE_DURATION = 1 * 60 * 60; // 1 hours in seconds
+
+const getCachedBonds = async (): Promise<Bond[] | null> => {
+	const cachedData = await db.get<Bond[]>("bondsCache");
+	if (cachedData) {
+		return cachedData;
+	}
+	return null;
+};
+
+const cacheBonds = async (bonds: Bond[]): Promise<void> => {
+	await db.set("bondsCache", bonds, { ex: CACHE_DURATION });
+};
 
 const fetchBondDataFromMoex = async (): Promise<Bond[]> => {
 	const response = await fetch(
-		"https://iss.moex.com/iss/engines/stock/markets/bonds/securities.json?marketprice_board=1&iss.json=extended&iss.meta=off&iss.only=securities&securities.columns=SECID,SHORTNAME,ISIN",
-		{
-			next: { revalidate: 3600 },
-		}
+		"https://iss.moex.com/iss/engines/stock/markets/bonds/securities.json?marketprice_board=1&iss.json=extended&iss.meta=off&iss.only=securities&securities.columns=SECID,SHORTNAME,ISIN"
 	);
 
 	if (!response.ok) {
@@ -20,6 +32,7 @@ const fetchBondDataFromMoex = async (): Promise<Bond[]> => {
 			SECID: bond.SECID,
 			SHORTNAME: bond.SHORTNAME,
 			ISIN: bond.ISIN,
+			CURRENCY: bond.CURRENCY,
 		}))
 		.sort((a, b) => a.SHORTNAME.localeCompare(b.SHORTNAME));
 
@@ -27,18 +40,16 @@ const fetchBondDataFromMoex = async (): Promise<Bond[]> => {
 };
 
 export async function GET(req: Request) {
+	const cachedBonds = await getCachedBonds();
+
 	try {
-		// Check Redis cache first
-		const cachedBonds = await getCachedBonds();
 		if (cachedBonds) {
-			// console.log("Returning cached bond data from Redis");
 			return new Response(JSON.stringify(cachedBonds), {
 				headers: { "Cache-Control": "s-maxage=3600, stale-while-revalidate" },
 			});
 		}
 
 		// If no cache, fetch fresh data from MOEX
-		// console.log("Fetching fresh bond data");
 		const bonds = await fetchBondDataFromMoex();
 
 		// Save fresh data to Redis cache
@@ -48,7 +59,7 @@ export async function GET(req: Request) {
 			headers: { "Cache-Control": "s-maxage=3600, stale-while-revalidate" },
 		});
 	} catch (error) {
-		console.log("ERROR on all-bonds: ", error);
+		console.error("❗ERROR on all-bonds: ", error);
 		return new Response("Internal server error", { status: 500 });
 	}
 }

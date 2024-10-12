@@ -1,7 +1,6 @@
 "use client";
 
 import { useBonds } from "@/context/BondContext";
-import { Bond } from "@/types/bond";
 import { X } from "lucide-react";
 import { FC, useEffect, useState } from "react";
 import SelectList from "./SelectList";
@@ -14,34 +13,30 @@ interface PortfolioProps {
 
 const Portfolio: FC<PortfolioProps> = ({ allBonds }) => {
 	const { bonds, setBonds } = useBonds();
-	const [quantities, setQuantities] = useState<{ [secid: string]: number }>({}); // Track quantities by secid
+	const [quantities, setQuantities] = useState<{ [secid: string]: number }>({});
 
 	useEffect(() => {
 		const initialQuantities = bonds.reduce((acc: { [secid: string]: number }, bond) => {
-			acc[bond.SECID] = bond.quantity || 1; // Default to 1 if no quantity is set
+			acc[bond.SECID] = bond.quantity || 1;
 			return acc;
 		}, {});
 		setQuantities(initialQuantities);
 	}, [bonds]);
 
 	const handleQuantityChange = (secid: string, newQuantity: number) => {
-		// Update quantity in state
 		setQuantities((prevQuantities) => ({
 			...prevQuantities,
 			[secid]: newQuantity,
 		}));
 
-		// Update quantity in bonds state
 		setBonds((prevBonds) =>
 			prevBonds.map((bond) => (bond.SECID === secid ? { ...bond, quantity: newQuantity } : bond))
 		);
 
-		// Update quantity in local storage
-		const updatedBonds = bonds.map(
-			(bond) =>
-				bond.SECID === secid
-					? { SECID: bond.SECID, quantity: newQuantity } // Store only SECID and quantity
-					: { SECID: bond.SECID, quantity: bond.quantity || 1 } // Ensure all bonds have SECID and quantity
+		const updatedBonds = bonds.map((bond) =>
+			bond.SECID === secid
+				? { SECID: bond.SECID, quantity: newQuantity }
+				: { SECID: bond.SECID, quantity: bond.quantity || 1 }
 		);
 
 		localStorage.setItem("BONDSECIDS", JSON.stringify(updatedBonds));
@@ -50,13 +45,11 @@ const Portfolio: FC<PortfolioProps> = ({ allBonds }) => {
 	const removeBond = (secid: string) => {
 		setBonds((prev) => prev.filter((bond) => bond.SECID !== secid));
 
-		// Update local storage
 		const oldStorage = JSON.parse(localStorage.getItem("BONDSECIDS")!) as { SECID: string; quantity: string }[];
 		const updatedStorage = oldStorage.filter((item) => item.SECID === secid);
 
 		localStorage.setItem("BONDSECIDS", JSON.stringify(updatedStorage));
 
-		// Remove from quantities state
 		setQuantities((prevQuantities) => {
 			const newQuantities = { ...prevQuantities };
 			delete newQuantities[secid];

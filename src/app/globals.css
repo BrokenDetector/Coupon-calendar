@@ -2,18 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* styles/global.css */
-.highlight-date {
-	background-color: green !important;
-	color: white !important	;
-}
-
-/* Disable the default active tile style */
-.react-calendar__tile--active {
-	background-color: inherit !important;
-	color: inherit !important;
-	font-weight: normal !important;
-}
 @layer base {
 	:root {
 		--background: 0 0% 100%;
