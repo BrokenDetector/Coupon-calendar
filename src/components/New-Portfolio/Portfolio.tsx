@@ -15,7 +15,7 @@ interface PortfolioProps {
 
 const Portfolio: FC<PortfolioProps> = ({ quantities, bonds, portfolioName, addBond, removeBond }) => {
 	return (
-		<div className="bg-secondary p-4 rounded-md border">
+		<div className="bg-card p-4 rounded-md border">
 			<h2 className="text-lg font-semibold mb-2">{portfolioName}</h2>
 			{bonds.length === 0 ? (
 				<p className="text-muted-foreground">Облигации не добавлены</p>

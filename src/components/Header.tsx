@@ -16,6 +16,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FC, useState } from "react";
+import ChangeThemeButton from "./ChangeThemeButton";
 
 interface HeaderProps {
 	user: User | null;
@@ -27,7 +28,7 @@ const Header: FC<HeaderProps> = ({ user }) => {
 	const router = useRouter();
 
 	return (
-		<header className="w-full shadow-md">
+		<header className="w-full border-b">
 			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 				<div className="flex justify-between h-16">
 					<div className="flex items-center">
@@ -36,19 +37,20 @@ const Header: FC<HeaderProps> = ({ user }) => {
 							className="flex-shrink-0 flex items-center"
 						>
 							<Image
-								className="size-14"
+								className="size-14 dark:invert"
 								src={"/logo.svg"}
-								alt="Logo"
+								alt="logo"
 								width={"56"}
 								height={"56"}
 							/>
-							<div className="flex flex-col ml-2 text-xl font-bold text-gray-900">
+							<div className="flex flex-col ml-2 text-xl font-bold">
 								<span>Календарь</span>
 								<span>купонов</span>
 							</div>
 						</Link>
 					</div>
 					<div className="hidden sm:ml-6 sm:flex sm:items-center">
+						<ChangeThemeButton />
 						{user ? (
 							<DropdownMenu>
 								<DropdownMenuTrigger asChild>
@@ -145,6 +147,7 @@ const Header: FC<HeaderProps> = ({ user }) => {
 			{isMenuOpen && (
 				<div className="sm:hidden border-t border-gray-200">
 					<div className="pt-2 pb-3 space-y-1">
+						<ChangeThemeButton />
 						{user ? (
 							<>
 								{user.portfolios.map((port, index) => (

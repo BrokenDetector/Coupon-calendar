@@ -46,7 +46,7 @@ const MonthCalendar: FC<MonthCalendarProps> = ({ date, highlightedDates, onDayCl
 						<div
 							key={day}
 							className={`font-medium ${
-								day === "Sat" || day === "Sun" ? "text-red-500" : "text-muted-foreground"
+								day === "Sat" || day === "Sun" ? "text-destructive" : "text-muted-foreground"
 							}`}
 						>
 							{day}
@@ -62,9 +62,9 @@ const MonthCalendar: FC<MonthCalendarProps> = ({ date, highlightedDates, onDayCl
 									day.getMonth() !== date.getMonth()
 										? "text-muted-foreground"
 										: isWeekend
-										? "text-red-500"
+										? "text-destructive"
 										: ""
-								} ${isHighlighted ? "bg-green-300 hover:bg-green-400" : ""}`}
+								} ${isHighlighted ? "bg-primary hover:bg-primary-foreground" : ""}`}
 								onClick={() => onDayClick(day)}
 							>
 								<div>{format(day, "d")}</div>

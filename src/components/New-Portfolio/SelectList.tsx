@@ -49,7 +49,7 @@ const SelectList: FC<SelectListProps> = ({ options, onBondUpdate, quantities }) 
 				className="relative"
 				ref={dropdownRef}
 			>
-				<div className="relative grid grid-cols-4 items-center cursor-pointer border border-gray-300 rounded-md shadow-sm min-w-60">
+				<div className="relative grid grid-cols-4 items-center cursor-pointer border rounded-md shadow-sm min-w-60">
 					<input
 						type="text"
 						value={searchTerm}
@@ -60,26 +60,26 @@ const SelectList: FC<SelectListProps> = ({ options, onBondUpdate, quantities }) 
 						onClick={(e) => e.stopPropagation()}
 						onFocus={() => setIsListVisible(true)}
 					/>
-					<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+					<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
 					{isListVisible ? (
 						<ChevronUp
-							className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400"
+							className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground"
 							onClick={() => setIsListVisible(false)}
 						/>
 					) : (
 						<ChevronDown
-							className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400"
+							className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground"
 							onClick={() => setIsListVisible(true)}
 						/>
 					)}
 				</div>
 				{isListVisible && filteredOptions.length > 0 && (
-					<ul className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
+					<ul className="absolute z-10 w-full mt-1 bg-muted border rounded-md shadow-lg max-h-60 overflow-auto">
 						{filteredOptions.map((bond, index) => (
 							<li
 								key={index}
 								onClick={() => handleSelect(bond.SECID)}
-								className="p-2 hover:bg-gray-100 cursor-pointer"
+								className="p-2 hover:bg-muted-foreground cursor-pointer"
 							>
 								{bond.SHORTNAME}
 							</li>

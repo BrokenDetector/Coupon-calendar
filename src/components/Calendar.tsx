@@ -10,7 +10,7 @@ import { ru } from "date-fns/locale";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { FC, useCallback, useState } from "react";
-import MonthCalendar from "./MoutCalendar";
+import MonthCalendar from "./MonthCalendar";
 
 interface CouponCalendarProps {
 	bonds?: Bond[];
@@ -90,7 +90,7 @@ const CouponCalendar: FC<CouponCalendarProps> = ({ bonds: bondsFromProps }) => {
 					return (
 						<div
 							key={index}
-							className="flex flex-col gap-4 border-zinc-400 border rounded-lg items-center justify-between"
+							className="flex flex-col gap-4 border rounded-lg items-center justify-between"
 						>
 							<MonthCalendar
 								date={month}

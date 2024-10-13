@@ -1,11 +1,17 @@
 "use client";
 import { BondProvider } from "@/context/BondContext";
 import { SessionProvider } from "next-auth/react";
+import { ThemeProvider as NextThemesProvider } from "next-themes";
+import { type ThemeProviderProps } from "next-themes/dist/types";
 import { FC, ReactNode } from "react";
 import { Toaster } from "react-hot-toast";
 
 interface ProvidersProps {
 	children: ReactNode;
+}
+
+function ThemeProvider({ children, ...props }: ThemeProviderProps) {
+	return <NextThemesProvider {...props}>{children}</NextThemesProvider>;
 }
 
 const Providers: FC<ProvidersProps> = ({ children }) => {
@@ -16,7 +22,15 @@ const Providers: FC<ProvidersProps> = ({ children }) => {
 				reverseOrder={false}
 			/>
 			<SessionProvider>
-				<BondProvider>{children}</BondProvider>
+				<BondProvider>
+					<ThemeProvider
+						attribute="class"
+						defaultTheme="system"
+						enableSystem
+					>
+						{children}
+					</ThemeProvider>
+				</BondProvider>
 			</SessionProvider>
 		</>
 	);
