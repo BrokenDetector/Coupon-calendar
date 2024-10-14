@@ -1,6 +1,6 @@
 import { fetchBondCoupons } from "@/actions/fetch-bond";
 import Header from "@/components/Header";
-import BondManager from "@/components/New-Portfolio/BondManager";
+import ServerPortfolioManager from "@/components/ServerPortfolioManager";
 import { fetchRedis } from "@/helpers/redis";
 import { authOptions } from "@/lib/auth";
 import { getServerSession } from "next-auth";
@@ -51,13 +51,12 @@ const page: FC<pageProps> = async ({ params }) => {
 		<main className="flex min-h-screen flex-col items-center gap-3 min-w-[1000px] ">
 			<Header user={JSON.parse(userData)} />
 
-			<BondManager
+			<ServerPortfolioManager
 				allBonds={allBonds}
 				portfolioId={portfolioId}
 				portfolioName={portfolio.name}
 				userId={session!.user.id}
 				initialBonds={bondsList}
-				isMaxBonds={bondsList.length > 20}
 			/>
 		</main>
 	);

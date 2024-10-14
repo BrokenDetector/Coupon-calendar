@@ -49,7 +49,7 @@ const Header: FC<HeaderProps> = ({ user }) => {
 							</div>
 						</Link>
 					</div>
-					<div className="hidden sm:ml-6 sm:flex sm:items-center">
+					<div className="hidden sm:ml-6 sm:flex sm:items-center space-x-2">
 						<ChangeThemeButton />
 						{user ? (
 							<DropdownMenu>
@@ -105,7 +105,7 @@ const Header: FC<HeaderProps> = ({ user }) => {
 								<Button
 									variant="outline"
 									asChild
-									className="border-gray-300 shadow-sm"
+									className="border shadow-sm"
 								>
 									<Link href="/auth?view=login">
 										<User className="size-5 mr-2" />
@@ -125,7 +125,7 @@ const Header: FC<HeaderProps> = ({ user }) => {
 					<div className="-mr-2 flex items-center sm:hidden">
 						<Button
 							variant="outline"
-							className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary border-gray-300 shadow-sm"
+							className="inline-flex items-center justify-center p-2 rounded-md text-muted-foreground hover:bg-muted focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary border-gray-300 shadow-sm"
 							onClick={() => setIsMenuOpen(!isMenuOpen)}
 						>
 							{isMenuOpen ? (
@@ -145,7 +145,7 @@ const Header: FC<HeaderProps> = ({ user }) => {
 			</div>
 
 			{isMenuOpen && (
-				<div className="sm:hidden border-t border-gray-200">
+				<div className="sm:hidden border-t border">
 					<div className="pt-2 pb-3 space-y-1">
 						<ChangeThemeButton />
 						{user ? (
@@ -163,7 +163,7 @@ const Header: FC<HeaderProps> = ({ user }) => {
 
 								<Button
 									variant="ghost"
-									className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50"
+									className="w-full justify-start text-red-600 hover:text-red-700"
 									onClick={async () => await signOut()}
 								>
 									<LogOut className="size-5 mr-2" />

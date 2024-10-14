@@ -3,7 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { format, isSameDay } from "date-fns";
 import { ru } from "date-fns/locale";
-import { FC } from "react";
+import { FC, memo } from "react";
 
 const daysOfWeek = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
 
@@ -17,7 +17,7 @@ function capitalizeFirstLetter(string: string) {
 	return string.replace(/^./, string[0].toUpperCase());
 }
 
-const MonthCalendar: FC<MonthCalendarProps> = ({ date, highlightedDates, onDayClick }) => {
+const MonthCalendar: FC<MonthCalendarProps> = memo(function MonthCalendar({ date, highlightedDates, onDayClick }) {
 	const monthStart = new Date(date.getFullYear(), date.getMonth(), 1);
 	const monthEnd = new Date(date.getFullYear(), date.getMonth() + 1, 0);
 	const startDate = new Date(monthStart);
@@ -64,7 +64,7 @@ const MonthCalendar: FC<MonthCalendarProps> = ({ date, highlightedDates, onDayCl
 										: isWeekend
 										? "text-destructive"
 										: ""
-								} ${isHighlighted ? "bg-primary hover:bg-primary-foreground" : ""}`}
+								} ${isHighlighted ? "bg-primary/70 hover:bg-primary/60" : ""}`}
 								onClick={() => onDayClick(day)}
 							>
 								<div>{format(day, "d")}</div>
@@ -75,6 +75,6 @@ const MonthCalendar: FC<MonthCalendarProps> = ({ date, highlightedDates, onDayCl
 			</CardContent>
 		</Card>
 	);
-};
+});
 
 export default MonthCalendar;

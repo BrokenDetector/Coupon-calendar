@@ -1,15 +1,14 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useBonds } from "@/context/BondContext";
 import { getCurrencySymbol } from "@/helpers/getCurrencySymbol";
 import { sumCouponsByCurrency } from "@/helpers/sumCouponsByCurrency";
-import { addMonths, format, getYear, isSameDay, parseISO, startOfYear } from "date-fns";
-import { ru } from "date-fns/locale";
+import { addMonths, getYear, isSameDay, parseISO, startOfYear } from "date-fns";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useSession } from "next-auth/react";
-import { FC, useCallback, useState } from "react";
+import { FC, useCallback, useMemo, useState } from "react";
+import CouponModal from "./CouponModal,";
 import MonthCalendar from "./MonthCalendar";
 
 interface CouponCalendarProps {
@@ -28,27 +27,28 @@ const CouponCalendar: FC<CouponCalendarProps> = ({ bonds: bondsFromProps }) => {
 
 	const bonds = bondsFromProps || bondsFromContext;
 
-	const highlightedDates = () => {
-		let dates: string[] = [];
+	const highlightedDates = useMemo(() => {
 		if (bonds.length > 0) {
-			bonds.map((bond) => {
-				bond.COUPONDATES!.map((date) => {
-					dates.push(date);
-				});
-			});
+			return bonds.reduce((dates: string[], bond) => {
+				bond.COUPONDATES?.forEach((date) => dates.push(date));
+				return dates;
+			}, []);
 		}
-		return dates;
-	};
+		return [];
+	}, [bonds]);
 
-	const months = Array.from({ length: 12 }, (_, i) => addMonths(startOfYear(new Date(currentYear, 0)), i));
-	const parsedHighlightedDates = highlightedDates().map((date) => parseISO(date));
+	const parsedHighlightedDates = useMemo(() => highlightedDates.map((date) => parseISO(date)), [highlightedDates]);
+
+	const months = useMemo(
+		() => Array.from({ length: 12 }, (_, i) => addMonths(startOfYear(new Date(currentYear, 0)), i)),
+		[currentYear]
+	);
 
 	const handleDayClick = useCallback(
 		(date: Date) => {
 			const bondsWithCoupons = bonds.filter((bond) =>
 				bond.COUPONDATES!.some((couponDate) => isSameDay(parseISO(couponDate), date))
 			);
-
 			const totalsByCurrency = sumCouponsByCurrency(bondsWithCoupons, (couponDate) =>
 				isSameDay(couponDate, date)
 			);
@@ -119,63 +119,13 @@ const CouponCalendar: FC<CouponCalendarProps> = ({ bonds: bondsFromProps }) => {
 				)}
 			</div>
 
-			<Dialog
-				open={isModalOpen}
-				onOpenChange={setIsModalOpen}
-			>
-				<DialogContent>
-					<DialogHeader>
-						<DialogTitle>
-							Купоны на {selectedDate ? format(selectedDate, "d MMMM, yyyy", { locale: ru }) : ""}
-						</DialogTitle>
-					</DialogHeader>
-					<div className="grid gap-4 py-4">
-						{bondsForSelectedDate.length > 0 ? (
-							<div className="grid gap-2">
-								{bondsForSelectedDate.map((bond, index) => {
-									const couponIndex = bond.COUPONDATES!.findIndex((couponDate) =>
-										isSameDay(parseISO(couponDate), selectedDate!)
-									);
-									const couponValue = bond.COUPONVALUE![couponIndex];
-									const quantity = bond.quantity || 1;
-									const currencySymbol = getCurrencySymbol(bond.CURRENCY || "RUB");
-
-									return (
-										<div
-											key={index}
-											className="flex justify-between"
-										>
-											<span>
-												{bond.SHORTNAME} (x{quantity})
-											</span>
-											<span>
-												{couponValue
-													? `${(couponValue * quantity).toFixed(2)} ${currencySymbol}`
-													: "-"}
-											</span>
-										</div>
-									);
-								})}
-								<div className="flex justify-between font-bold">
-									<span>Сумма купонов за день:</span>
-									<div>
-										{Object.entries(totalCouponsByCurrency).map(([currency, total]) => (
-											<div key={currency}>
-												{total.toFixed(2)} {getCurrencySymbol(currency)}
-											</div>
-										))}
-									</div>
-								</div>
-							</div>
-						) : (
-							<p>Нет купонов в этот день.</p>
-						)}
-					</div>
-					<DialogFooter>
-						<Button onClick={() => setIsModalOpen(false)}>Закрыть</Button>
-					</DialogFooter>
-				</DialogContent>
-			</Dialog>
+			<CouponModal
+				isModalOpen={isModalOpen}
+				selectedDate={selectedDate}
+				bondsForSelectedDate={bondsForSelectedDate}
+				totalCouponsByCurrency={totalCouponsByCurrency}
+				onClose={() => setIsModalOpen(false)}
+			/>
 		</div>
 	);
 };

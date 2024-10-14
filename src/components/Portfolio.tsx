@@ -1,107 +1,90 @@
 "use client";
 
-import { useBonds } from "@/context/BondContext";
 import { X } from "lucide-react";
-import { FC, useEffect, useState } from "react";
-import SelectList from "./SelectList";
+import { FC, useCallback, useEffect, useState } from "react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 
 interface PortfolioProps {
-	allBonds: Bond[];
+	bonds: Bond[];
+	portfolioName?: string;
+	addBond: (updatedBonds: Bond) => void;
+	removeBond: (SECID: string) => void;
 }
 
-const Portfolio: FC<PortfolioProps> = ({ allBonds }) => {
-	const { bonds, setBonds } = useBonds();
-	const [quantities, setQuantities] = useState<{ [secid: string]: number }>({});
+const Portfolio: FC<PortfolioProps> = ({ bonds, portfolioName, addBond, removeBond }) => {
+	const [quantities, setQuantities] = useState<Record<string, number>>({});
 
 	useEffect(() => {
-		const initialQuantities = bonds.reduce((acc: { [secid: string]: number }, bond) => {
-			acc[bond.SECID] = bond.quantity || 1;
-			return acc;
-		}, {});
-		setQuantities(initialQuantities);
+		if (bonds.length > 0) {
+			const initialQuantities = bonds.reduce((acc, bond) => {
+				acc[bond.SECID] = bond.quantity || 1;
+				return acc;
+			}, {} as Record<string, number>);
+			setQuantities(initialQuantities);
+		}
 	}, [bonds]);
 
-	const handleQuantityChange = (secid: string, newQuantity: number) => {
-		setQuantities((prevQuantities) => ({
-			...prevQuantities,
-			[secid]: newQuantity,
-		}));
+	const handleQuantityChange = useCallback((bond: Bond, value: number) => {
+		if (!isNaN(value) && value > 0) {
+			setQuantities((prev) => ({ ...prev, [bond.SECID]: value }));
+		}
+	}, []);
 
-		setBonds((prevBonds) =>
-			prevBonds.map((bond) => (bond.SECID === secid ? { ...bond, quantity: newQuantity } : bond))
-		);
-
-		const updatedBonds = bonds.map((bond) =>
-			bond.SECID === secid
-				? { SECID: bond.SECID, quantity: newQuantity }
-				: { SECID: bond.SECID, quantity: bond.quantity || 1 }
-		);
-
-		localStorage.setItem("BONDSECIDS", JSON.stringify(updatedBonds));
-	};
-
-	const removeBond = (secid: string) => {
-		setBonds((prev) => prev.filter((bond) => bond.SECID !== secid));
-
-		const oldStorage = JSON.parse(localStorage.getItem("BONDSECIDS")!) as { SECID: string; quantity: string }[];
-		const updatedStorage = oldStorage.filter((item) => item.SECID === secid);
-
-		localStorage.setItem("BONDSECIDS", JSON.stringify(updatedStorage));
-
-		setQuantities((prevQuantities) => {
-			const newQuantities = { ...prevQuantities };
-			delete newQuantities[secid];
-			return newQuantities;
-		});
-	};
+	const handleBlur = useCallback(
+		(bond: Bond) => {
+			const quantity = quantities[bond.SECID];
+			if (quantity) {
+				addBond({ ...bond, quantity });
+			}
+		},
+		[quantities, addBond]
+	);
 
 	return (
-		<div className="flex flex-col items-center p-2">
-			<h1>Все облигации</h1>
-			<SelectList options={allBonds} />
+		<div className="bg-card p-4 rounded-md border">
+			<h2 className="text-lg font-semibold mb-2">{portfolioName || "Мой портфель"}</h2>
+			{bonds.length === 0 ? (
+				<p className="text-muted-foreground">Облигации не добавлены </p>
+			) : (
+				<ul
+					className="space-y-2"
+					aria-label="List of selected bonds"
+				>
+					{bonds.map((bond, index) => (
+						<li
+							key={index}
+							className="grid grid-cols-3 items-center justify-between space-x-3 bg-background p-2 rounded-md"
+						>
+							<span className="text-sm">{bond.SHORTNAME}</span>
+							<div className="flex flex-row items-center justify-center col-span-2 space-x-2">
+								<span className="text-sm text-muted-foreground">x</span>
+								<Input
+									type="number"
+									value={quantities[bond.SECID] || 1}
+									onChange={(e) => handleQuantityChange(bond, parseInt(e.target.value))}
+									onBlur={() => handleBlur(bond)}
+									onKeyDown={(e) => {
+										if (e.keyCode === 13) {
+											handleBlur(bond);
+										}
+									}}
+									className="border p-1 rounded-md text-center max-w-28 overflow-hidden text-ellipsis"
+								/>
 
-			<div className="bg-secondary p-4 rounded-md">
-				<h2 className="text-lg font-semibold mb-2">Мой портфель</h2>
-				{bonds.length === 0 ? (
-					<p className="text-muted-foreground">Облигации не добавлены </p>
-				) : (
-					<ul
-						className="space-y-2"
-						aria-label="List of selected bonds"
-					>
-						{bonds.map((bond, index) => (
-							<li
-								key={index}
-								className="grid grid-cols-3 items-center justify-between space-x-3 bg-background p-2 rounded-md"
-							>
-								<span className="text-sm">{bond.SHORTNAME}</span>
-								<div className="flex flex-row items-center justify-center col-span-2 space-x-2">
-									<span className="text-sm text-muted-foreground">x</span>
-									<Input
-										type="number"
-										min="1"
-										max="1000000"
-										value={quantities[bond.SECID] || 1}
-										onChange={(e) => handleQuantityChange(bond.SECID, parseInt(e.target.value))}
-										className="border border-zinc-600 p-1 rounded-md text-center max-w-28 overflow-hidden text-ellipsis"
-									/>
-
-									<Button
-										onClick={() => removeBond(bond.SECID)}
-										size={"icon"}
-										className="p-1 m-3 bg-red-500 hover:bg-red-600 rounded-lg h-fit"
-										aria-label={`Remove ${bond.SHORTNAME}`}
-									>
-										<X className="size-4" />
-									</Button>
-								</div>
-							</li>
-						))}
-					</ul>
-				)}
-			</div>
+								<Button
+									onClick={() => removeBond(bond.SECID)}
+									size={"icon"}
+									className="p-1 m-3 bg-destructive hover:bg-destructive/90 rounded-lg h-fit"
+									aria-label={`Remove ${bond.SHORTNAME}`}
+								>
+									<X className="size-4" />
+								</Button>
+							</div>
+						</li>
+					))}
+				</ul>
+			)}
 		</div>
 	);
 };

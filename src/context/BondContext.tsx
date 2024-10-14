@@ -31,7 +31,7 @@ export const BondProvider: FC<BondProviderProps> = ({ children }) => {
 					try {
 						for (const bond of bondStorage) {
 							const bondData = await fetchBondCoupons(bond.SECID);
-							setBonds((prevBonds) => [...prevBonds, { ...bondData, quantity: bond.quantity || 1 }]);
+							setBonds((prevBonds) => [...prevBonds, { ...bondData, quantity: bond.quantity }]);
 						}
 
 						toast.success("Облигации загружены");

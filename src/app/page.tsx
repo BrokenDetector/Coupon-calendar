@@ -1,6 +1,5 @@
-import CouponCalendar from "@/components/Calendar";
 import Header from "@/components/Header";
-import Portfolio from "@/components/Portfolio";
+import LocalPortfolioManager from "@/components/LocalPortfolioManager";
 import { fetchRedis } from "@/helpers/redis";
 import { authOptions } from "@/lib/auth";
 import { getServerSession } from "next-auth";
@@ -31,10 +30,7 @@ export default async function Home() {
 	return (
 		<main className="flex min-h-screen flex-col items-center gap-3 min-w-[1000px] ">
 			<Header user={user} />
-			<div className="flex flex-row justify-between gap-5">
-				<CouponCalendar />
-				<Portfolio allBonds={bondsList} />
-			</div>
+			<LocalPortfolioManager allBonds={bondsList} />
 		</main>
 	);
 }

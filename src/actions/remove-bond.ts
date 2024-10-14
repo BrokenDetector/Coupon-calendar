@@ -17,6 +17,5 @@ export const removeBondFromPortfolio = async (portfolioId: string | number, seci
 	const updatedBonds = portfolio.bonds.filter((bond) => bond.SECID !== secidToRemove);
 
 	user.portfolios[portfolioIndex].bonds = updatedBonds;
-
 	await db.set(`user:${userId}`, JSON.stringify(user));
 };
