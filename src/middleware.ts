@@ -3,12 +3,13 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function middleware(req: NextRequest) {
 	const session = await getToken({ req });
+	const pathname = req.nextUrl.pathname;
 
-	if (!session && req.nextUrl.pathname.startsWith("/portfolio")) {
+	if (!session && pathname.startsWith("/portfolio")) {
 		return NextResponse.redirect(new URL("/auth", req.url));
 	}
 
-	if (session && (req.nextUrl.pathname.startsWith("/auth") || req.nextUrl.pathname === "/")) {
+	if (session && (pathname.startsWith("/auth") || pathname === "/")) {
 		return NextResponse.redirect(new URL("/portfolio/1", req.url));
 	}
 

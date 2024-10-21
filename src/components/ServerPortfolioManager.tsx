@@ -1,7 +1,5 @@
 "use client";
 
-import { addBondToPortfolio } from "@/actions/add-bond";
-import { removeBondFromPortfolio } from "@/actions/remove-bond";
 import CouponCalendar from "@/components/Calendar";
 import Portfolio from "@/components/Portfolio";
 import SelectList from "@/components/SelectList";
@@ -27,9 +25,20 @@ const ServerPortfolioManager: FC<ServerPortfolioManagerProps> = ({
 	const [bonds, setBonds] = useState<Bond[]>(initialBonds);
 
 	const debouncedUpdate = useCallback(
-		debounce(async (updates) => {
-			await addBondToPortfolio(portfolioId, updates, userId);
-		}, 500),
+		debounce(async (bondsToAdd) => {
+			const response = await fetch("/api/add-bond", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({ portfolioId, bondsToAdd }),
+			});
+
+			if (!response.ok) {
+				const error = await response.json();
+				toast.error(error.error);
+			}
+		}, 1000),
 		[portfolioId, userId]
 	);
 
@@ -58,14 +67,22 @@ const ServerPortfolioManager: FC<ServerPortfolioManagerProps> = ({
 
 	const removeBond = useCallback(
 		async (SECID: string) => {
-			try {
+			const response = await fetch("/api/remove-bond", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({ portfolioId, secIdToRemove: SECID }),
+			});
+
+			if (!response.ok) {
+				const error = await response.json();
+				toast.error(error.error);
+			} else {
 				setBonds((prevBonds) => prevBonds.filter((bond) => bond.SECID !== SECID));
-				await removeBondFromPortfolio(portfolioId, SECID, userId);
-			} catch (error) {
-				console.error("❗Failed to remove bond:", error);
 			}
 		},
-		[portfolioId, userId]
+		[portfolioId]
 	);
 
 	return (

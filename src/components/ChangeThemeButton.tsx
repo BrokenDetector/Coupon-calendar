@@ -14,7 +14,7 @@ const ChangeThemeButton = () => {
 	}, []);
 
 	if (!mounted) {
-		return <LoaderCircle className="animate-spin size-[1.2rem]" />;
+		return <LoaderCircle className="animate-spin size-[1.3rem]" />;
 	}
 
 	if (resolvedTheme === "dark") {
@@ -22,9 +22,9 @@ const ChangeThemeButton = () => {
 			<Button
 				variant="outline"
 				onClick={() => setTheme("light")}
-				className="rounded-full"
+				className="rounded-full p-3"
 			>
-				<Sun className="size-[1.2rem]" />
+				<Sun className="size-[1.3rem]" />
 			</Button>
 		);
 	}
@@ -34,9 +34,9 @@ const ChangeThemeButton = () => {
 			<Button
 				variant="outline"
 				onClick={() => setTheme("dark")}
-				className="rounded-full"
+				className="rounded-full p-3"
 			>
-				<Moon className="size-[1.2rem]" />
+				<Moon className="size-[1.3rem]" />
 			</Button>
 		);
 	}

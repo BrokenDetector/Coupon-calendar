@@ -1,6 +1,5 @@
 "use client";
 
-import { addPortfolio } from "@/actions/add-portfolio";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -16,6 +15,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FC, useState } from "react";
+import toast from "react-hot-toast";
 import ChangeThemeButton from "./ChangeThemeButton";
 
 interface HeaderProps {
@@ -27,9 +27,27 @@ const Header: FC<HeaderProps> = ({ user }) => {
 	const portfoliosCount = user?.portfolios.length! < 5;
 	const router = useRouter();
 
+	const handleAddPortfolio = async () => {
+		const response = await fetch("/api/add-portfolio", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+		});
+
+		if (!response.ok) {
+			const error = await response.json();
+			toast.error(error.error);
+			return;
+		}
+
+		const newPortId = (await response.json()).newPortfolioId;
+		router.push(`/portfolio/${newPortId}`);
+	};
+
 	return (
 		<header className="w-full border-b">
-			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-1">
 				<div className="flex justify-between h-16">
 					<div className="flex items-center">
 						<Link
@@ -81,10 +99,7 @@ const Header: FC<HeaderProps> = ({ user }) => {
 									{portfoliosCount && (
 										<DropdownMenuItem
 											className="hover:cursor-pointer"
-											onClick={async () => {
-												const newPortId = await addPortfolio();
-												router.push(`/portfolio/${newPortId}`);
-											}}
+											onClick={handleAddPortfolio}
 										>
 											<Plus className="size-4 mr-2" />
 											<span>Новый портфель</span>

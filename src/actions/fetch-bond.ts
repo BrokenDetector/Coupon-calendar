@@ -1,4 +1,4 @@
-// "use server"; dont make it server. Otherwise there is gonna be a lot of calls to MOEX API from one server
+// "use server"; dont make it server and dont move it to api routes. Otherwise there is gonna be a lot of calls to MOEX API from one server
 
 const createBondObject = (data: any): Bond => {
 	const coupons = data[1]?.coupons;

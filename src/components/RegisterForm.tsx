@@ -1,6 +1,5 @@
 "use client";
 
-import { register } from "@/actions/register";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -36,16 +35,25 @@ const RegisterForm: FC = () => {
 		const { email, password } = validatedFields.data;
 
 		startPending(async () => {
-			const res = await register(values);
-			if (!res.error) {
+			const res = await fetch("/api/register", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify(values),
+			});
+
+			if (!res.ok) {
+				const error = await res.json();
+				toast.error(error.error);
+				return;
+			} else {
 				await signIn("credentials", {
 					redirect: false,
 					email,
 					password,
 				});
 				router.push("/");
-			} else {
-				toast.error(res.error);
 			}
 		});
 	};
