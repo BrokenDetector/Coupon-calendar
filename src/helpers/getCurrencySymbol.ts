@@ -2,6 +2,8 @@ export const getCurrencySymbol = (currency: string): string => {
 	switch (currency.toUpperCase()) {
 		case "RUB":
 			return "₽";
+		case "SUR":
+			return "₽";
 		case "EUR":
 			return "€";
 		case "USD":

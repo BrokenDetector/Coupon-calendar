@@ -1,5 +1,5 @@
-import { isLimited } from "@/helpers/rateLimit";
 import { db } from "@/lib/db";
+import { isLimited } from "@/lib/rateLimit";
 import { RegisterSchema } from "@/lib/validations/schemas";
 import bcrypt from "bcryptjs";
 import { nanoid } from "nanoid";

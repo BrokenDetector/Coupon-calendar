@@ -5,8 +5,8 @@ export const sumCouponsByCurrency = (bonds: Bond[], dateFilter: (date: Date) => 
 		bond.COUPONDATES!.forEach((couponDate, index) => {
 			const date = parseISO(couponDate);
 			if (dateFilter(date)) {
-				const currency = bond.CURRENCY;
-				const couponValue = bond.COUPONVALUE![index] * (bond.quantity || 1);
+				const currency = bond.FACEUNIT;
+				const couponValue = bond.COUPONVALUES![index] * (bond.quantity || 1);
 				if (!totals[currency]) {
 					totals[currency] = 0;
 				}

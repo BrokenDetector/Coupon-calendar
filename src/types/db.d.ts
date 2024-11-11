@@ -1,11 +1,29 @@
-interface Bond {
+interface BondData {
 	SECID: string;
+	NAME: string;
 	SHORTNAME: string;
-	COUPONVALUE?: number[];
 	ISIN: string;
-	COUPONDATES?: string[];
-	CURRENCY: string;
+	FACEUNIT: string;
+	FACEVALUE?: number;
+	NEXTCOUPON?: string;
+	COUPONVALUE?: number;
+	COUPONFREQUENCY?: number;
+	MATDATE?: string;
+	PREVWAPRICE?: number;
+	LAST?: number;
+	EFFECTIVEYIELD?: number;
+	ACCRUEDINT?: number;
 	quantity?: number;
+	purchasePrice?: string;
+	DURATION?: number;
+	DURATIONWAPRICE?: number;
+	COUPONPERCENT?: number;
+}
+
+interface Bond extends BondData {
+	NAME?: string;
+	COUPONVALUES?: number[];
+	COUPONDATES?: string[];
 }
 
 type BondResponse = [{ charsetinfo: { name: string } }, { securities: Bond[] }];
@@ -13,6 +31,7 @@ type BondResponse = [{ charsetinfo: { name: string } }, { securities: Bond[] }];
 interface Bondsecid {
 	SECID: string;
 	quantity: number;
+	purchasePrice?: string;
 }
 
 interface Portfolio {

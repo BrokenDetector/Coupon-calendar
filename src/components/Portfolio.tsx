@@ -54,10 +54,10 @@ const Portfolio: FC<PortfolioProps> = ({ bonds, portfolioName, addBond, removeBo
 					{bonds.map((bond, index) => (
 						<li
 							key={index}
-							className="grid grid-cols-3 items-center justify-between space-x-3 bg-background p-2 rounded-md"
+							className="grid grid-cols-3 items-center justify-between space-x-1 bg-background p-2 rounded-md text-sm max-w-96"
 						>
-							<span className="text-sm">{bond.SHORTNAME}</span>
-							<div className="flex flex-row items-center justify-center col-span-2 space-x-2">
+							<span>{bond.SHORTNAME}</span>
+							<div className="flex flex-row items-center justify-center col-span-2 space-x-1">
 								<span className="text-sm text-muted-foreground">x</span>
 								<Input
 									type="number"

@@ -67,3 +67,15 @@
 		@apply bg-background text-foreground;
 	}
 }
+
+@layer components {
+	.react-loading-skeleton {
+		--base-color: #e0e0e0;
+		--highlight-color: #ccc;
+	}
+
+	.dark .react-loading-skeleton {
+		--base-color: #18181b;
+		--highlight-color: #27272a;
+	}
+}

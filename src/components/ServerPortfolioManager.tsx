@@ -1,108 +1,87 @@
 "use client";
 
 import CouponCalendar from "@/components/Calendar";
-import Portfolio from "@/components/Portfolio";
-import SelectList from "@/components/SelectList";
-import { debounce } from "@/lib/utils";
-import { FC, useCallback, useState } from "react";
+import SummaryCard from "@/components/SummaryCard";
+import BondsTable from "@/components/Table/BondsTable";
+import { useBonds } from "@/context/BondContext";
+import { calculatePortfolioSummary } from "@/helpers/calculatePortfolioSummary";
+import { FC, useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
+import Skeleton from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
 
 interface ServerPortfolioManagerProps {
 	allBonds: Bond[];
-	portfolioId: string;
-	portfolioName: string;
-	userId: string;
 	initialBonds: Bond[];
+	portfolioId: string;
 }
 
-const ServerPortfolioManager: FC<ServerPortfolioManagerProps> = ({
-	allBonds,
-	portfolioId,
-	portfolioName,
-	userId,
-	initialBonds,
-}) => {
-	const [bonds, setBonds] = useState<Bond[]>(initialBonds);
+const ServerPortfolioManager: FC<ServerPortfolioManagerProps> = ({ allBonds, initialBonds, portfolioId }) => {
+	const { bonds, setBonds } = useBonds();
+	const [currencyRates, setCurrencyRates] = useState<{ [key: string]: { rate: number; name: string } } | null>(null);
+	const [loading, setLoading] = useState(true);
 
-	const debouncedUpdate = useCallback(
-		debounce(async (bondsToAdd) => {
-			const response = await fetch("/api/add-bond", {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify({ portfolioId, bondsToAdd }),
-			});
+	useEffect(() => {
+		setBonds(initialBonds);
+	}, [initialBonds, setBonds]);
 
-			if (!response.ok) {
-				const error = await response.json();
-				toast.error(error.error);
-			}
-		}, 1000),
-		[portfolioId, userId]
-	);
-
-	const addBond = useCallback(
-		(bondToAdd: Bond) => {
-			const { SECID, quantity } = bondToAdd;
-
-			setBonds((prevBonds) => {
-				const bondExists = prevBonds.find((bond) => bond.SECID === SECID);
-
-				if (prevBonds.length >= 20) {
-					toast.error("Максимум 20 облигаций");
-					return prevBonds;
-				}
-
-				const newBonds = bondExists
-					? prevBonds.map((bond) => (bond.SECID === SECID ? { ...bond, quantity } : bond))
-					: [...prevBonds, { ...bondToAdd, quantity }];
-
-				debouncedUpdate(newBonds.map((bond) => ({ SECID: bond.SECID, quantity: bond.quantity! })));
-				return newBonds;
-			});
-		},
-		[debouncedUpdate]
-	);
-
-	const removeBond = useCallback(
-		async (SECID: string) => {
-			const response = await fetch("/api/remove-bond", {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify({ portfolioId, secIdToRemove: SECID }),
-			});
-
-			if (!response.ok) {
-				const error = await response.json();
+	useEffect(() => {
+		const fetchCurrencyRates = async () => {
+			const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ""}/api/currency-exchange-rate`);
+			if (!res.ok) {
+				const error = await res.json();
+				console.log(error);
 				toast.error(error.error);
 			} else {
-				setBonds((prevBonds) => prevBonds.filter((bond) => bond.SECID !== SECID));
+				const data = await res.json();
+				setCurrencyRates(data.currencyRates);
 			}
-		},
-		[portfolioId]
-	);
+			setLoading(false);
+		};
 
-	return (
-		<div className="flex flex-row justify-between gap-5">
-			<CouponCalendar bonds={bonds} />
+		fetchCurrencyRates();
+	}, []);
 
-			<div className="flex flex-col items-center p-2">
-				<h1>Все облигации</h1>
-				<SelectList
-					options={allBonds}
-					onBondUpdate={addBond}
-					bonds={bonds}
-				/>
-				<Portfolio
-					addBond={addBond}
-					removeBond={removeBond}
-					bonds={bonds}
-					portfolioName={portfolioName}
+	const portfolioSummary = useMemo(() => {
+		return calculatePortfolioSummary(bonds, currencyRates);
+	}, [bonds, currencyRates]);
+
+	if (loading) {
+		return (
+			<div className="flex flex-col space-y-4 mx-10 size-full">
+				{/* Skeleton for SummaryCard */}
+				<div className="grid grid-cols-1 xl:grid-cols-4 gap-3">
+					<Skeleton
+						height={340}
+						containerClassName="flex-1 col-span-4 xl:col-span-1 rounded-xl mx-4"
+					/>
+					{/* Skeleton for BondsTable */}
+					<Skeleton
+						count={7}
+						height={45}
+						containerClassName="flex-1 rounded-lg col-span-4 xl:col-span-3 mx-3"
+					/>
+				</div>
+
+				{/* Skeleton for CouponCalendar */}
+				<Skeleton
+					height={500}
+					containerClassName="flex-1 col-span-3 rounded-xl m-4"
 				/>
 			</div>
+		);
+	}
+
+	return (
+		<div className="flex flex-col space-y-4 mx-10">
+			<div className="grid grid-cols-1 xl:grid-cols-4 gap-3">
+				<SummaryCard portfolioSummary={portfolioSummary} />
+				<BondsTable
+					portfolioId={portfolioId}
+					allBonds={allBonds}
+				/>
+			</div>
+			<CouponCalendar />
 		</div>
 	);
 };

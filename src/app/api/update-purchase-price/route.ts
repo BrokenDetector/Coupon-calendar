@@ -5,7 +5,7 @@ import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
-	const { portfolioId, bondsToAdd }: { portfolioId: string; bondsToAdd: Bondsecid[] } = await req.json();
+	const { portfolioId, secid, newPrice }: { portfolioId: string; secid: string; newPrice: string } = await req.json();
 
 	const ip = req.headers.get("x-real-ip") || (req.headers.get("x-forwarded-for") as string);
 	const isAllowed = await isLimited(ip);
@@ -30,20 +30,14 @@ export async function POST(req: Request) {
 
 		const portfolio = user.portfolios[portfolioIndex] as Portfolio;
 
-		bondsToAdd.forEach((bond) => {
-			const existingBondIndex = portfolio.bonds.findIndex((pBond) => pBond.SECID === bond.SECID);
+		const bond = portfolio.bonds.find((b: any) => b.SECID === secid);
+		if (!bond) {
+			throw new Error(`Облигация ${secid} не найдена`);
+		}
 
-			if (existingBondIndex !== -1) {
-				portfolio.bonds[existingBondIndex].quantity = bond.quantity;
-			} else {
-				portfolio.bonds.push({ SECID: bond.SECID, quantity: bond.quantity });
-			}
-		});
-
-		user.portfolios[portfolioIndex] = portfolio;
+		bond.purchasePrice = newPrice;
 		await db.set(`user:${userId}`, JSON.stringify(user));
-
-		return NextResponse.json({ message: "Облигации успешно добавлены." }, { status: 200 });
+		return NextResponse.json({ message: "Облигация успешно обновлена." }, { status: 200 });
 	} catch (error) {
 		console.log(`❗ ERROR: ${error}`);
 		if (error instanceof Error) {

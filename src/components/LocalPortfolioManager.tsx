@@ -15,28 +15,20 @@ const LocalPortfolioManager: FC<LocalPortfolioManagerProps> = ({ allBonds }) => 
 
 	const addBond = useCallback(
 		(bond: Bond) => {
-			const { SECID: secid, quantity } = bond;
-
 			setBonds((prevBonds) =>
-				prevBonds.some((b) => b.SECID === secid)
-					? prevBonds.map((b) => (b.SECID === secid ? { ...b, quantity } : b))
+				prevBonds.some((b) => b.SECID === bond.SECID)
+					? prevBonds.map((b) => (b.SECID === bond.SECID ? { ...b, quantity: bond.quantity } : b))
 					: [...prevBonds, bond]
 			);
 
 			const oldLocalStorage = localStorage.getItem("BONDSECIDS");
-			let updatedData: Bondsecid[] = [];
+			const updatedData: Bondsecid[] = oldLocalStorage ? JSON.parse(oldLocalStorage) : [];
 
-			if (oldLocalStorage) {
-				updatedData = JSON.parse(oldLocalStorage);
-
-				const bondIndex = updatedData.findIndex((item) => item.SECID === secid);
-				if (bondIndex > -1) {
-					updatedData[bondIndex].quantity = quantity!;
-				} else {
-					updatedData.push({ SECID: secid, quantity: quantity! });
-				}
+			const bondIndex = updatedData.findIndex((item) => item.SECID === bond.SECID);
+			if (bondIndex > -1) {
+				updatedData[bondIndex].quantity = bond.quantity!;
 			} else {
-				updatedData = [{ SECID: secid, quantity: quantity! }];
+				updatedData.push({ SECID: bond.SECID, quantity: bond.quantity! });
 			}
 
 			localStorage.setItem("BONDSECIDS", JSON.stringify(updatedData));
@@ -59,10 +51,10 @@ const LocalPortfolioManager: FC<LocalPortfolioManagerProps> = ({ allBonds }) => 
 	);
 
 	return (
-		<div className="flex flex-row justify-between gap-5">
+		<div className="grid grid-cols-4 mx-8 justify-between gap-2">
 			<CouponCalendar bonds={bonds} />
 
-			<div className="flex flex-col items-center p-2">
+			<div className="flex flex-col items-center p-2 col-span-1">
 				<h1>Все облигации</h1>
 				<SelectList
 					options={allBonds}

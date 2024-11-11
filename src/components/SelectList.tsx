@@ -3,6 +3,7 @@
 import { fetchBondCoupons } from "@/actions/fetch-bond";
 import { ChevronDown, ChevronUp, Search } from "lucide-react";
 import { FC, memo, useEffect, useRef, useState } from "react";
+import { Input } from "./ui/input";
 
 interface SelectListProps {
 	options: Bond[];
@@ -19,8 +20,10 @@ const SelectList: FC<SelectListProps> = memo(function SelectList({ options, onBo
 		setSearchTerm(event.target.value);
 	};
 
-	const filteredOptions = options.filter((option) =>
-		option.SHORTNAME.toLowerCase().includes(searchTerm.toLowerCase())
+	const filteredOptions = options.filter(
+		(option) =>
+			option.SHORTNAME.toLowerCase().includes(searchTerm.toLowerCase()) ||
+			(option.ISIN && option.ISIN.toLowerCase().includes(searchTerm.toLowerCase()))
 	);
 
 	const handleSelect = async (secid: string) => {
@@ -46,32 +49,19 @@ const SelectList: FC<SelectListProps> = memo(function SelectList({ options, onBo
 		};
 	}, []);
 
-	useEffect(() => {
-		const handleClickOutside = (event: MouseEvent) => {
-			if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-				setIsListVisible(false);
-			}
-		};
-
-		document.addEventListener("mousedown", handleClickOutside);
-		return () => {
-			document.removeEventListener("mousedown", handleClickOutside);
-		};
-	}, []);
-
 	return (
-		<div className="flex flex-col space-y-4 w-full max-w-md mx-auto p-4">
+		<div className="flex flex-col space-y-2 w-full max-w-80 p-4">
 			<div
 				className="relative"
 				ref={dropdownRef}
 			>
-				<div className="relative grid grid-cols-4 items-center cursor-pointer border rounded-md shadow-sm min-w-60">
-					<input
+				<div className="relative grid grid-cols-4 items-center cursor-pointer border rounded-md shadow-sm min-w-50">
+					<Input
 						type="text"
 						value={searchTerm}
 						onChange={handleInputChange}
 						placeholder="Поиск облигаций..."
-						className="p-2 pl-10 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary col-span-4"
+						className="p-2 pl-10 rounded-md col-span-4 bg-muted"
 						aria-label="Search bonds"
 						onClick={(e) => e.stopPropagation()}
 						onFocus={() => setIsListVisible(true)}
@@ -95,9 +85,10 @@ const SelectList: FC<SelectListProps> = memo(function SelectList({ options, onBo
 							<li
 								key={index}
 								onClick={() => handleSelect(bond.SECID)}
-								className="p-2 hover:bg-muted-foreground/30 cursor-pointer"
+								className="p-2 hover:bg-muted-foreground/30 cursor-pointer flex flex-col text-left"
 							>
-								{bond.SHORTNAME}
+								<span>{bond.SHORTNAME}</span>
+								<span className="text-xs ml-0 text-muted-foreground">{bond.ISIN}</span>
 							</li>
 						))}
 					</ul>

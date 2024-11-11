@@ -1,6 +1,6 @@
-import { isLimited } from "@/helpers/rateLimit";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { isLimited } from "@/lib/rateLimit";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
@@ -10,7 +10,7 @@ export async function POST(req: Request) {
 	const ip = req.headers.get("x-real-ip") || (req.headers.get("x-forwarded-for") as string);
 	const isAllowed = await isLimited(ip);
 
-	if (!~isAllowed) {
+	if (!isAllowed) {
 		return NextResponse.json({ error: "Слишком много запросов, попробуйте позже." }, { status: 429 });
 	}
 

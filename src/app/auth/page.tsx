@@ -1,4 +1,4 @@
-import AuthPage from "@/components/AuthCard";
+import AuthPage from "@/components/Auth/AuthCard";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import { FC, Suspense } from "react";
 

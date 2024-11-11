@@ -32,7 +32,7 @@ const fetchBondDataFromMoex = async (): Promise<Bond[]> => {
 			SECID: bond.SECID,
 			SHORTNAME: bond.SHORTNAME,
 			ISIN: bond.ISIN,
-			CURRENCY: bond.CURRENCY,
+			FACEUNIT: bond.FACEUNIT,
 		}))
 		.sort((a, b) => a.SHORTNAME.localeCompare(b.SHORTNAME));
 

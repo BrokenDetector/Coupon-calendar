@@ -1,8 +1,10 @@
-import { fetchBondCoupons } from "@/actions/fetch-bond";
+import { fetchAllBonds } from "@/actions/fetch-all-bonds";
+import { fetchBondCoupons, fetchBondData } from "@/actions/fetch-bond";
 import Header from "@/components/Header";
 import ServerPortfolioManager from "@/components/ServerPortfolioManager";
-import { fetchRedis } from "@/helpers/redis";
+import { getPortfolio } from "@/helpers/getPortfolio";
 import { authOptions } from "@/lib/auth";
+import { db } from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { notFound } from "next/navigation";
 import { FC } from "react";
@@ -13,50 +15,31 @@ interface pageProps {
 
 const page: FC<pageProps> = async ({ params }) => {
 	const session = await getServerSession(authOptions);
-
+	const user = (await db.get(`user:${session!.user.id}`)) as User;
 	const portfolioId = params.portfolioId;
-	const userData = (await fetchRedis("get", `user:${session?.user.id}`)) as string;
-
-	const portfolios = JSON.parse(userData).portfolios;
-	const portfolio = portfolios.find((p: Portfolio) => p.id === portfolioId) as Portfolio;
+	const portfolio = await getPortfolio(session!.user.id, portfolioId);
 
 	if (!portfolio) return notFound();
 
 	const bondPromises =
 		portfolio.bonds?.map(async (bond) => {
-			const bondData = await fetchBondCoupons(bond.SECID);
-			return { ...bondData, quantity: bond.quantity };
+			const bondData = await fetchBondData(bond.SECID);
+			const bondCoupons = await fetchBondCoupons(bond.SECID);
+			return { ...bondCoupons, quantity: bond.quantity, ...bondData, purchasePrice: bond.purchasePrice || 100 };
 		}) || [];
 
-	const bondsList = await Promise.all(bondPromises);
-
-	const fetchAllBonds = async () => {
-		try {
-			const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ""}/api/all-bonds`, {
-				headers: {
-					"Content-Type": "application/json",
-				},
-			});
-			const data: Bond[] = await response.json();
-			return data;
-		} catch (error) {
-			console.error("❗ERROR: ", error);
-			return [];
-		}
-	};
+	const bondsList = (await Promise.all(bondPromises)) as BondData[];
 
 	const allBonds = await fetchAllBonds();
 
 	return (
-		<main className="flex min-h-screen flex-col items-center gap-3 min-w-[1000px] ">
-			<Header user={JSON.parse(userData)} />
+		<main className="flex min-h-screen flex-col items-center gap-3 min-w-[800px]">
+			<Header user={user} />
 
 			<ServerPortfolioManager
-				allBonds={allBonds}
-				portfolioId={portfolioId}
-				portfolioName={portfolio.name}
-				userId={session!.user.id}
 				initialBonds={bondsList}
+				portfolioId={portfolioId}
+				allBonds={allBonds}
 			/>
 		</main>
 	);

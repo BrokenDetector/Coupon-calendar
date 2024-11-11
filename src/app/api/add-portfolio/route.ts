@@ -1,6 +1,6 @@
-import { isLimited } from "@/helpers/rateLimit";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { isLimited } from "@/lib/rateLimit";
 import { getServerSession } from "next-auth/next";
 import { NextResponse } from "next/server";
 

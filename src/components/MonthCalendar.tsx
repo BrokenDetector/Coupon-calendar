@@ -17,7 +17,7 @@ function capitalizeFirstLetter(string: string) {
 	return string.replace(/^./, string[0].toUpperCase());
 }
 
-const MonthCalendar: FC<MonthCalendarProps> = memo(function MonthCalendar({ date, highlightedDates, onDayClick }) {
+const MonthCalendar: FC<MonthCalendarProps> = memo(({ date, highlightedDates, onDayClick }) => {
 	const monthStart = new Date(date.getFullYear(), date.getMonth(), 1);
 	const monthEnd = new Date(date.getFullYear(), date.getMonth() + 1, 0);
 	const startDate = new Date(monthStart);
@@ -77,4 +77,5 @@ const MonthCalendar: FC<MonthCalendarProps> = memo(function MonthCalendar({ date
 	);
 });
 
+MonthCalendar.displayName = "MonthCalendar";
 export default MonthCalendar;

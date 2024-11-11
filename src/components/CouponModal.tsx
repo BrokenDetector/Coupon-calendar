@@ -38,9 +38,9 @@ const CouponModal: FC<CouponModalProps> = ({
 								const couponIndex = bond.COUPONDATES!.findIndex((couponDate) =>
 									isSameDay(parseISO(couponDate), selectedDate!)
 								);
-								const couponValue = bond.COUPONVALUE![couponIndex];
+								const couponValue = bond.COUPONVALUES![couponIndex];
 								const quantity = bond.quantity || 1;
-								const currencySymbol = getCurrencySymbol(bond.CURRENCY || "RUB");
+								const currencySymbol = getCurrencySymbol(bond.FACEUNIT || "RUB");
 
 								return (
 									<div

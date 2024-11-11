@@ -1,13 +1,14 @@
 # Coupon calendar
 
-This service allows users to track bond coupons from the Moscow Exchange by displaying payment dates on a calendar. You can view how many coupons will be received on a specific day and the total amount for each month.
+This service allows users to track bond coupons from the Moscow Exchange and view key details about their bond portfolio. The calendar highlights coupon payment dates and displays daily and monthly totals, making it easy to keep track of upcoming income. Additionally, a detailed table provides essential information about bonds in your portfolio.
 
 ## Features
 
-- Visualize bond coupon payments on a calendar
-- View the total coupon value for each month
+- View bond coupon payment dates and amounts in a convenient calendar format
+- Key portfolio metrics, such as total investment amount and current value
+- View daily and monthly coupon totals in the calendar
 - Add multiple quantities of the same bond to your portfolio
-- Search bonds by shortname
+- Search bonds by shortname and ISIN
 - Fetch real-time bond data from the Moscow Exchange (MOEX)
 - User authentication
 - Manage multiple portfolios, each with different bonds
