@@ -4,6 +4,7 @@ import { fetchBondCoupons } from "@/actions/fetch-bond";
 import { usePathname } from "next/navigation";
 import { createContext, Dispatch, FC, ReactNode, SetStateAction, useContext, useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import { useLocalStorage } from "./useLocalStorage";
 
 interface BondContextProps {
 	bonds: Bond[];
@@ -19,13 +20,15 @@ const BondContext = createContext<BondContextProps | undefined>(undefined);
 export const BondProvider: FC<BondProviderProps> = ({ children }) => {
 	const [bonds, setBonds] = useState<Bond[]>([]);
 	const pathname = usePathname();
+	const { getLocalData } = useLocalStorage("BONDSECIDS");
 
 	useEffect(() => {
 		const fetchData = async () => {
-			const bondSecids = localStorage.getItem("BONDSECIDS");
-			if (bondSecids) {
-				const bondStorage: Bondsecid[] = JSON.parse(bondSecids);
-				if (pathname === "/") {
+			if (pathname === "/") {
+				const bondSecids = getLocalData();
+				if (bondSecids) {
+					const bondStorage: Bondsecid[] = JSON.parse(bondSecids);
+
 					const toastId = toast.loading("Загрузка облигаций...");
 
 					try {

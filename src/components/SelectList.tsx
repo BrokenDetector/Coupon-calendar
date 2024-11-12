@@ -23,7 +23,8 @@ const SelectList: FC<SelectListProps> = memo(function SelectList({ options, onBo
 	const filteredOptions = options.filter(
 		(option) =>
 			option.SHORTNAME.toLowerCase().includes(searchTerm.toLowerCase()) ||
-			(option.ISIN && option.ISIN.toLowerCase().includes(searchTerm.toLowerCase()))
+			(option.ISIN && option.ISIN.toLowerCase().includes(searchTerm.toLowerCase())) ||
+			(option.SECID && option.SECID.toLowerCase().includes(searchTerm.toLowerCase()))
 	);
 
 	const handleSelect = async (secid: string) => {

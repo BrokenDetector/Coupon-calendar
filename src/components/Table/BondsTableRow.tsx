@@ -1,7 +1,7 @@
 "use client";
 
-import { useBonds } from "@/context/BondContext";
 import { getCurrencySymbol } from "@/helpers/getCurrencySymbol";
+import { useBonds } from "@/hooks/useBondContext";
 import { Trash } from "lucide-react";
 import { FC, memo, useCallback } from "react";
 import { Button } from "../ui/button";
@@ -33,7 +33,7 @@ const BondRow: FC<BondRowProps> = memo(
 		};
 
 		const getCurrentPrice = (): number => {
-			return bond.LAST ?? bond.PREVWAPRICE ?? bond.FACEVALUE ?? 0;
+			return bond.LAST ?? bond.PREVWAPRICE ?? 0;
 		};
 
 		const handleQuantityChange = (value: number) => {

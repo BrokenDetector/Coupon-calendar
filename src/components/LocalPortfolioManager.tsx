@@ -3,8 +3,9 @@
 import CouponCalendar from "@/components/Calendar";
 import Portfolio from "@/components/Portfolio";
 import SelectList from "@/components/SelectList";
-import { useBonds } from "@/context/BondContext";
-import { FC, useCallback } from "react";
+import { useBonds } from "@/hooks/useBondContext";
+import { FC, useCallback, useEffect } from "react";
+import {useLocalStorage} from "@/hooks/useLocalStorage";
 
 interface LocalPortfolioManagerProps {
 	allBonds: Bond[];
@@ -12,42 +13,42 @@ interface LocalPortfolioManagerProps {
 
 const LocalPortfolioManager: FC<LocalPortfolioManagerProps> = ({ allBonds }) => {
 	const { bonds, setBonds } = useBonds();
+	const { getLocalData, setLocalData } = useLocalStorage("BONDSECIDS");
+
+	useEffect(() => {
+		const storedBonds = getLocalData();
+		if (storedBonds.length) setBonds(storedBonds);
+	}, [getLocalData, setBonds]);
 
 	const addBond = useCallback(
 		(bond: Bond) => {
+			const { SECID: secid, quantity } = bond;
 			setBonds((prevBonds) =>
-				prevBonds.some((b) => b.SECID === bond.SECID)
-					? prevBonds.map((b) => (b.SECID === bond.SECID ? { ...b, quantity: bond.quantity } : b))
+				prevBonds.some((b) => b.SECID === secid)
+					? prevBonds.map((b) => (b.SECID === secid ? { ...b, quantity } : b))
 					: [...prevBonds, bond]
 			);
 
-			const oldLocalStorage = localStorage.getItem("BONDSECIDS");
-			const updatedData: Bondsecid[] = oldLocalStorage ? JSON.parse(oldLocalStorage) : [];
-
-			const bondIndex = updatedData.findIndex((item) => item.SECID === bond.SECID);
+			const updatedData = getLocalData();
+			const bondIndex = updatedData.findIndex((item: Bondsecid) => item.SECID === secid);
 			if (bondIndex > -1) {
-				updatedData[bondIndex].quantity = bond.quantity!;
+				updatedData[bondIndex].quantity = quantity!;
 			} else {
-				updatedData.push({ SECID: bond.SECID, quantity: bond.quantity! });
+				updatedData.push({ SECID: secid, quantity: quantity! });
 			}
-
-			localStorage.setItem("BONDSECIDS", JSON.stringify(updatedData));
+			setLocalData(updatedData);
 		},
-		[setBonds]
+		[setBonds, getLocalData, setLocalData]
 	);
 
 	const removeBond = useCallback(
 		(secid: string) => {
 			setBonds((prev) => prev.filter((bond) => bond.SECID !== secid));
 
-			const oldStorage = localStorage.getItem("BONDSECIDS");
-			if (oldStorage) {
-				const data = JSON.parse(oldStorage) as Bondsecid[];
-				const updatedStorage = data.filter((item) => item.SECID !== secid);
-				localStorage.setItem("BONDSECIDS", JSON.stringify(updatedStorage));
-			}
+			const updatedStorage = getLocalData().filter((item: Bondsecid) => item.SECID !== secid);
+			setLocalData(updatedStorage);
 		},
-		[setBonds]
+		[setBonds, getLocalData, setLocalData]
 	);
 
 	return (
@@ -56,16 +57,8 @@ const LocalPortfolioManager: FC<LocalPortfolioManagerProps> = ({ allBonds }) => 
 
 			<div className="flex flex-col items-center p-2 col-span-1">
 				<h1>Все облигации</h1>
-				<SelectList
-					options={allBonds}
-					bonds={bonds}
-					onBondUpdate={addBond}
-				/>
-				<Portfolio
-					addBond={addBond}
-					bonds={bonds}
-					removeBond={removeBond}
-				/>
+				<SelectList options={allBonds} bonds={bonds} onBondUpdate={addBond} />
+				<Portfolio addBond={addBond} bonds={bonds} removeBond={removeBond} />
 			</div>
 		</div>
 	);

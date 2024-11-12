@@ -3,8 +3,8 @@
 import CouponCalendar from "@/components/Calendar";
 import SummaryCard from "@/components/SummaryCard";
 import BondsTable from "@/components/Table/BondsTable";
-import { useBonds } from "@/context/BondContext";
 import { calculatePortfolioSummary } from "@/helpers/calculatePortfolioSummary";
+import { useBonds } from "@/hooks/useBondContext";
 import { FC, useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import Skeleton from "react-loading-skeleton";

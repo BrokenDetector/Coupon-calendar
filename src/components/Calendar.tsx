@@ -2,9 +2,9 @@
 
 import CouponModal from "@/components/CouponModal";
 import { Button } from "@/components/ui/button";
-import { useBonds } from "@/context/BondContext";
 import { getCurrencySymbol } from "@/helpers/getCurrencySymbol";
 import { sumCouponsByCurrency } from "@/helpers/sumCouponsByCurrency";
+import { useBonds } from "@/hooks/useBondContext";
 import { addMonths, getYear, isSameDay, parseISO, startOfYear } from "date-fns";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useSession } from "next-auth/react";

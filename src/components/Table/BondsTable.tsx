@@ -1,7 +1,7 @@
 "use client";
 
 import { fetchBondData } from "@/actions/fetch-bond";
-import { useBonds } from "@/context/BondContext";
+import { useBonds } from "@/hooks/useBondContext";
 import { debounce } from "@/lib/utils";
 import { FC, useCallback } from "react";
 import toast from "react-hot-toast";
@@ -117,7 +117,7 @@ const BondsTable: FC<BondsTableProps> = ({ portfolioId, allBonds }) => {
 						<TableRow className="text-xs text-center">
 							<TableHead>Облигация</TableHead>
 							<TableHead>Номинал</TableHead>
-							<TableHead>Цена покупки (%)</TableHead>
+							<TableHead className="min-w-24">Цена покупки (%)</TableHead>
 							<TableHead>Текущая стоимость</TableHead>
 							<TableHead>Частота купонов (в днях)</TableHead>
 							<TableHead>Купон</TableHead>

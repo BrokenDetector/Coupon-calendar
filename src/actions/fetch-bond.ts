@@ -8,6 +8,13 @@ const createMOEXUrl = (secid: string, type: "coupons" | "data"): string => {
 	return `${baseUrl}/${board}/securities/${secid}.json?iss.meta=off&iss.only=securities,marketdata,marketdata_yields&lang=ru`;
 };
 
+const mapColumns = (columns: string[]) => {
+	return columns.reduce((acc, column, index) => {
+		acc[column] = index;
+		return acc;
+	}, {} as Record<string, number>);
+};
+
 // for calendar
 const createBondObject = (data: any): Bond => {
 	const coupons = data[1]?.coupons;
@@ -47,29 +54,35 @@ export const fetchBondCoupons = async (secid: string): Promise<Bond> => {
 
 // for table
 const createBondDataObject = (data: any): BondData => {
-	const bondData = data.securities?.data?.[0] ?? [];
-	const marketData = data.marketdata?.data?.[0] ?? [];
-	const yieldData = data.marketdata_yields?.data?.[0] ?? [];
+	const securitiesColumns = mapColumns(data.securities.columns);
+	const marketDataColumns = mapColumns(data.marketdata.columns);
+	const yieldDataColumns = mapColumns(data.marketdata_yields.columns);
 
-	const bondValues = {
-		SECID: bondData[0],
-		NAME: bondData[19],
-		SHORTNAME: bondData[2],
-		ISIN: bondData[28],
-		FACEVALUE: bondData[10],
-		NEXTCOUPON: bondData[6],
-		COUPONVALUE: bondData[5] || undefined,
-		COUPONFREQUENCY: bondData[15],
-		MATDATE: bondData[13],
-		PREVWAPRICE: marketData[8] || undefined,
-		LAST: marketData[11] || undefined,
-		EFFECTIVEYIELD: yieldData[6] || undefined,
-		ACCRUEDINT: bondData[7],
-		FACEUNIT: bondData[25],
-		DURATION: marketData[36] || undefined,
-		DURATIONWAPRICE: yieldData[12] || undefined,
-		COUPONPERCENT: bondData[34],
-	} as BondData;
+	const bondData = data.securities.data?.[0] ?? [];
+	const marketData = data.marketdata.data?.[0] ?? [];
+	const yieldData = data.marketdata_yields.data?.[0] ?? [];
+
+	const bondValues: BondData = {
+		SECID: bondData[securitiesColumns["SECID"]],
+		NAME: bondData[securitiesColumns["SECNAME"]],
+		SHORTNAME: bondData[securitiesColumns["SHORTNAME"]],
+		ISIN: bondData[securitiesColumns["ISIN"]],
+		FACEVALUE: bondData[securitiesColumns["FACEVALUE"]],
+		NEXTCOUPON: bondData[securitiesColumns["NEXTCOUPON"]],
+		COUPONVALUE: bondData[securitiesColumns["COUPONVALUE"]] || undefined,
+		COUPONFREQUENCY: bondData[securitiesColumns["COUPONPERIOD"]],
+		MATDATE: bondData[securitiesColumns["MATDATE"]],
+		ACCRUEDINT: bondData[securitiesColumns["ACCRUEDINT"]],
+		FACEUNIT: bondData[securitiesColumns["FACEUNIT"]],
+		COUPONPERCENT: bondData[securitiesColumns["COUPONPERCENT"]],
+
+		PREVWAPRICE: marketData[marketDataColumns["WAPRICE"]] || undefined,
+		LAST: marketData[marketDataColumns["LAST"]] || undefined,
+		DURATION: marketData[marketDataColumns["DURATION"]] || undefined,
+
+		EFFECTIVEYIELD: yieldData[yieldDataColumns["EFFECTIVEYIELD"]] || undefined,
+		DURATIONWAPRICE: yieldData[yieldDataColumns["DURATIONWAPRICE"]] || undefined,
+	};
 
 	return bondValues;
 };
