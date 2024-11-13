@@ -127,7 +127,7 @@ const BondsTable: FC<BondsTableProps> = ({ portfolioId, allBonds }) => {
 							<TableHead>НКД</TableHead>
 							<TableHead>Следующий купон</TableHead>
 							<TableHead>Погашение</TableHead>
-							<TableHead>Кол-во</TableHead>
+							<TableHead className="min-w-16">Кол-во</TableHead>
 							<TableHead></TableHead>
 						</TableRow>
 					</TableHeader>

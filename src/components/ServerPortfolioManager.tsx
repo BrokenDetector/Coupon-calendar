@@ -27,7 +27,7 @@ const ServerPortfolioManager: FC<ServerPortfolioManagerProps> = ({ allBonds, ini
 
 	useEffect(() => {
 		const fetchCurrencyRates = async () => {
-			const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ""}/api/currency-exchange-rate`);
+			const res = await fetch("/api/currency-exchange-rate");
 			if (!res.ok) {
 				const error = await res.json();
 				console.log(error);

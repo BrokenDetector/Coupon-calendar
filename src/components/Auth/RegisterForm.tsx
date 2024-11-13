@@ -53,7 +53,7 @@ const RegisterForm: FC = () => {
 					email,
 					password,
 				});
-				router.push("/");
+				router.push("/portfolio/1");
 			}
 		});
 	};

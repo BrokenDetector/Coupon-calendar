@@ -1,8 +1,7 @@
-"use server";
-
 import { db } from "@/lib/db";
+import { NextResponse } from "next/server";
 
-const CACHE_DURATION = 1 * 60 * 60; // 1 hours in seconds
+const CACHE_DURATION = 1 * 60 * 60; // 1 hour in seconds
 
 const getCachedBonds = async (): Promise<Bond[] | null> => {
 	const cachedData = await db.get<Bond[]>("bondsCache");
@@ -44,7 +43,7 @@ export async function GET(req: Request) {
 
 	try {
 		if (cachedBonds) {
-			return new Response(JSON.stringify(cachedBonds), {
+			return NextResponse.json(cachedBonds, {
 				headers: { "Cache-Control": "s-maxage=3600, stale-while-revalidate" },
 			});
 		}
@@ -55,11 +54,15 @@ export async function GET(req: Request) {
 		// Save fresh data to Redis cache
 		await cacheBonds(bonds);
 
-		return new Response(JSON.stringify(bonds), {
+		return NextResponse.json(bonds, {
 			headers: { "Cache-Control": "s-maxage=3600, stale-while-revalidate" },
 		});
 	} catch (error) {
-		console.error("❗ERROR on all-bonds: ", error);
-		return new Response("Internal server error", { status: 500 });
+		console.log(`❗ ERROR: ${error}`);
+		if (error instanceof Error) {
+			return NextResponse.json({ error: error.message }, { status: 500 });
+		} else {
+			return NextResponse.json({ error: "Произошла неизвестная ошибка." }, { status: 500 });
+		}
 	}
 }

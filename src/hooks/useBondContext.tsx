@@ -26,7 +26,7 @@ export const BondProvider: FC<BondProviderProps> = ({ children }) => {
 		const fetchData = async () => {
 			if (pathname === "/") {
 				const bondSecids = getLocalData();
-				if (bondSecids) {
+				if (bondSecids.length > 0) {
 					const bondStorage: Bondsecid[] = JSON.parse(bondSecids);
 
 					const toastId = toast.loading("Загрузка облигаций...");
