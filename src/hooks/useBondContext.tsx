@@ -27,12 +27,10 @@ export const BondProvider: FC<BondProviderProps> = ({ children }) => {
 			if (pathname === "/") {
 				const bondSecids = getLocalData();
 				if (bondSecids.length > 0) {
-					const bondStorage: Bondsecid[] = JSON.parse(bondSecids);
-
 					const toastId = toast.loading("Загрузка облигаций...");
 
 					try {
-						for (const bond of bondStorage) {
+						for (const bond of bondSecids) {
 							const bondData = await fetchBondCoupons(bond.SECID);
 							setBonds((prevBonds) => [...prevBonds, { ...bondData, quantity: bond.quantity }]);
 						}

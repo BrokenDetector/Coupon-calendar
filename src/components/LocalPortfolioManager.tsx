@@ -4,8 +4,8 @@ import CouponCalendar from "@/components/Calendar";
 import Portfolio from "@/components/Portfolio";
 import SelectList from "@/components/SelectList";
 import { useBonds } from "@/hooks/useBondContext";
-import { FC, useCallback, useEffect } from "react";
-import {useLocalStorage} from "@/hooks/useLocalStorage";
+import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { FC, useCallback } from "react";
 
 interface LocalPortfolioManagerProps {
 	allBonds: Bond[];
@@ -14,11 +14,6 @@ interface LocalPortfolioManagerProps {
 const LocalPortfolioManager: FC<LocalPortfolioManagerProps> = ({ allBonds }) => {
 	const { bonds, setBonds } = useBonds();
 	const { getLocalData, setLocalData } = useLocalStorage("BONDSECIDS");
-
-	useEffect(() => {
-		const storedBonds = getLocalData();
-		if (storedBonds.length) setBonds(storedBonds);
-	}, [getLocalData, setBonds]);
 
 	const addBond = useCallback(
 		(bond: Bond) => {
@@ -57,8 +52,16 @@ const LocalPortfolioManager: FC<LocalPortfolioManagerProps> = ({ allBonds }) => 
 
 			<div className="flex flex-col items-center p-2 col-span-1">
 				<h1>Все облигации</h1>
-				<SelectList options={allBonds} bonds={bonds} onBondUpdate={addBond} />
-				<Portfolio addBond={addBond} bonds={bonds} removeBond={removeBond} />
+				<SelectList
+					options={allBonds}
+					bonds={bonds}
+					onBondUpdate={addBond}
+				/>
+				<Portfolio
+					addBond={addBond}
+					bonds={bonds}
+					removeBond={removeBond}
+				/>
 			</div>
 		</div>
 	);

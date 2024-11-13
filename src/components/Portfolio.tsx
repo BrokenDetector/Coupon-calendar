@@ -42,7 +42,8 @@ const Portfolio: FC<PortfolioProps> = ({ bonds, portfolioName, addBond, removeBo
 	);
 
 	return (
-		<div className="bg-card p-4 rounded-md border">
+		<div className="bg-card p-4 rounded-md border w-64 xl:w-80 2xl:w-96">
+			{" "}
 			<h2 className="text-lg font-semibold mb-2">{portfolioName || "Мой портфель"}</h2>
 			{bonds.length === 0 ? (
 				<p className="text-muted-foreground">Облигации не добавлены </p>
@@ -58,7 +59,7 @@ const Portfolio: FC<PortfolioProps> = ({ bonds, portfolioName, addBond, removeBo
 						>
 							<span>{bond.SHORTNAME}</span>
 							<div className="flex flex-row items-center justify-center col-span-2 space-x-1">
-								<span className="text-sm text-muted-foreground">x</span>
+								<span className="text-sm text-muted-foreground mr-1">x</span>
 								<Input
 									type="number"
 									value={quantities[bond.SECID] || 1}
