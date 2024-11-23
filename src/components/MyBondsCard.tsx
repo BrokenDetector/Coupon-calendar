@@ -5,17 +5,17 @@ import { useBonds } from "@/hooks/useBondContext";
 import { debounce } from "@/lib/utils";
 import { FC, useCallback } from "react";
 import toast from "react-hot-toast";
-import SelectList from "../SelectList";
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
-import { Table, TableBody, TableHead, TableHeader, TableRow } from "../ui/table";
-import BondRow from "./BondsTableRow";
+import SelectList from "./SelectList";
+import { columns } from "./BondTable/Columns";
+import { DataTable } from "./BondTable/DataTable";
+import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 
-interface BondsTableProps {
+interface MyBondsCardProps {
 	allBonds: Bond[];
 	portfolioId: string;
 }
 
-const BondsTable: FC<BondsTableProps> = ({ portfolioId, allBonds }) => {
+const MyBondsCard: FC<MyBondsCardProps> = ({ portfolioId, allBonds }) => {
 	const { bonds, setBonds } = useBonds();
 
 	const debouncedUpdate = useCallback(
@@ -101,6 +101,25 @@ const BondsTable: FC<BondsTableProps> = ({ portfolioId, allBonds }) => {
 		}
 	};
 
+	const handleQuantityChange = (secId: string, value: number) => {
+		if (!isNaN(value) && value > 0) {
+			setBonds((prev) => prev.map((b) => (b.SECID === secId ? { ...b, quantity: value } : b)));
+		}
+	};
+
+	const handlePriceChange = (secId: string, price: string) => {
+		setBonds((prevBonds) => prevBonds.map((b) => (b.SECID === secId ? { ...b, purchasePrice: price } : b)));
+	};
+
+	const dataWithHandlers = bonds.map((bond) => ({
+		...bond,
+		removeBond: (secId: string) => removeBond(secId),
+		handlePriceBlur: (secId: string, newPrice: string) => handlePriceBlur(secId, newPrice),
+		handleQuantityBlur: (bond: Bond) => addBond(bond),
+		handleQuantityChange,
+		handlePriceChange,
+	}));
+
 	return (
 		<Card className="rounded-lg col-span-4 xl:col-span-3">
 			<CardHeader className="flex flex-row items-center justify-between">
@@ -112,40 +131,13 @@ const BondsTable: FC<BondsTableProps> = ({ portfolioId, allBonds }) => {
 				/>
 			</CardHeader>
 			<CardContent>
-				<Table divClassname="max-h-[300px] overflow-auto">
-					<TableHeader className="sticky top-0 bg-card shadow-lg">
-						<TableRow className="text-xs text-center">
-							<TableHead>Облигация</TableHead>
-							<TableHead>Номинал</TableHead>
-							<TableHead className="min-w-24">Цена покупки (%)</TableHead>
-							<TableHead>Текущая стоимость</TableHead>
-							<TableHead>Частота купонов (в днях)</TableHead>
-							<TableHead>Купон</TableHead>
-							<TableHead>Текущая доходность</TableHead>
-							<TableHead>YTM</TableHead>
-							<TableHead>Дюрация (в днях)</TableHead>
-							<TableHead>НКД</TableHead>
-							<TableHead>Следующий купон</TableHead>
-							<TableHead>Погашение</TableHead>
-							<TableHead className="min-w-16">Кол-во</TableHead>
-							<TableHead></TableHead>
-						</TableRow>
-					</TableHeader>
-					<TableBody>
-						{bonds.map((bond, index) => (
-							<BondRow
-								key={index}
-								bond={bond}
-								handlePriceBlur={handlePriceBlur}
-								removeBond={removeBond}
-								handleQuantityBlur={addBond}
-							/>
-						))}
-					</TableBody>
-				</Table>
+				<DataTable
+					columns={columns}
+					data={dataWithHandlers}
+				/>
 			</CardContent>
 		</Card>
 	);
 };
 
-export default BondsTable;
+export default MyBondsCard;

@@ -61,7 +61,7 @@ const SelectList: FC<SelectListProps> = memo(function SelectList({ options, onBo
 						type="text"
 						value={searchTerm}
 						onChange={handleInputChange}
-						placeholder="Поиск облигаций..."
+						placeholder="Поиск облигаций"
 						className="p-2 pl-10 rounded-md col-span-4 bg-muted"
 						aria-label="Search bonds"
 						onClick={(e) => e.stopPropagation()}

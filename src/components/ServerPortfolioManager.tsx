@@ -1,8 +1,8 @@
 "use client";
 
 import CouponCalendar from "@/components/Calendar";
+import MyBondsCard from "@/components/MyBondsCard";
 import SummaryCard from "@/components/SummaryCard";
-import BondsTable from "@/components/Table/BondsTable";
 import { calculatePortfolioSummary } from "@/helpers/calculatePortfolioSummary";
 import { useBonds } from "@/hooks/useBondContext";
 import { FC, useEffect, useMemo, useState } from "react";
@@ -55,7 +55,7 @@ const ServerPortfolioManager: FC<ServerPortfolioManagerProps> = ({ allBonds, ini
 						height={340}
 						containerClassName="flex-1 col-span-4 xl:col-span-1 rounded-xl mx-4"
 					/>
-					{/* Skeleton for BondsTable */}
+					{/* Skeleton for MyBondsCard */}
 					<Skeleton
 						count={7}
 						height={45}
@@ -76,7 +76,7 @@ const ServerPortfolioManager: FC<ServerPortfolioManagerProps> = ({ allBonds, ini
 		<div className="flex flex-col space-y-4 mx-10">
 			<div className="grid grid-cols-1 xl:grid-cols-4 gap-3">
 				<SummaryCard portfolioSummary={portfolioSummary} />
-				<BondsTable
+				<MyBondsCard
 					portfolioId={portfolioId}
 					allBonds={allBonds}
 				/>
