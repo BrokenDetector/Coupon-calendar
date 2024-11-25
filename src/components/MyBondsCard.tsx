@@ -1,120 +1,34 @@
 "use client";
 
-import { fetchBondData } from "@/actions/fetch-bond";
 import { useBonds } from "@/hooks/useBondContext";
-import { debounce } from "@/lib/utils";
-import { FC, useCallback } from "react";
-import toast from "react-hot-toast";
-import SelectList from "./SelectList";
+import { FC } from "react";
 import { columns } from "./BondTable/Columns";
 import { DataTable } from "./BondTable/DataTable";
+import SelectList from "./SelectList";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 
 interface MyBondsCardProps {
 	allBonds: Bond[];
-	portfolioId: string;
+	removeBond: (secId: string) => void;
+	handlePriceBlur: (bond: Bond, newPrice: number) => void;
+	addBond: (bond: Bond) => void;
 }
 
-const MyBondsCard: FC<MyBondsCardProps> = ({ portfolioId, allBonds }) => {
+const MyBondsCard: FC<MyBondsCardProps> = ({ allBonds, removeBond, handlePriceBlur, addBond }) => {
 	const { bonds, setBonds } = useBonds();
 
-	const debouncedUpdate = useCallback(
-		debounce(async (bondsToAdd: { SECID: string; quantity: number }[]) => {
-			const response = await fetch("/api/add-bond", {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify({ portfolioId, bondsToAdd }),
-			});
-
-			if (!response.ok) {
-				const error = await response.json();
-				console.log(error);
-				toast.error(error.error);
-			}
-		}, 1000),
-		[portfolioId]
-	);
-
-	const addBond = useCallback(
-		async (bondsToAdd: Bond) => {
-			const { SECID, quantity } = bondsToAdd;
-			const bondData = await fetchBondData(bondsToAdd.SECID);
-
-			setBonds((prevBonds) => {
-				const bondExists = prevBonds.find((bond) => bond.SECID === SECID);
-
-				if (prevBonds.length >= 20) {
-					toast.error("Максимум 20 облигаций");
-					return prevBonds;
-				}
-
-				const newBonds = bondExists
-					? prevBonds.map((bond) => (bond.SECID === SECID ? { ...bond, ...bondData, quantity } : bond))
-					: [...prevBonds, { ...bondsToAdd, ...bondData, quantity }];
-
-				debouncedUpdate(newBonds.map((bond) => ({ SECID: bond.SECID, quantity: bond.quantity! })));
-				return newBonds;
-			});
-		},
-		[debouncedUpdate, setBonds]
-	);
-
-	const removeBond = useCallback(
-		async (SECID: string) => {
-			const response = await fetch("/api/remove-bond", {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify({ portfolioId, secIdToRemove: SECID }),
-			});
-
-			if (!response.ok) {
-				const error = await response.json();
-				toast.error(error.error);
-			} else {
-				setBonds((prevBonds) => prevBonds.filter((bond) => bond.SECID !== SECID));
-			}
-		},
-		[portfolioId, setBonds]
-	);
-
-	const handlePriceBlur = async (secid: string, newPrice: string) => {
-		try {
-			const response = await fetch("/api/update-purchase-price", {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify({ portfolioId, secid, newPrice }),
-			});
-
-			if (!response.ok) {
-				const error = await response.json();
-				toast.error(error.error);
-			}
-		} catch (error) {
-			console.error("Error updating purchase price", error);
-			toast.error("Ошибка при обновлении цены покупки");
-		}
+	const handleQuantityChange = async (secId: string, value: number) => {
+		setBonds((prev) => prev.map((b) => (b.SECID === secId ? { ...b, quantity: value } : b)));
 	};
 
-	const handleQuantityChange = (secId: string, value: number) => {
-		if (!isNaN(value) && value > 0) {
-			setBonds((prev) => prev.map((b) => (b.SECID === secId ? { ...b, quantity: value } : b)));
-		}
-	};
-
-	const handlePriceChange = (secId: string, price: string) => {
+	const handlePriceChange = (secId: string, price: number) => {
 		setBonds((prevBonds) => prevBonds.map((b) => (b.SECID === secId ? { ...b, purchasePrice: price } : b)));
 	};
 
 	const dataWithHandlers = bonds.map((bond) => ({
 		...bond,
 		removeBond: (secId: string) => removeBond(secId),
-		handlePriceBlur: (secId: string, newPrice: string) => handlePriceBlur(secId, newPrice),
+		handlePriceBlur: (bond: Bond, newPrice: number) => handlePriceBlur(bond, newPrice),
 		handleQuantityBlur: (bond: Bond) => addBond(bond),
 		handleQuantityChange,
 		handlePriceChange,

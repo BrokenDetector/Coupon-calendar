@@ -8,6 +8,7 @@ import { useBonds } from "@/hooks/useBondContext";
 import { addMonths, getYear, isSameDay, parseISO, startOfYear } from "date-fns";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useSession } from "next-auth/react";
+import Link from "next/link";
 import { FC, useCallback, useMemo, useState } from "react";
 import MonthCalendar from "./MonthCalendar";
 
@@ -114,10 +115,25 @@ const CouponCalendar: FC<CouponCalendarProps> = ({ bonds: bondsFromProps }) => {
 			<div className="flex flex-col text-xs text-muted-foreground italic p-4">
 				<span>*Все платежи указаны без вычета налогов и комиссий.</span>
 				{!session?.data?.user && (
-					<span>
-						Хотите отслеживать выбранные облигации? Войдите или зарегистрируйтесь, чтобы сохранить их
-						навсегда.
-					</span>
+					<div>
+						<p>
+							Хотите отслеживать выбранные облигации?{" "}
+							<Link
+								href="/auth?view=register"
+								className="underline"
+							>
+								Войдите в аккаунт
+							</Link>{" "}
+							или{" "}
+							<Link
+								href="/auth?view=register"
+								className="underline"
+							>
+								зарегистрируйтесь
+							</Link>
+							, чтобы сохранить их навсегда.{" "}
+						</p>
+					</div>
 				)}
 			</div>
 

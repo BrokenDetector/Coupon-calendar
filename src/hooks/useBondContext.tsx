@@ -1,6 +1,5 @@
 "use client";
 
-import { fetchBondCoupons } from "@/actions/fetch-bond";
 import { usePathname } from "next/navigation";
 import { createContext, Dispatch, FC, ReactNode, SetStateAction, useContext, useEffect, useState } from "react";
 import toast from "react-hot-toast";
@@ -26,15 +25,28 @@ export const BondProvider: FC<BondProviderProps> = ({ children }) => {
 		const fetchData = async () => {
 			if (pathname === "/") {
 				const bondSecids = getLocalData();
-				if (bondSecids.length > 0) {
+				const limitedBondSecids = bondSecids.slice(0, 10);
+
+				if (limitedBondSecids.length > 0) {
 					const toastId = toast.loading("Загрузка облигаций...");
 
 					try {
-						for (const bond of bondSecids) {
-							const bondData = await fetchBondCoupons(bond.SECID);
-							setBonds((prevBonds) => [...prevBonds, { ...bondData, quantity: bond.quantity }]);
-						}
+						const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ""}/api/fetch-bonds`, {
+							method: "POST",
+							headers: {
+								"Content-Type": "application/json",
+							},
+							body: JSON.stringify({
+								bonds: limitedBondSecids,
+								fetchCoupons: true,
+							}),
+						});
 
+						if (!res.ok) {
+							throw new Error(`status: ${res.status}`);
+						}
+						const bondsList = await res.json();
+						setBonds(bondsList);
 						toast.success("Облигации загружены");
 					} catch (error) {
 						console.error(`❗Error fetching bonds`, error);
@@ -47,7 +59,7 @@ export const BondProvider: FC<BondProviderProps> = ({ children }) => {
 		};
 
 		fetchData();
-	}, [pathname]);
+	}, [pathname, getLocalData]);
 
 	return <BondContext.Provider value={{ bonds, setBonds }}>{children}</BondContext.Provider>;
 };

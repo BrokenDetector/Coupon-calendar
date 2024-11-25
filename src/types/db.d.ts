@@ -14,7 +14,7 @@ interface BondData {
 	EFFECTIVEYIELD?: number;
 	ACCRUEDINT?: number;
 	quantity?: number;
-	purchasePrice?: string;
+	purchasePrice?: number;
 	DURATION?: number;
 	DURATIONWAPRICE?: number;
 	COUPONPERCENT?: number;

@@ -1,6 +1,3 @@
-import { authOptions } from "@/lib/auth";
-import { isLimited } from "@/lib/rateLimit";
-import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 import { parseStringPromise } from "xml2js";
 
@@ -15,16 +12,6 @@ interface Valute {
 
 export async function GET(req: Request) {
 	const ip = req.headers.get("x-real-ip") || req.headers.get("x-forwarded-for") || "";
-	const isAllowed = await isLimited(ip);
-
-	if (!isAllowed) {
-		return NextResponse.json({ error: "Слишком много запросов, попробуйте позже." }, { status: 429 });
-	}
-
-	const session = await getServerSession(authOptions);
-	if (!session?.user) {
-		return NextResponse.json({ error: "Неавторизован." }, { status: 401 });
-	}
 
 	try {
 		const res = await fetch("https://www.cbr.ru/scripts/XML_daily.asp", { next: { revalidate: 3600 } });

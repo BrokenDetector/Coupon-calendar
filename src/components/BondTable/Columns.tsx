@@ -6,10 +6,10 @@ import { Trash } from "lucide-react";
 
 interface ExtendedBond extends Bond {
 	handleQuantityBlur: (bond: Bond) => void;
-	handlePriceBlur: (secid: string, newPrice: string) => void;
+	handlePriceBlur: (bond: Bond, newPrice: number) => void;
 	removeBond: (SECID: string) => void;
 	handleQuantityChange: (secId: string, value: number) => void;
-	handlePriceChange: (secId: string, price: string) => void;
+	handlePriceChange: (secId: string, price: number) => void;
 }
 
 const getCurrentYield = (bond: Bond): number => {
@@ -68,17 +68,27 @@ export const columns: ColumnDef<ExtendedBond>[] = [
 				<Input
 					type="number"
 					placeholder="Введите %"
-					value={bond.purchasePrice || 100}
-					onBlur={(e) => bond.handlePriceChange(bond.SECID, e.target.value === "" ? "100" : e.target.value)}
+					value={bond.purchasePrice}
+					onBlur={(e) => {
+						// If input is empty, reset to 100 and update both state and server
+						const newValue = e.target.value === "" ? 100 : parseInt(e.target.value);
+						bond.handlePriceChange(bond.SECID, newValue);
+						bond.handlePriceBlur(bond, newValue);
+					}}
 					aria-label={`${bond.SHORTNAME} price`}
-					onChange={(e) => bond.handlePriceChange(bond.SECID, e.target.value)}
+					onChange={(e) => bond.handlePriceChange(bond.SECID, parseInt(e.target.value))}
 					className="w-24"
+					onKeyDown={(e) => {
+						if (e.key === "Enter") {
+							bond.handlePriceBlur(bond, bond.purchasePrice!);
+						}
+					}}
 				/>
 			);
 		},
 		sortingFn: (rowA, rowB) => {
-			const priceA = parseFloat(rowA.original.purchasePrice || "100");
-			const priceB = parseFloat(rowB.original.purchasePrice || "100");
+			const priceA = rowA.original.purchasePrice || 100;
+			const priceB = rowB.original.purchasePrice || 100;
 			return priceA - priceB;
 		},
 	},
@@ -159,9 +169,14 @@ export const columns: ColumnDef<ExtendedBond>[] = [
 					type="number"
 					value={bond.quantity}
 					onChange={(e) => bond.handleQuantityChange(bond.SECID, parseInt(e.target.value))}
-					onBlur={() => bond.handleQuantityBlur(bond)}
+					onBlur={(e) => {
+						// If input is empty, reset to 1 and update both state and server
+						const newValue = e.target.value === "" ? 1 : parseInt(e.target.value);
+						bond.handleQuantityChange(bond.SECID, newValue);
+						bond.handleQuantityBlur({ ...bond, quantity: newValue });
+					}}
 					onKeyDown={(e) => {
-						if (e.keyCode === 13) {
+						if (e.key === "Enter") {
 							bond.handleQuantityBlur(bond);
 						}
 					}}

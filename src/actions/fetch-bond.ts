@@ -38,7 +38,7 @@ const createBondObject = (data: any): Bond => {
 	};
 };
 
-export const fetchBondCoupons = async (secid: string): Promise<Bond> => {
+const fetchBondCoupons = async (secid: string): Promise<Bond> => {
 	try {
 		const response = await fetch(createMOEXUrl(secid, "coupons"), { next: { revalidate: 3600 } });
 		if (!response.ok) {
@@ -87,7 +87,7 @@ const createBondDataObject = (data: any): BondData => {
 	return bondValues;
 };
 
-export const fetchBondData = async (secid: string): Promise<BondData> => {
+const fetchBondData = async (secid: string): Promise<BondData> => {
 	try {
 		const response = await fetch(createMOEXUrl(secid, "data"), { next: { revalidate: 3600 } });
 		if (!response.ok) {
@@ -99,4 +99,37 @@ export const fetchBondData = async (secid: string): Promise<BondData> => {
 		console.error(`❗Error fetching data for bond ${secid}:`, error);
 		throw error;
 	}
+};
+
+export const fetchBondsInChunks = async (bonds: Bond[], fetchCoupons: boolean = false) => {
+	const chunkSize = 10;
+	const chunks = [];
+	for (let i = 0; i < bonds.length; i += chunkSize) {
+		chunks.push(bonds.slice(i, i + chunkSize));
+	}
+
+	const allBonds: BondData[] = [];
+	for (const chunk of chunks) {
+		const bondPromises = chunk.map(async (bond) => {
+			if (fetchCoupons) {
+				const bondData = await fetchBondData(bond.SECID);
+				const bondCoupons = await fetchBondCoupons(bond.SECID);
+				return {
+					...bondCoupons,
+					quantity: bond.quantity,
+					...bondData,
+					purchasePrice: bond.purchasePrice || 100,
+				};
+			} else {
+				const bondData = await fetchBondData(bond.SECID);
+				return { ...bondData };
+			}
+		});
+
+		// Wait for all promises to resolve for this chunk
+		const chunkResults = (await Promise.all(bondPromises)) as BondData[];
+		allBonds.push(...chunkResults);
+	}
+
+	return allBonds;
 };

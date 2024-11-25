@@ -5,10 +5,10 @@ import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
-	const { portfolioId, bondsToAdd }: { portfolioId: string; bondsToAdd: Bondsecid[] } = await req.json();
+	const { portfolioId, bondToAdd }: { portfolioId: string; bondToAdd: Bond } = await req.json();
 
 	const ip = req.headers.get("x-real-ip") || (req.headers.get("x-forwarded-for") as string);
-	const isAllowed = await isLimited(ip);
+	const isAllowed = await isLimited(ip, true);
 
 	if (!isAllowed) {
 		return NextResponse.json({ error: "Слишком много запросов, попробуйте позже." }, { status: 429 });
@@ -30,15 +30,13 @@ export async function POST(req: Request) {
 
 		const portfolio = user.portfolios[portfolioIndex] as Portfolio;
 
-		bondsToAdd.forEach((bond) => {
-			const existingBondIndex = portfolio.bonds.findIndex((pBond) => pBond.SECID === bond.SECID);
+		const existingBondIndex = portfolio.bonds.findIndex((pBond) => pBond.SECID === bondToAdd.SECID);
 
-			if (existingBondIndex !== -1) {
-				portfolio.bonds[existingBondIndex].quantity = bond.quantity;
-			} else {
-				portfolio.bonds.push({ SECID: bond.SECID, quantity: bond.quantity });
-			}
-		});
+		if (existingBondIndex !== -1) {
+			portfolio.bonds[existingBondIndex].quantity = bondToAdd.quantity!;
+		} else {
+			portfolio.bonds.push({ SECID: bondToAdd.SECID, quantity: bondToAdd.quantity! });
+		}
 
 		user.portfolios[portfolioIndex] = portfolio;
 		await db.set(`user:${userId}`, JSON.stringify(user));

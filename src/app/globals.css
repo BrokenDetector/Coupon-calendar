@@ -78,4 +78,8 @@
 		--base-color: #18181b;
 		--highlight-color: #27272a;
 	}
+
+	.custom-toast {
+		@apply bg-popover text-popover-foreground border-2 rounded-lg flex flex-row justify-center items-center p-2 !important;
+	}
 }

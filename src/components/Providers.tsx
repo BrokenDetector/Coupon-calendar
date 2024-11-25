@@ -20,6 +20,9 @@ const Providers: FC<ProvidersProps> = ({ children }) => {
 			<Toaster
 				position="top-center"
 				reverseOrder={false}
+				toastOptions={{
+					className: "custom-toast",
+				}}
 			/>
 			<SessionProvider>
 				<BondProvider>

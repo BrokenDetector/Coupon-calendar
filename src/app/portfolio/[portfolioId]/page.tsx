@@ -1,11 +1,11 @@
 import { fetchAllBonds } from "@/actions/fetch-all-bonds";
-import { fetchBondCoupons, fetchBondData } from "@/actions/fetch-bond";
 import Header from "@/components/Header";
 import ServerPortfolioManager from "@/components/ServerPortfolioManager";
 import { getPortfolio } from "@/helpers/getPortfolio";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { getServerSession } from "next-auth";
+import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { FC } from "react";
 
@@ -21,14 +21,26 @@ const page: FC<pageProps> = async ({ params }) => {
 
 	if (!portfolio) return notFound();
 
-	const bondPromises =
-		portfolio.bonds?.map(async (bond) => {
-			const bondData = await fetchBondData(bond.SECID);
-			const bondCoupons = await fetchBondCoupons(bond.SECID);
-			return { ...bondCoupons, quantity: bond.quantity, ...bondData, purchasePrice: bond.purchasePrice || 100 };
-		}) || [];
+	const headersList = await headers();
+	const ip = headersList.get("x-real-ip") || headersList.get("x-forwarded-for");
 
-	const bondsList = (await Promise.all(bondPromises)) as BondData[];
+	const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ""}/api/fetch-bonds`, {
+		method: "POST",
+		headers: {
+			"Content-Type": "application/json",
+			"Client-ip": ip || "unknow",
+		},
+		body: JSON.stringify({
+			bonds: portfolio.bonds,
+			fetchCoupons: true,
+		}),
+	});
+
+	if (!res.ok) {
+		console.error(`❗Error fetching bonds: ${await res.json()}, status: ${res.status}`);
+	}
+
+	const bondsList = res.ok ? await res.json() : [];
 
 	const allBonds = await fetchAllBonds();
 

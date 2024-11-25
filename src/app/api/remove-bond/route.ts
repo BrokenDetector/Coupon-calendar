@@ -8,7 +8,7 @@ export async function POST(req: Request) {
 	const { portfolioId, secIdToRemove }: { portfolioId: string | number; secIdToRemove: string } = await req.json();
 
 	const ip = req.headers.get("x-real-ip") || (req.headers.get("x-forwarded-for") as string);
-	const isAllowed = await isLimited(ip);
+	const isAllowed = await isLimited(ip, true);
 
 	if (!isAllowed) {
 		return NextResponse.json({ error: "Слишком много запросов, попробуйте позже." }, { status: 429 });

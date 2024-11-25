@@ -1,6 +1,6 @@
 "use client";
 
-import { fetchBondCoupons } from "@/actions/fetch-bond";
+import { fetchBondsInChunks } from "@/actions/fetch-bond";
 import { ChevronDown, ChevronUp, Search } from "lucide-react";
 import { FC, memo, useEffect, useRef, useState } from "react";
 import { Input } from "./ui/input";
@@ -27,11 +27,11 @@ const SelectList: FC<SelectListProps> = memo(function SelectList({ options, onBo
 			(option.SECID && option.SECID.toLowerCase().includes(searchTerm.toLowerCase()))
 	);
 
-	const handleSelect = async (secid: string) => {
-		const selectedBond = await fetchBondCoupons(secid);
-		const bondExist = bonds.find((bond) => bond.SECID === secid);
+	const handleSelect = async (bond: Bond) => {
+		const selectedBond = await fetchBondsInChunks([bond], true);
+		const bondExist = bonds.find((b) => b.SECID === bond.SECID);
 		const quantity = bondExist ? bondExist.quantity! + 1 : 1;
-		const bondWithQuantity = { ...selectedBond, quantity };
+		const bondWithQuantity = { ...selectedBond[0], quantity };
 
 		setIsListVisible(false);
 		onBondUpdate(bondWithQuantity);
@@ -85,7 +85,7 @@ const SelectList: FC<SelectListProps> = memo(function SelectList({ options, onBo
 						{filteredOptions.map((bond, index) => (
 							<li
 								key={index}
-								onClick={() => handleSelect(bond.SECID)}
+								onClick={() => handleSelect(bond)}
 								className="p-2 hover:bg-muted-foreground/30 cursor-pointer flex flex-col text-left"
 							>
 								<span>{bond.SHORTNAME}</span>
