@@ -6,9 +6,7 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function getBaseUrl(path?: string) {
-	const baseUrl =
-		process.env.NODE_ENV === "production"
-			? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`
-			: "http://localhost:3000";
+	const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+
 	return baseUrl + path;
 }
