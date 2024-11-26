@@ -1,5 +1,6 @@
 "use client";
 
+import { getBaseUrl } from "@/lib/utils";
 import { usePathname } from "next/navigation";
 import { createContext, Dispatch, FC, ReactNode, SetStateAction, useContext, useEffect, useState } from "react";
 import toast from "react-hot-toast";
@@ -31,7 +32,7 @@ export const BondProvider: FC<BondProviderProps> = ({ children }) => {
 					const toastId = toast.loading("Загрузка облигаций...");
 
 					try {
-						const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ""}/api/fetch-bonds`, {
+						const res = await fetch(getBaseUrl("/api/fetch-bonds"), {
 							method: "POST",
 							headers: {
 								"Content-Type": "application/json",

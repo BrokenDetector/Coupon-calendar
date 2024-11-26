@@ -4,6 +4,7 @@ import ServerPortfolioManager from "@/components/ServerPortfolioManager";
 import { getPortfolio } from "@/helpers/getPortfolio";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { getBaseUrl } from "@/lib/utils";
 import { getServerSession } from "next-auth";
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
@@ -24,7 +25,7 @@ const page: FC<pageProps> = async ({ params }) => {
 	const headersList = await headers();
 	const ip = headersList.get("x-real-ip") || headersList.get("x-forwarded-for");
 
-	const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ""}/api/fetch-bonds`, {
+	const res = await fetch(getBaseUrl("/api/fetch-bonds"), {
 		method: "POST",
 		headers: {
 			"Content-Type": "application/json",
