@@ -43,55 +43,54 @@ const LocalPortfolioManager: FC<LocalPortfolioManagerProps> = ({ allBonds }) => 
 	}, [bonds, currencyRates]);
 
 	const addBond = useCallback(
-		(bond: Bond) => {
-			const { SECID: secid, quantity, purchasePrice } = bond;
+		(bondToAdd: Bond) => {
+			const { SECID, quantity, purchasePrice } = bondToAdd;
 			const currentBonds = getLocalData();
+			const bondExists = bonds.find((bond) => bond.SECID === SECID);
 
-			if (!currentBonds.some((b: Bondsecid) => b.SECID === secid)) {
-				if (currentBonds.length >= 10) {
-					toast((t) => (
-						<div>
-							<p>Вы достигли предела облигаций!</p>
-							<p>
-								<Link
-									href="/auth?view=register"
-									className="underline"
-									onClick={() => toast.dismiss(t.id)}
-								>
-									Зарегистрируйтесь
-								</Link>{" "}
-								или{" "}
-								<Link
-									href="/auth?view=login"
-									className="underline"
-									onClick={() => toast.dismiss(t.id)}
-								>
-									войдите в аккаунт
-								</Link>{" "}
-								для увеличения лимита.
-							</p>
-						</div>
-					));
+			if (currentBonds.length >= 10 && !bondExists) {
+				toast((t) => (
+					<div className="text-sm">
+						<p className="text-base font bold">Вы достигли предела облигаций!</p>
+						<p>
+							<Link
+								href="/auth?view=register"
+								className="underline font-bold"
+								onClick={() => toast.dismiss(t.id)}
+							>
+								Зарегистрируйтесь
+							</Link>{" "}
+							или{" "}
+							<Link
+								href="/auth?view=login"
+								className="underline font-bold"
+								onClick={() => toast.dismiss(t.id)}
+							>
+								войдите в аккаунт
+							</Link>{" "}
+							для увеличения лимита.
+						</p>
+					</div>
+				));
 
-					return;
-				}
+				return;
 			}
 
 			setBonds((prevBonds) =>
-				prevBonds.some((b) => b.SECID === secid)
-					? prevBonds.map((b) => (b.SECID === secid ? { ...b, quantity } : b))
-					: [...prevBonds, bond]
+				bondExists
+					? prevBonds.map((bond) => (bond.SECID === SECID ? { ...bond, quantity } : bond))
+					: [...prevBonds, bondToAdd]
 			);
 
-			const bondIndex = currentBonds.findIndex((item: Bondsecid) => item.SECID === secid);
+			const bondIndex = currentBonds.findIndex((item: Bondsecid) => item.SECID === SECID);
 			if (bondIndex > -1) {
-				currentBonds[bondIndex] = { SECID: secid, quantity, purchasePrice };
+				currentBonds[bondIndex] = { SECID, quantity, purchasePrice };
 			} else {
-				currentBonds.push({ SECID: secid, quantity, purchasePrice });
+				currentBonds.push({ SECID, quantity, purchasePrice });
 			}
 			setLocalData(currentBonds);
 		},
-		[setBonds, getLocalData, setLocalData]
+		[setBonds, bonds, getLocalData, setLocalData]
 	);
 
 	const removeBond = useCallback(
@@ -101,7 +100,7 @@ const LocalPortfolioManager: FC<LocalPortfolioManagerProps> = ({ allBonds }) => 
 
 			setLocalData(updatedStorage);
 		},
-		[setBonds, setLocalData]
+		[setBonds, setLocalData, bonds]
 	);
 
 	if (loading) {

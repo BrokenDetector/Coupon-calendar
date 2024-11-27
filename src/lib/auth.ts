@@ -2,7 +2,6 @@ import { UpstashRedisAdapter } from "@auth/upstash-redis-adapter";
 import bcrypt from "bcryptjs";
 import { NextAuthOptions } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
-import { fetchRedis } from "../helpers/redis";
 import { db } from "./db";
 import { LoginSchema } from "./validations/schemas";
 
@@ -27,13 +26,12 @@ export const authOptions: NextAuthOptions = {
 				if (validatedFields.success) {
 					const { email, password } = validatedFields.data;
 
-					const existingId = (await fetchRedis("get", `user:email:${email}`)) as string | null;
+					const existingId = (await db.get(`user:email:${email}`)) as string | null;
 
 					if (existingId) {
-						const userResult = await fetchRedis("get", `user:${JSON.parse(existingId)}`);
-						if (!userResult) return null;
+						const user = (await db.get(`user:${existingId}`)) as User | null;
+						if (!user) return null;
 
-						const user = JSON.parse(userResult);
 						if (!user.password) return null;
 
 						const passwordsMatch = await bcrypt.compare(password, user.password);
@@ -53,14 +51,13 @@ export const authOptions: NextAuthOptions = {
 	],
 	callbacks: {
 		async jwt({ token, user }) {
-			const userResult = await fetchRedis("get", `user:${token.id}`);
+			const dbUser = (await db.get(`user:${token.id}`)) as User;
 
-			if (!userResult && user) {
+			if (!dbUser && user) {
 				token.id = user.id;
 				return token;
 			}
 
-			const dbUser = JSON.parse(userResult);
 			return {
 				id: dbUser.id,
 				name: dbUser.name,

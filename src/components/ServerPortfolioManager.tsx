@@ -51,18 +51,16 @@ const ServerPortfolioManager: FC<ServerPortfolioManagerProps> = ({ allBonds, ini
 			const { SECID, quantity } = bondToAdd;
 			const bondExists = bonds.find((bond) => bond.SECID === SECID);
 
-			setBonds((prevBonds) => {
-				if (prevBonds.length >= 50) {
-					toast.error("Максимум 50 облигаций");
-					return prevBonds;
-				}
+			if (bonds.length >= 50 && !bondExists) {
+				toast.error("Максимум 50 облигаций");
+				return;
+			}
 
-				const newBonds = bondExists
+			setBonds((prevBonds) =>
+				bondExists
 					? prevBonds.map((bond) => (bond.SECID === SECID ? { ...bond, quantity } : bond))
-					: [...prevBonds, { ...bondToAdd, quantity }];
-
-				return newBonds;
-			});
+					: [...prevBonds, bondToAdd]
+			);
 
 			const response = await fetch("/api/add-bond", {
 				method: "POST",
@@ -78,7 +76,7 @@ const ServerPortfolioManager: FC<ServerPortfolioManagerProps> = ({ allBonds, ini
 				toast.error(error.error);
 			}
 		},
-		[setBonds, portfolioId]
+		[setBonds, portfolioId,bonds]
 	);
 
 	const removeBond = useCallback(

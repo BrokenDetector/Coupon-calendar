@@ -18,7 +18,7 @@ const page: FC<pageProps> = async ({ params }) => {
 	const session = await getServerSession(authOptions);
 	const user = (await db.get(`user:${session!.user.id}`)) as User;
 	const portfolioId = params.portfolioId;
-	const portfolio = await getPortfolio(session!.user.id, portfolioId);
+	const portfolio = await getPortfolio(user.id, portfolioId);
 
 	if (!portfolio) return notFound();
 
@@ -29,7 +29,7 @@ const page: FC<pageProps> = async ({ params }) => {
 		method: "POST",
 		headers: {
 			"Content-Type": "application/json",
-			"Client-ip": ip || "unknow",
+			"Client-ip": ip || "unknown",
 		},
 		body: JSON.stringify({
 			bonds: portfolio.bonds,

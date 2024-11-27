@@ -18,14 +18,14 @@ export const calculatePortfolioSummary = (
 	bonds.forEach((bond) => {
 		const quantity = bond.quantity || 1;
 		const nominalValue = bond.FACEVALUE || 0;
-		const purchasePricePercent = Number(bond.purchasePrice) || 100;
+		const purchasePricePercent = bond.purchasePrice || 100;
 		const currency = bond.FACEUNIT;
 		const conversionRate = currency === "RUB" || currency === "SUR" ? 1 : currencyRates?.[currency].rate || 1;
 
 		const purchaseValueInRUB = (purchasePricePercent / 100) * nominalValue * quantity * conversionRate;
 		totalPurchasePrice += purchaseValueInRUB;
 
-		const currentPricePercent = bond.LAST || bond.PREVWAPRICE || bond.FACEVALUE || 0;
+		const currentPricePercent = bond.LAST || bond.PREVWAPRICE || 0;
 		const currentMarketValueInRUB = (currentPricePercent / 100) * nominalValue * quantity * conversionRate;
 		totalCurrentPrice += currentMarketValueInRUB;
 
