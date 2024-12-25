@@ -19,12 +19,12 @@ import toast from "react-hot-toast";
 import ChangeThemeButton from "./ChangeThemeButton";
 
 interface HeaderProps {
-	user: User | null;
+	user?: User;
 }
 
 const Header: FC<HeaderProps> = ({ user }) => {
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
-	const portfoliosCount = user?.portfolios.length! < 5;
+	const portfoliosCount = (user?.portfolios.length || 0) < 5;
 	const router = useRouter();
 
 	const handleAddPortfolio = async () => {
@@ -74,17 +74,20 @@ const Header: FC<HeaderProps> = ({ user }) => {
 								<DropdownMenuTrigger asChild>
 									<Button
 										variant="ghost"
-										className="flex items-center space-x-2"
+										asChild
+										aria-label="Профиль"
 									>
-										<Avatar className="size-8">
-											<AvatarImage
-												src="/placeholder-user.jpg"
-												alt={user!.name}
-											/>
-											<AvatarFallback>{user!.name.slice(0, 2).toUpperCase()}</AvatarFallback>
-										</Avatar>
-										<span>{user!.name}</span>
-										<ChevronDown className="size-4 text-gray-500" />
+										<div className="flex items-center space-x-2 h-fit py-1">
+											<Avatar className="size-8">
+												<AvatarImage
+													src="/placeholder-user.jpg"
+													alt={user!.name}
+												/>
+												<AvatarFallback>{user!.name.slice(0, 2).toUpperCase()}</AvatarFallback>
+											</Avatar>
+											<span>{user!.name}</span>
+											<ChevronDown className="size-4 text-gray-500" />
+										</div>
 									</Button>
 								</DropdownMenuTrigger>
 								<DropdownMenuContent
@@ -92,14 +95,23 @@ const Header: FC<HeaderProps> = ({ user }) => {
 									className="w-56"
 								>
 									{user.portfolios.map((port, index) => (
-										<DropdownMenuItem key={index}>
-											<Link href={`/portfolio/${port.id}`}>{port.name}</Link>
+										<DropdownMenuItem
+											key={index}
+											aria-label={`Портфель ${port.name}`}
+										>
+											<Link
+												href={`/portfolio/${port.id}`}
+												className="hover:cursor-pointer size-full"
+											>
+												{port.name}
+											</Link>
 										</DropdownMenuItem>
 									))}
 									{portfoliosCount && (
 										<DropdownMenuItem
-											className="hover:cursor-pointer"
+											className="hover:cursor-pointer size-full"
 											onClick={handleAddPortfolio}
+											aria-label="Новый портфель"
 										>
 											<Plus className="size-4 mr-2" />
 											<span>Новый портфель</span>
@@ -108,7 +120,8 @@ const Header: FC<HeaderProps> = ({ user }) => {
 									<DropdownMenuSeparator />
 									<DropdownMenuItem
 										onClick={async () => await signOut()}
-										className="hover:cursor-pointer"
+										className="hover:cursor-pointer size-full"
+										aria-label="Выйти"
 									>
 										<LogOut className="mr-2 size-4" />
 										<span>Выйти</span>
@@ -121,6 +134,7 @@ const Header: FC<HeaderProps> = ({ user }) => {
 									variant="outline"
 									asChild
 									className="border shadow-sm"
+									aria-label="Вход"
 								>
 									<Link href="/auth?view=login">
 										<User className="size-5 mr-2" />
@@ -131,6 +145,7 @@ const Header: FC<HeaderProps> = ({ user }) => {
 									variant="default"
 									asChild
 									className="ml-4 shadow-sm"
+									aria-label="Регистрация"
 								>
 									<Link href="/auth?view=register">Регистрация</Link>
 								</Button>
@@ -142,6 +157,7 @@ const Header: FC<HeaderProps> = ({ user }) => {
 							variant="outline"
 							className="inline-flex items-center justify-center p-2 rounded-md text-muted-foreground hover:bg-muted focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary border-gray-300 shadow-sm"
 							onClick={() => setIsMenuOpen(!isMenuOpen)}
+							aria-label="Меню"
 						>
 							{isMenuOpen ? (
 								<X
@@ -171,6 +187,7 @@ const Header: FC<HeaderProps> = ({ user }) => {
 										variant="ghost"
 										asChild
 										className="w-full justify-start"
+										aria-label={`Портфель ${port.name}`}
 									>
 										<Link href={`/portfolio/${port.id}`}>{port.name}</Link>
 									</Button>
@@ -180,6 +197,7 @@ const Header: FC<HeaderProps> = ({ user }) => {
 									variant="ghost"
 									className="w-full justify-start text-red-600 hover:text-red-700"
 									onClick={async () => await signOut()}
+									aria-label="Выйти"
 								>
 									<LogOut className="size-5 mr-2" />
 									Выйти
@@ -191,6 +209,7 @@ const Header: FC<HeaderProps> = ({ user }) => {
 									variant="ghost"
 									asChild
 									className="w-full justify-start"
+									aria-label="Вход"
 								>
 									<Link href="/auth?view=login">
 										<User className="size-5 mr-2" />
@@ -201,6 +220,7 @@ const Header: FC<HeaderProps> = ({ user }) => {
 									variant="ghost"
 									asChild
 									className="w-full justify-start"
+									aria-label="Регистрация"
 								>
 									<Link href="/auth?view=register">Регистрация</Link>
 								</Button>

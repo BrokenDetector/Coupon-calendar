@@ -1,135 +1,79 @@
-const createMOEXUrl = (secid: string, type: "coupons" | "data"): string => {
-	const baseUrl = `https://iss.moex.com/iss/engines/stock/markets/bonds/boards`;
-	const board = secid.startsWith("SU") ? "TQOB" : "TQCB";
+import { createBondObjectWithCoupons, createBondsWithData } from "@/helpers/createBondObjectWithData";
+
+const createMOEXUrl = (secids: string[], type: "coupons" | "data"): string => {
+	const baseUrl = `https://iss.moex.com/iss/engines/stock/markets/bonds`;
 
 	if (type === "coupons") {
-		return `https://iss.moex.com/iss/securities/${secid}/bondization.json?iss.json=extended&iss.meta=off&iss.only=coupons&lang=ru&limit=unlimited`;
-	}
-	return `${baseUrl}/${board}/securities/${secid}.json?iss.meta=off&iss.only=securities,marketdata,marketdata_yields&lang=ru`;
-};
-
-const mapColumns = (columns: string[]) => {
-	return columns.reduce((acc, column, index) => {
-		acc[column] = index;
-		return acc;
-	}, {} as Record<string, number>);
-};
-
-// for calendar
-const createBondObject = (data: any): Bond => {
-	const coupons = data[1]?.coupons;
-
-	if (!coupons.length) {
-		throw new Error("❗No coupon data available.");
+		return `https://iss.moex.com/iss/securities/${secids[0]}/bondization.json?iss.json=extended&iss.meta=off&iss.only=coupons&lang=ru&limit=unlimited`;
 	}
 
-	const { isin: ISIN, name: SHORTNAME, secid: SECID, faceunit: FACEUNIT } = coupons[0];
+	return `${baseUrl}/securities.json?iss.meta=off&iss.only=securities,marketdata,marketdata_yields&lang=ru&marketprice_board=1&securities=${secids.join(
+		","
+	)}`;
+};
 
-	const COUPONVALUES: number[] = coupons.map((coupon: any) => coupon.value);
-	const COUPONDATES: string[] = coupons.map((coupon: any) => coupon.coupondate);
-
-	return {
-		SHORTNAME,
-		COUPONVALUES,
-		SECID,
-		ISIN,
-		FACEUNIT,
-		COUPONDATES,
-	};
+const chunkBonds = (bonds: Bond[]): string[][] => {
+	const chunkSize = 10;
+	const chunks: string[][] = [];
+	for (let i = 0; i < bonds.length; i += chunkSize) {
+		chunks.push(bonds.slice(i, i + chunkSize).map((bond) => bond.SECID));
+	}
+	return chunks;
 };
 
 const fetchBondCoupons = async (secid: string): Promise<Bond> => {
 	try {
-		const response = await fetch(createMOEXUrl(secid, "coupons"), { next: { revalidate: 3600 } });
+		const response = await fetch(createMOEXUrl([secid], "coupons"), { next: { revalidate: 3600 } });
 		if (!response.ok) {
 			throw new Error(`❗Failed to fetch bond coupons for ${secid}, status: ${response.status}`);
 		}
 		const data = await response.json();
-		return createBondObject(data);
+		return createBondObjectWithCoupons(data);
 	} catch (error) {
 		console.error(`❗Error fetching coupons for bond ${secid}:`, error);
 		throw error;
 	}
 };
 
-// for table
-const createBondDataObject = (data: any): BondData => {
-	const securitiesColumns = mapColumns(data.securities.columns);
-	const marketDataColumns = mapColumns(data.marketdata.columns);
-	const yieldDataColumns = mapColumns(data.marketdata_yields.columns);
-
-	const bondData = data.securities.data?.[0] ?? [];
-	const marketData = data.marketdata.data?.[0] ?? [];
-	const yieldData = data.marketdata_yields.data?.[0] ?? [];
-
-	const bondValues: BondData = {
-		SECID: bondData[securitiesColumns["SECID"]],
-		NAME: bondData[securitiesColumns["SECNAME"]],
-		SHORTNAME: bondData[securitiesColumns["SHORTNAME"]],
-		ISIN: bondData[securitiesColumns["ISIN"]],
-		FACEVALUE: bondData[securitiesColumns["FACEVALUE"]],
-		NEXTCOUPON: bondData[securitiesColumns["NEXTCOUPON"]],
-		COUPONVALUE: bondData[securitiesColumns["COUPONVALUE"]] || undefined,
-		COUPONFREQUENCY: bondData[securitiesColumns["COUPONPERIOD"]],
-		MATDATE: bondData[securitiesColumns["MATDATE"]],
-		ACCRUEDINT: bondData[securitiesColumns["ACCRUEDINT"]],
-		FACEUNIT: bondData[securitiesColumns["FACEUNIT"]],
-		COUPONPERCENT: bondData[securitiesColumns["COUPONPERCENT"]],
-
-		PREVWAPRICE: marketData[marketDataColumns["WAPRICE"]] || undefined,
-		LAST: marketData[marketDataColumns["LAST"]] || undefined,
-		DURATION: marketData[marketDataColumns["DURATION"]] || undefined,
-
-		EFFECTIVEYIELD: yieldData[yieldDataColumns["EFFECTIVEYIELD"]] || undefined,
-		DURATIONWAPRICE: yieldData[yieldDataColumns["DURATIONWAPRICE"]] || undefined,
-	};
-
-	return bondValues;
-};
-
-const fetchBondData = async (secid: string): Promise<BondData> => {
+const fetchBondData = async (secids: string[]): Promise<BondData[]> => {
 	try {
-		const response = await fetch(createMOEXUrl(secid, "data"), { next: { revalidate: 3600 } });
+		const response = await fetch(createMOEXUrl(secids, "data"), { next: { revalidate: 3600 } });
 		if (!response.ok) {
-			throw new Error(`❗Failed to fetch bond data for ${secid}, status: ${response.status}`);
+			throw new Error(`❗Failed to fetch bond data for ${secids.join(", ")}, status: ${response.status}`);
 		}
 		const data = await response.json();
-		return createBondDataObject(data);
+		const bonds = await createBondsWithData(data);
+		return bonds;
 	} catch (error) {
-		console.error(`❗Error fetching data for bond ${secid}:`, error);
+		console.error(`❗Error fetching data for bonds ${secids.join(", ")}:`, error);
 		throw error;
 	}
 };
 
-export const fetchBondsInChunks = async (bonds: Bond[], fetchCoupons: boolean = false) => {
-	const chunkSize = 10;
-	const chunks = [];
-	for (let i = 0; i < bonds.length; i += chunkSize) {
-		chunks.push(bonds.slice(i, i + chunkSize));
-	}
+export const fetchBonds = async (bonds: Bond[], fetchCoupons: boolean = false): Promise<Bond[] | BondData[]> => {
+	const chunks = chunkBonds(bonds);
 
-	const allBonds: BondData[] = [];
-	for (const chunk of chunks) {
-		const bondPromises = chunk.map(async (bond) => {
-			if (fetchCoupons) {
-				const bondData = await fetchBondData(bond.SECID);
-				const bondCoupons = await fetchBondCoupons(bond.SECID);
-				return {
-					...bondCoupons,
-					quantity: bond.quantity,
-					...bondData,
-					purchasePrice: bond.purchasePrice || 100,
-				};
-			} else {
-				const bondData = await fetchBondData(bond.SECID);
-				return { ...bondData };
-			}
-		});
+	const bondDataPromises = chunks.map((secids) => fetchBondData(secids));
 
-		// Wait for all promises to resolve for this chunk
-		const chunkResults = (await Promise.all(bondPromises)) as BondData[];
-		allBonds.push(...chunkResults);
-	}
+	const bondCouponsPromises = fetchCoupons ? bonds.map((bond) => fetchBondCoupons(bond.SECID)) : [];
+
+	const bondDataResults = await Promise.all(bondDataPromises);
+	const bondCouponsResults = fetchCoupons ? await Promise.all(bondCouponsPromises) : [];
+
+	const allBondData = bondDataResults.flat();
+	const allBondCoupons = fetchCoupons ? bondCouponsResults : [];
+
+	const allBonds = bonds.map((bond) => {
+		const bondDataForCurrent = allBondData.find((data) => data.SECID === bond.SECID);
+		const bondCouponsForCurrent = allBondCoupons.find((coupons) => coupons.SECID === bond.SECID);
+
+		return {
+			...bondCouponsForCurrent,
+			quantity: bond.quantity,
+			...bondDataForCurrent,
+			purchasePrice: bond.purchasePrice || 100,
+		} as Bond;
+	});
 
 	return allBonds;
 };

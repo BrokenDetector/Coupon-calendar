@@ -10,6 +10,12 @@ export const getCurrencySymbol = (currency: string): string => {
 			return "$";
 		case "CNY":
 			return "¥";
+		case "KGS":
+			return "KGS";
+		case "CHF":
+			return "CHF";
+		case "AED":
+			return "AED";
 		default:
 			return "";
 	}

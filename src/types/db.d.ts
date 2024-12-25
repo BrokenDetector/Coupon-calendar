@@ -18,6 +18,8 @@ interface BondData {
 	DURATION?: number;
 	DURATIONWAPRICE?: number;
 	COUPONPERCENT?: number;
+	CURRENTPRICE?: number;
+	CURRENTYIELD?: number;
 }
 
 interface Bond extends BondData {
@@ -25,8 +27,6 @@ interface Bond extends BondData {
 	COUPONVALUES?: number[];
 	COUPONDATES?: string[];
 }
-
-type BondResponse = [{ charsetinfo: { name: string } }, { securities: Bond[] }];
 
 interface Bondsecid {
 	SECID: string;

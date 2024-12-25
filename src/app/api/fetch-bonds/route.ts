@@ -1,4 +1,4 @@
-import { fetchBondsInChunks } from "@/actions/fetch-bond";
+import { fetchBonds } from "@/actions/fetch-bond";
 import { authOptions } from "@/lib/auth";
 import { isLimited } from "@/lib/rateLimit";
 import { getServerSession } from "next-auth";
@@ -18,14 +18,17 @@ export async function POST(req: Request) {
 	}
 
 	try {
-		const bondResults = await fetchBondsInChunks(bonds, fetchCouponsFlag);
+		const bondResults = await fetchBonds(bonds, fetchCouponsFlag);
 		return NextResponse.json(bondResults, { status: 200 });
 	} catch (error) {
 		console.error(`❗ ERROR in fetch-bond: ${error}`);
 		if (error instanceof Error) {
-			return NextResponse.json({ error: error.message }, { status: 500 });
+			return NextResponse.json({ error: `Ошибка при получении облигаций: ${error.message}` }, { status: 500 });
 		} else {
-			return NextResponse.json({ error: "Произошла неизвестная ошибка." }, { status: 500 });
+			return NextResponse.json(
+				{ error: "Произошла неизвестная ошибка при получении облигаций." },
+				{ status: 500 }
+			);
 		}
 	}
 }

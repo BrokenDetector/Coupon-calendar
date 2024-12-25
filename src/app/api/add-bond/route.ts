@@ -43,11 +43,14 @@ export async function POST(req: Request) {
 
 		return NextResponse.json({ message: "Облигации успешно добавлены." }, { status: 200 });
 	} catch (error) {
-		console.log(`❗ ERROR: ${error}`);
+		console.error(`❗ ERROR adding bond: ${error}`);
 		if (error instanceof Error) {
-			return NextResponse.json({ error: error.message }, { status: 500 });
+			return NextResponse.json({ error: `Ошибка при добавлении облигации: ${error.message}` }, { status: 500 });
 		} else {
-			return NextResponse.json({ error: "Произошла неизвестная ошибка." }, { status: 500 });
+			return NextResponse.json(
+				{ error: "Произошла неизвестная ошибка при добавлении облигации." },
+				{ status: 500 }
+			);
 		}
 	}
 }

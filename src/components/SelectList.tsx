@@ -1,8 +1,8 @@
 "use client";
 
-import { fetchBondsInChunks } from "@/actions/fetch-bond";
-import { ChevronDown, ChevronUp, Search } from "lucide-react";
-import { FC, memo, useEffect, useRef, useState } from "react";
+import { fetchBonds } from "@/actions/fetch-bond";
+import { Search } from "lucide-react";
+import { FC, memo, useEffect, useMemo, useRef, useState } from "react";
 import { Input } from "./ui/input";
 
 interface SelectListProps {
@@ -20,15 +20,17 @@ const SelectList: FC<SelectListProps> = memo(function SelectList({ options, onBo
 		setSearchTerm(event.target.value);
 	};
 
-	const filteredOptions = options.filter(
-		(option) =>
-			option.SHORTNAME.toLowerCase().includes(searchTerm.toLowerCase()) ||
-			(option.ISIN && option.ISIN.toLowerCase().includes(searchTerm.toLowerCase())) ||
-			(option.SECID && option.SECID.toLowerCase().includes(searchTerm.toLowerCase()))
-	);
+	const filteredOptions = useMemo(() => {
+		return options.filter(
+			(option) =>
+				option.SHORTNAME.toLowerCase().includes(searchTerm.toLowerCase()) ||
+				(option.ISIN && option.ISIN.toLowerCase().includes(searchTerm.toLowerCase())) ||
+				(option.SECID && option.SECID.toLowerCase().includes(searchTerm.toLowerCase()))
+		);
+	}, [options, searchTerm]);
 
 	const handleSelect = async (bond: Bond) => {
-		const selectedBond = await fetchBondsInChunks([bond], true);
+		const selectedBond = await fetchBonds([bond], true);
 		const bondExist = bonds.find((b) => b.SECID === bond.SECID);
 		const quantity = bondExist ? bondExist.quantity! + 1 : 1;
 		const bondWithQuantity = { ...selectedBond[0], quantity };
@@ -51,37 +53,27 @@ const SelectList: FC<SelectListProps> = memo(function SelectList({ options, onBo
 	}, []);
 
 	return (
-		<div className="flex flex-col space-y-2 w-full max-w-80 p-4">
+		<div className="flex flex-col space-y-2 w-full max-w-80 p-2">
 			<div
 				className="relative"
 				ref={dropdownRef}
 			>
 				<div className="relative grid grid-cols-4 items-center cursor-pointer border rounded-md shadow-sm min-w-50">
+					<Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-muted-foreground size-4" />
+
 					<Input
 						type="text"
 						value={searchTerm}
 						onChange={handleInputChange}
-						placeholder="Поиск облигаций"
+						placeholder="Быстрый поиск облигаций"
 						className="p-2 pl-10 rounded-md col-span-4 bg-muted"
 						aria-label="Search bonds"
 						onClick={(e) => e.stopPropagation()}
 						onFocus={() => setIsListVisible(true)}
 					/>
-					<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-					{isListVisible ? (
-						<ChevronUp
-							className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground"
-							onClick={() => setIsListVisible(false)}
-						/>
-					) : (
-						<ChevronDown
-							className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground"
-							onClick={() => setIsListVisible(true)}
-						/>
-					)}
 				</div>
 				{isListVisible && filteredOptions.length > 0 && (
-					<ul className="absolute z-10 w-full mt-1 bg-muted border rounded-md shadow-lg max-h-60 overflow-auto">
+					<ul className="absolute z-50 w-full mt-1 bg-muted border rounded-md shadow-lg max-h-60 overflow-auto">
 						{filteredOptions.map((bond, index) => (
 							<li
 								key={index}

@@ -18,7 +18,9 @@ interface LocalPortfolioManagerProps {
 const LocalPortfolioManager: FC<LocalPortfolioManagerProps> = ({ allBonds }) => {
 	const { bonds, setBonds } = useBonds();
 	const { getLocalData, setLocalData } = useLocalStorage("BONDSECIDS");
-	const [currencyRates, setCurrencyRates] = useState<{ [key: string]: { rate: number; name: string } } | null>(null);
+	const [currencyRates, setCurrencyRates] = useState<{
+		[key: string]: { rate: number; name: string; charCode: string };
+	} | null>(null);
 	const [loading, setLoading] = useState(true);
 
 	useEffect(() => {

@@ -1,10 +1,13 @@
 "use client";
 
+import { getCurrentPrice, getCurrentYield } from "@/helpers/createBondObjectWithData";
 import { useBonds } from "@/hooks/useBondContext";
+import Link from "next/link";
 import { FC } from "react";
-import { columns } from "./BondTable/Columns";
 import { DataTable } from "./BondTable/DataTable";
+import { columns } from "./BondTable/PortfolioColumns";
 import SelectList from "./SelectList";
+import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 
 interface MyBondsCardProps {
@@ -32,22 +35,35 @@ const MyBondsCard: FC<MyBondsCardProps> = ({ allBonds, removeBond, handlePriceBl
 		handleQuantityBlur: (bond: Bond) => addBond(bond),
 		handleQuantityChange,
 		handlePriceChange,
+		CURRENTYIELD: getCurrentYield(bond),
+		CURRENTPRICE: getCurrentPrice(bond),
 	}));
 
 	return (
 		<Card className="rounded-lg col-span-4 xl:col-span-3">
 			<CardHeader className="flex flex-row items-center justify-between">
 				<CardTitle className="text-2xl font-bold">Мои облигации</CardTitle>
-				<SelectList
-					options={allBonds}
-					onBondUpdate={addBond}
-					bonds={bonds}
-				/>
+				<div>
+					<Button
+						variant="link"
+						asChild
+						className="ml-4 text-foreground text-sm p-0"
+					>
+						<Link href="/bonds">Список всех облигаций</Link>
+					</Button>
+					<SelectList
+						options={allBonds}
+						onBondUpdate={addBond}
+						bonds={bonds}
+					/>
+				</div>
 			</CardHeader>
-			<CardContent>
+			<CardContent className="max-h-[400px]">
 				<DataTable
 					columns={columns}
 					data={dataWithHandlers}
+					filterPlaceholder="Поиск по портфелю"
+					maxHeight={"max-h-[320px]"}
 				/>
 			</CardContent>
 		</Card>

@@ -18,7 +18,9 @@ interface ServerPortfolioManagerProps {
 
 const ServerPortfolioManager: FC<ServerPortfolioManagerProps> = ({ allBonds, initialBonds, portfolioId }) => {
 	const { bonds, setBonds } = useBonds();
-	const [currencyRates, setCurrencyRates] = useState<{ [key: string]: { rate: number; name: string } } | null>(null);
+	const [currencyRates, setCurrencyRates] = useState<{
+		[key: string]: { rate: number; name: string; charCode: string };
+	} | null>(null);
 	const [loading, setLoading] = useState(true);
 
 	useEffect(() => {
@@ -76,7 +78,7 @@ const ServerPortfolioManager: FC<ServerPortfolioManagerProps> = ({ allBonds, ini
 				toast.error(error.error);
 			}
 		},
-		[setBonds, portfolioId,bonds]
+		[setBonds, portfolioId, bonds]
 	);
 
 	const removeBond = useCallback(

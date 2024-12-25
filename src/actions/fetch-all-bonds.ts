@@ -10,7 +10,7 @@ export const fetchAllBonds = async () => {
 		const data: Bond[] = await response.json();
 		return data;
 	} catch (error) {
-		console.error("❗ERROR: ", error);
+		console.error("❗ERROR fetching all bonds: ", error);
 		return [];
 	}
 };

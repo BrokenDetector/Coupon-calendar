@@ -8,12 +8,12 @@ import { getServerSession } from "next-auth";
 export default async function Home() {
 	const session = await getServerSession(authOptions);
 
-	const user = (await db.get(`user:${session?.user.id}`)) as User | null;
+	const user = (await db.get(`user:${session?.user.id}`)) as User | undefined;
 
 	const bondsList = await fetchAllBonds();
 
 	return (
-		<main className="flex min-h-screen flex-col items-center gap-3 min-w-[1000px] ">
+		<main className="flex min-h-screen flex-col items-center gap-3 min-w-[800px] ">
 			<Header user={user} />
 			<LocalPortfolioManager allBonds={bondsList} />
 		</main>

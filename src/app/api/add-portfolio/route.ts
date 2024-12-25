@@ -6,7 +6,7 @@ import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
 	const ip = req.headers.get("x-real-ip") || (req.headers.get("x-forwarded-for") as string);
-	const isAllowed = await isLimited(ip,true);
+	const isAllowed = await isLimited(ip, true);
 
 	if (!isAllowed) {
 		return NextResponse.json({ error: "Слишком много запросов, попробуйте позже." }, { status: 429 });
@@ -42,7 +42,7 @@ export async function POST(req: Request) {
 
 		return NextResponse.json({ message: "Новый портфель успешно создан.", newPortfolioId }, { status: 200 });
 	} catch (error) {
-		console.log(`❗ ERROR: ${error}`);
+		console.error(`❗ ERROR: ${error}`);
 		if (error instanceof Error) {
 			return NextResponse.json({ error: error.message }, { status: 500 });
 		} else {

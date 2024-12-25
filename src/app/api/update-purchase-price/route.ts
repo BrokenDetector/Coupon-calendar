@@ -39,7 +39,7 @@ export async function POST(req: Request) {
 		await db.set(`user:${userId}`, JSON.stringify(user));
 		return NextResponse.json({ message: "Облигация успешно обновлена." }, { status: 200 });
 	} catch (error) {
-		console.log(`❗ ERROR: ${error}`);
+		console.error(`❗ ERROR: ${error}`);
 		if (error instanceof Error) {
 			return NextResponse.json({ error: error.message }, { status: 500 });
 		} else {

@@ -1,17 +1,23 @@
 # Coupon calendar
 
-This service allows users to track bond coupons from the Moscow Exchange and view key details about their bond portfolio. The calendar highlights coupon payment dates and displays daily and monthly totals, making it easy to keep track of upcoming income. Additionally, a detailed table provides essential information about bonds in your portfolio.
+Coupon Calendar is a bond portfolio management service focused on the Russian market. Track your MOEX bond investments, monitor coupon payments, and manage multiple portfolios
 
 ## Features
 
 - View bond coupon payment dates and amounts in a convenient calendar format
+- Track daily and monthly coupon payments
 - Key portfolio metrics, such as total investment amount and current value
-- View daily and monthly coupon totals in the calendar
-- Add multiple quantities of the same bond to your portfolio
 - Search bonds by shortname and ISIN
-- Fetch real-time bond data from the Moscow Exchange (MOEX)
+- Real-time data updates from Moscow Exchange (MOEX)
 - User authentication
-- Manage multiple portfolios, each with different bonds
+- Manage multiple portfolios with different bonds
+- View comprehensive bond data in an interactive table:
+  - Current price and face value
+  - Coupon amount and payment schedule
+  - Yield to maturity (YTM)
+  - Duration and maturity dates
+  - Current yield and accumulated coupon income
+- Virtualized scrolling for large datasets
 
 ## Built with
 
@@ -22,3 +28,4 @@ This service allows users to track bond coupons from the Moscow Exchange and vie
 - Upstash Redis
 - React Hot Toast
 - Next Auth (Auth.js)
+- Tanstack Table
