@@ -4,13 +4,11 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ subsets: ["cyrillic"], preload: true });
 
 export const metadata: Metadata = {
 	title: "Купоны Облигаций — Отслеживание выплат по облигациям",
-	description:
-		"Сервис для отслеживания купонов облигаций с Московской биржи и просмотра ключевых данных по портфелю.\n" +
-		"Календарь отображает даты выплат, суммы за день и месяц, а таблица показывает подробную информацию по каждой облигации в портфеле.",
+	description: "Сервис для отслеживания купонов облигаций с Московской биржи",
 };
 
 export default function RootLayout({

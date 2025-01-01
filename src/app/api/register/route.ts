@@ -38,7 +38,8 @@ export async function POST(req: Request) {
 			email,
 			password: hashedPassword,
 			portfolios: [{ id: "1", name: "Портфель 1", bonds: [] }],
-		};
+			isVerified: false,
+		} as User;
 
 		await db.set(`user:${userId}`, JSON.stringify(userData));
 

@@ -1,14 +1,11 @@
 import AuthPage from "@/components/Auth/AuthCard";
-import LoadingSpinner from "@/components/LoadingSpinner";
-import { FC, Suspense } from "react";
+import { FC } from "react";
 
-const page: FC = () => {
+const page: FC = async () => {
 	return (
-		<Suspense fallback={<LoadingSpinner />}>
-			<main className="min-h-screen flex items-center justify-center">
-				<AuthPage />
-			</main>
-		</Suspense>
+		<main className="min-h-screen flex items-center justify-center">
+			<AuthPage />
+		</main>
 	);
 };
 

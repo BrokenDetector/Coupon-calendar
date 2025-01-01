@@ -47,4 +47,9 @@ interface User {
 	image?: string;
 	portfolios: Portfolio[];
 	password?: string;
+	isVerified: boolean;
+	verificationToken?: string;
+	verificationTokenExpires?: Date;
+	resetPasswordToken?: string;
+	resetPasswordTokenExpires?: Date;
 }

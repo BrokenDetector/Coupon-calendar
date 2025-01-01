@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 const NotFound = () => {
 	return (
 		<main className="flex flex-col items-center mt-20 text-lg gap-2">
@@ -8,6 +10,12 @@ const NotFound = () => {
 					<span className="text-5xl font-bold mb-5">НЕ НАЙДЕНО</span>
 				</h1>
 				<p className="italic">Запрашиваемый контент не найден.</p>
+				<Link
+					href="/"
+					className="mt-4 underline hover:text-gray-600"
+				>
+					Вернуться на главную
+				</Link>
 			</div>
 		</main>
 	);

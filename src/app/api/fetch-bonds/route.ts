@@ -5,8 +5,7 @@ import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
-	const { bonds, fetchCoupons }: { bonds: Bond[]; fetchCoupons: boolean } = await req.json();
-	const fetchCouponsFlag = fetchCoupons === true;
+	const { bonds, fetchCouponsFlag }: { bonds: Bond[]; fetchCouponsFlag: boolean } = await req.json();
 
 	const session = await getServerSession(authOptions);
 

@@ -46,10 +46,13 @@ export const columns: ColumnDef<Bond>[] = [
 				</Tooltip>
 			</TooltipProvider>
 		),
-		cell: ({ row }) => `${row.original.CURRENTPRICE!.toFixed(2)}%`,
+		cell: ({ row }) => {
+			const bond = row.original;
+			return bond.CURRENTPRICE ? `${bond.CURRENTPRICE.toFixed(2)}%` : "Н/Д";
+		},
 		sortingFn: (rowA, rowB) => {
-			const currPriceA = rowA.original.CURRENTPRICE!;
-			const currPriceB = rowB.original.CURRENTPRICE!;
+			const currPriceA = rowA.original.CURRENTPRICE || 0;
+			const currPriceB = rowB.original.CURRENTPRICE || 0;
 			return currPriceA - currPriceB;
 		},
 	},
@@ -69,6 +72,52 @@ export const columns: ColumnDef<Bond>[] = [
 			const bond = row.original;
 			return bond.COUPONVALUE ? `${bond.COUPONVALUE} ${getCurrencySymbol(bond.FACEUNIT)}` : "Н/Д";
 		},
+		sortingFn: (rowA, rowB) => {
+			const couponA = rowA.original.COUPONVALUE || 0;
+			const couponB = rowB.original.COUPONVALUE || 0;
+			return couponA - couponB;
+		},
+	},
+	{
+		accessorKey: "COUPONPERCENT",
+		header: () => (
+			<TooltipProvider>
+				<Tooltip>
+					<TooltipTrigger>Ставка купона</TooltipTrigger>
+					<TooltipContent>
+						<p>Годовая ставка купона в процентах</p>
+					</TooltipContent>
+				</Tooltip>
+			</TooltipProvider>
+		),
+		cell: ({ row }) => {
+			const bond = row.original;
+			return bond.COUPONPERCENT ? `${bond.COUPONPERCENT.toFixed(2)}%` : "Н/Д";
+		},
+		sortingFn: (rowA, rowB) => {
+			const percentA = rowA.original.COUPONPERCENT || 0;
+			const percentB = rowB.original.COUPONPERCENT || 0;
+			return percentA - percentB;
+		},
+	},
+	{
+		accessorKey: "COUPONPERIOD",
+		header: () => (
+			<TooltipProvider>
+				<Tooltip>
+					<TooltipTrigger>Период купона</TooltipTrigger>
+					<TooltipContent>
+						<p>Количество дней между выплатами купона</p>
+					</TooltipContent>
+				</Tooltip>
+			</TooltipProvider>
+		),
+		cell: ({ row }) => row.original.COUPONFREQUENCY || "Н/Д",
+		sortingFn: (rowA, rowB) => {
+			const periodA = rowA.original.COUPONFREQUENCY || 0;
+			const periodB = rowB.original.COUPONFREQUENCY || 0;
+			return periodA - periodB;
+		},
 	},
 	{
 		accessorKey: "CURRENTYIELD",
@@ -82,10 +131,13 @@ export const columns: ColumnDef<Bond>[] = [
 				</Tooltip>
 			</TooltipProvider>
 		),
-		cell: ({ row }) => `${row.original.CURRENTYIELD} %`,
+		cell: ({ row }) => {
+			const bond = row.original;
+			return bond.CURRENTYIELD ? `${bond.CURRENTYIELD.toFixed(2)} %` : "Н/Д";
+		},
 		sortingFn: (rowA, rowB) => {
-			const currYieldA = rowA.original.CURRENTYIELD!;
-			const currYieldB = rowB.original.CURRENTYIELD!;
+			const currYieldA = rowA.original.CURRENTYIELD || 0;
+			const currYieldB = rowB.original.CURRENTYIELD || 0;
 			return currYieldA - currYieldB;
 		},
 	},
@@ -128,6 +180,11 @@ export const columns: ColumnDef<Bond>[] = [
 			</TooltipProvider>
 		),
 		cell: ({ row }) => row.original.DURATION || "Н/Д",
+		sortingFn: (rowA, rowB) => {
+			const durationA = rowA.original.DURATION || 0;
+			const durationB = rowB.original.DURATION || 0;
+			return durationA - durationB;
+		},
 	},
 	{
 		accessorKey: "ACCUREDINT",

@@ -3,6 +3,7 @@ import Header from "@/components/Header";
 import LocalPortfolioManager from "@/components/LocalPortfolioManager";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { getBaseUrl } from "@/lib/utils";
 import { getServerSession } from "next-auth";
 
 export default async function Home() {
@@ -12,10 +13,26 @@ export default async function Home() {
 
 	const bondsList = await fetchAllBonds();
 
+	const fetchCurrencyRates = async () => {
+		const res = await fetch(getBaseUrl("/api/currency-exchange-rate"));
+		if (!res.ok) {
+			const error = await res.json();
+			console.error(error);
+		} else {
+			const data = await res.json();
+			return data.currencyRates;
+		}
+	};
+
+	const currencyRates = await fetchCurrencyRates();
+
 	return (
 		<main className="flex min-h-screen flex-col items-center gap-3 min-w-[800px] ">
 			<Header user={user} />
-			<LocalPortfolioManager allBonds={bondsList} />
+			<LocalPortfolioManager
+				allBonds={bondsList}
+				currencyRates={currencyRates}
+			/>
 		</main>
 	);
 }

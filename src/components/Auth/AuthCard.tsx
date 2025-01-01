@@ -1,15 +1,27 @@
 "use client";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useSearchParams } from "next/navigation";
 import LoginForm from "./LoginForm";
+import OAuthButtons from "./OAuthButtons";
 import RegisterForm from "./RegisterForm";
+import { useEffect } from "react";
+import toast from "react-hot-toast";
 
 const AuthPage = () => {
 	const searchParams = useSearchParams();
 	const view = searchParams?.get("view");
+	const error = searchParams?.get("error");
 	const isLogin = view === "login";
+
+	useEffect(() => {
+        if (error === "EmailInUse") {
+            toast.error(
+                "Этот email уже зарегистрирован с паролем. Пожалуйста, войдите используя email и пароль."
+            );
+        }
+    }, [error]);
 
 	return (
 		<div className="container flex flex-col items-center justify-center">
@@ -35,6 +47,9 @@ const AuthPage = () => {
 						</TabsContent>
 					</Tabs>
 				</CardContent>
+				<CardFooter>
+					<OAuthButtons />
+				</CardFooter>
 			</Card>
 		</div>
 	);

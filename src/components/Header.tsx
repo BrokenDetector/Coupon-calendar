@@ -57,9 +57,10 @@ const Header: FC<HeaderProps> = ({ user }) => {
 							<Image
 								className="size-14 dark:invert"
 								src={"/logo.svg"}
-								alt="logo"
-								width={"56"}
-								height={"56"}
+								alt="Календарь купонов"
+								width={56}
+								height={56}
+								priority
 							/>
 							<div className="flex flex-col ml-2 text-xl font-bold">
 								<span>Календарь</span>
@@ -80,7 +81,7 @@ const Header: FC<HeaderProps> = ({ user }) => {
 										<div className="flex items-center space-x-2 h-fit py-1">
 											<Avatar className="size-8">
 												<AvatarImage
-													src="/placeholder-user.jpg"
+													src={user!.image || "/placeholder-user.jpg"}
 													alt={user!.name}
 												/>
 												<AvatarFallback>{user!.name.slice(0, 2).toUpperCase()}</AvatarFallback>

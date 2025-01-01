@@ -13,7 +13,7 @@ import {
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { ArrowUpDown, Search } from "lucide-react";
+import { ArrowDown, ArrowUp, ArrowUpDown, Search } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useRef, useState } from "react";
 import { BsToggles } from "react-icons/bs";
@@ -54,7 +54,7 @@ export function DataTable<TData, TValue>({
 	};
 
 	const deserializeColumnVisibility = (): VisibilityState => {
-		const hiddenColumns = searchParams?.get("hidden_columns") || "";
+		const hiddenColumns = searchParams?.get("hidden_columns") || "DURATION-COUPONPERIOD-MATDATE";
 		const hiddenColumnIds = hiddenColumns.split("-").filter((id) => id.trim() !== "");
 
 		const visibilityState: VisibilityState = {};
@@ -226,7 +226,15 @@ export function DataTable<TData, TValue>({
 												{flexRender(header.column.columnDef.header, header.getContext())}
 
 												{header.column.getCanSort() && (
-													<ArrowUpDown className={"ml-2 size-3 flex-shrink-0 "} />
+													<>
+														{header.column.getIsSorted() === "asc" ? (
+															<ArrowUp className="ml-2 size-3 flex-shrink-0" />
+														) : header.column.getIsSorted() === "desc" ? (
+															<ArrowDown className="ml-2 size-3 flex-shrink-0" />
+														) : (
+															<ArrowUpDown className="ml-2 size-3 flex-shrink-0 text-muted-foreground" />
+														)}
+													</>
 												)}
 											</div>
 										)}

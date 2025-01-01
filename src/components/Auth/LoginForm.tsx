@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { LoginSchema } from "@/lib/validations/schemas";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader } from "lucide-react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { FC, useTransition } from "react";
@@ -42,7 +43,13 @@ const LoginForm: FC = () => {
 			if (!res?.error) {
 				router.push("/");
 			} else {
-				toast.error("Не удалось авторизоваться");
+				if (res.error.includes("Google or Yandex account")) {
+					toast.error(
+						"Этот email связан с аккаунтом Google или Yandex. Пожалуйста, войдите через соответствующий сервис."
+					);
+				} else {
+					toast.error("Неверный email или пароль");
+				}
 			}
 		});
 	};
@@ -97,7 +104,14 @@ const LoginForm: FC = () => {
 					className="w-full"
 					disabled={isPending}
 				>
-					Войти
+					{isPending ? (
+						<>
+							<Loader className="mr-2 h-4 w-4 animate-spin" />
+							Вход...
+						</>
+					) : (
+						"Войти"
+					)}
 				</Button>
 			</form>
 		</Form>

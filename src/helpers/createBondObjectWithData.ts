@@ -47,7 +47,7 @@ export const createBondsWithData = async (data: any): Promise<BondData[]> => {
 			ISIN: bondData[securitiesColumns["ISIN"]],
 			FACEVALUE: bondData[securitiesColumns["FACEVALUE"]],
 			NEXTCOUPON: bondData[securitiesColumns["NEXTCOUPON"]],
-			COUPONVALUE: bondData[securitiesColumns["COUPONVALUE"]] || undefined,
+			COUPONVALUE: bondData[securitiesColumns["COUPONVALUE"]],
 			COUPONFREQUENCY: bondData[securitiesColumns["COUPONPERIOD"]],
 			MATDATE: bondData[securitiesColumns["MATDATE"]],
 			ACCRUEDINT: bondData[securitiesColumns["ACCRUEDINT"]],
@@ -55,8 +55,8 @@ export const createBondsWithData = async (data: any): Promise<BondData[]> => {
 			COUPONPERCENT: bondData[securitiesColumns["COUPONPERCENT"]],
 			PREVWAPRICE: marketData[marketDataColumns["WAPRICE"]] || undefined,
 			LAST: marketData[marketDataColumns["LAST"]] || undefined,
-			DURATION: marketData[marketDataColumns["DURATION"]] || undefined,
-			EFFECTIVEYIELD: yieldData[yieldDataColumns["EFFECTIVEYIELD"]] || undefined,
+			DURATION: marketData[marketDataColumns["DURATION"]],
+			EFFECTIVEYIELD: yieldData[yieldDataColumns["EFFECTIVEYIELD"]],
 			DURATIONWAPRICE: yieldData[yieldDataColumns["DURATIONWAPRICE"]] || undefined,
 		};
 	});

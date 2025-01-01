@@ -1,44 +1,27 @@
 "use client";
 
 import CouponCalendar from "@/components/Calendar";
+import { Skeleton } from "@/components/ui/skeleton";
 import { calculatePortfolioSummary } from "@/helpers/calculatePortfolioSummary";
 import { useBonds } from "@/hooks/useBondContext";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import Link from "next/link";
 import { FC, useCallback, useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
-import Skeleton from "react-loading-skeleton";
 import MyBondsCard from "./MyBondsCard";
 import SummaryCard from "./SummaryCard";
 
 interface LocalPortfolioManagerProps {
 	allBonds: Bond[];
+	currencyRates: {
+		[key: string]: { rate: number; name: string; charCode: string };
+	};
 }
 
-const LocalPortfolioManager: FC<LocalPortfolioManagerProps> = ({ allBonds }) => {
+const LocalPortfolioManager: FC<LocalPortfolioManagerProps> = ({ allBonds, currencyRates }) => {
 	const { bonds, setBonds } = useBonds();
 	const { getLocalData, setLocalData } = useLocalStorage("BONDSECIDS");
-	const [currencyRates, setCurrencyRates] = useState<{
-		[key: string]: { rate: number; name: string; charCode: string };
-	} | null>(null);
-	const [loading, setLoading] = useState(true);
 
-	useEffect(() => {
-		const fetchCurrencyRates = async () => {
-			const res = await fetch("/api/currency-exchange-rate");
-			if (!res.ok) {
-				const error = await res.json();
-				console.error(error);
-				toast.error(error.error);
-			} else {
-				const data = await res.json();
-				setCurrencyRates(data.currencyRates);
-			}
-			setLoading(false);
-		};
-
-		fetchCurrencyRates();
-	}, []);
 
 	const portfolioSummary = useMemo(() => {
 		return calculatePortfolioSummary(bonds, currencyRates);
@@ -104,32 +87,6 @@ const LocalPortfolioManager: FC<LocalPortfolioManagerProps> = ({ allBonds }) => 
 		},
 		[setBonds, setLocalData, bonds]
 	);
-
-	if (loading) {
-		return (
-			<div className="flex flex-col space-y-4 mx-10 size-full">
-				{/* Skeleton for SummaryCard */}
-				<div className="grid grid-cols-1 xl:grid-cols-4 gap-3">
-					<Skeleton
-						height={340}
-						containerClassName="flex-1 col-span-4 xl:col-span-1 rounded-xl mx-4"
-					/>
-					{/* Skeleton for MyBondsCard */}
-					<Skeleton
-						count={7}
-						height={45}
-						containerClassName="flex-1 rounded-lg col-span-4 xl:col-span-3 mx-3"
-					/>
-				</div>
-
-				{/* Skeleton for CouponCalendar */}
-				<Skeleton
-					height={500}
-					containerClassName="flex-1 col-span-3 rounded-xl m-4"
-				/>
-			</div>
-		);
-	}
 
 	return (
 		<div className="flex flex-col space-y-4 mx-10">

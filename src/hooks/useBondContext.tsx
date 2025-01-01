@@ -39,7 +39,7 @@ export const BondProvider: FC<BondProviderProps> = ({ children }) => {
 							},
 							body: JSON.stringify({
 								bonds: limitedBondSecids,
-								fetchCoupons: true,
+								fetchCouponsFlag: true,
 							}),
 						});
 

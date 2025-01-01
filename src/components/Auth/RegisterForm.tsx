@@ -5,6 +5,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { RegisterSchema } from "@/lib/validations/schemas";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader } from "lucide-react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { FC, useTransition } from "react";
@@ -146,7 +147,14 @@ const RegisterForm: FC = () => {
 					className="w-full"
 					disabled={isPending}
 				>
-					Зарегистрироваться
+					{isPending ? (
+						<>
+							<Loader className="mr-2 h-4 w-4 animate-spin" />
+							Регистрация...
+						</>
+					) : (
+						"Зарегистрироваться"
+					)}
 				</Button>
 			</form>
 		</Form>
