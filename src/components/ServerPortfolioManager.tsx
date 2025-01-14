@@ -1,6 +1,6 @@
 "use client";
 
-import CouponCalendar from "@/components/Calendar";
+import CouponCalendar from "@/components/Calendar/Calendar";
 import MyBondsCard from "@/components/MyBondsCard";
 import SummaryCard from "@/components/SummaryCard";
 import { calculatePortfolioSummary } from "@/helpers/calculatePortfolioSummary";

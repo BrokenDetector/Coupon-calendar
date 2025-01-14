@@ -1,12 +1,11 @@
 "use client";
 
-import CouponCalendar from "@/components/Calendar";
-import { Skeleton } from "@/components/ui/skeleton";
+import CouponCalendar from "@/components/Calendar/Calendar";
 import { calculatePortfolioSummary } from "@/helpers/calculatePortfolioSummary";
 import { useBonds } from "@/hooks/useBondContext";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import Link from "next/link";
-import { FC, useCallback, useEffect, useMemo, useState } from "react";
+import { FC, useCallback, useMemo } from "react";
 import toast from "react-hot-toast";
 import MyBondsCard from "./MyBondsCard";
 import SummaryCard from "./SummaryCard";
@@ -21,7 +20,6 @@ interface LocalPortfolioManagerProps {
 const LocalPortfolioManager: FC<LocalPortfolioManagerProps> = ({ allBonds, currencyRates }) => {
 	const { bonds, setBonds } = useBonds();
 	const { getLocalData, setLocalData } = useLocalStorage("BONDSECIDS");
-
 
 	const portfolioSummary = useMemo(() => {
 		return calculatePortfolioSummary(bonds, currencyRates);

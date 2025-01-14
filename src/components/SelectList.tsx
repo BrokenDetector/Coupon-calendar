@@ -1,6 +1,7 @@
 "use client";
 
 import { fetchBonds } from "@/actions/fetch-bond";
+import { useVirtualizer } from "@tanstack/react-virtual";
 import { Search } from "lucide-react";
 import { FC, memo, useEffect, useMemo, useRef, useState } from "react";
 import { Input } from "./ui/input";
@@ -11,10 +12,11 @@ interface SelectListProps {
 	bonds: Bond[];
 }
 
-const SelectList: FC<SelectListProps> = memo(function SelectList({ options, onBondUpdate, bonds }) {
+const SelectList: FC<SelectListProps> = memo(({ options, onBondUpdate, bonds }) => {
 	const [searchTerm, setSearchTerm] = useState("");
 	const [isListVisible, setIsListVisible] = useState(false);
 	const dropdownRef = useRef<HTMLDivElement>(null);
+	const listRef = useRef<HTMLDivElement>(null);
 
 	const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
 		setSearchTerm(event.target.value);
@@ -28,6 +30,13 @@ const SelectList: FC<SelectListProps> = memo(function SelectList({ options, onBo
 				(option.SECID && option.SECID.toLowerCase().includes(searchTerm.toLowerCase()))
 		);
 	}, [options, searchTerm]);
+
+	const rowVirtualizer = useVirtualizer({
+		count: filteredOptions.length,
+		getScrollElement: () => listRef.current,
+		estimateSize: () => 55,
+		overscan: 5,
+	});
 
 	const handleSelect = async (bond: Bond) => {
 		const selectedBond = await fetchBonds([bond], true);
@@ -73,18 +82,39 @@ const SelectList: FC<SelectListProps> = memo(function SelectList({ options, onBo
 					/>
 				</div>
 				{isListVisible && filteredOptions.length > 0 && (
-					<ul className="absolute z-50 w-full mt-1 bg-muted border rounded-md shadow-lg max-h-60 overflow-auto">
-						{filteredOptions.map((bond, index) => (
-							<li
-								key={index}
-								onClick={() => handleSelect(bond)}
-								className="p-2 hover:bg-muted-foreground/30 cursor-pointer flex flex-col text-left"
-							>
-								<span>{bond.SHORTNAME}</span>
-								<span className="text-xs ml-0 text-muted-foreground">{bond.ISIN}</span>
-							</li>
-						))}
-					</ul>
+					<div
+						ref={listRef}
+						className="absolute z-50 w-full mt-1 bg-muted border rounded-md shadow-lg max-h-60 overflow-auto"
+					>
+						<div
+							className="relative"
+							style={{
+								height: `${rowVirtualizer.getTotalSize()}px`,
+							}}
+						>
+							{rowVirtualizer.getVirtualItems().map((virtualRow) => {
+								const bond = filteredOptions[virtualRow.index];
+								return (
+									<div
+										key={virtualRow.index}
+										className="absolute top-0 left-0 w-full"
+										style={{
+											height: `${virtualRow.size}px`,
+											transform: `translateY(${virtualRow.start}px)`,
+										}}
+									>
+										<div
+											onClick={() => handleSelect(bond)}
+											className="p-2 hover:bg-muted-foreground/30 cursor-pointer flex flex-col text-left h-full"
+										>
+											<span>{bond.SHORTNAME}</span>
+											<span className="text-xs ml-0 text-muted-foreground">{bond.ISIN}</span>
+										</div>
+									</div>
+								);
+							})}
+						</div>
+					</div>
 				)}
 			</div>
 		</div>
@@ -92,3 +122,5 @@ const SelectList: FC<SelectListProps> = memo(function SelectList({ options, onBo
 });
 
 export default SelectList;
+
+SelectList.displayName = "SelectList";

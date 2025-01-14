@@ -17,7 +17,10 @@ interface pageProps {
 const page: FC<pageProps> = async ({ params }) => {
 	const session = await getServerSession(authOptions);
 	const user = (await db.get(`user:${session!.user.id}`)) as User;
-	const portfolioId = params.portfolioId;
+
+	// `params` should be awaited before using its properties.
+	// https://nextjs.org/docs/messages/sync-dynamic-apis
+	const { portfolioId } = await params;
 	const portfolio = await getPortfolio(user.id, portfolioId);
 
 	if (!portfolio) return notFound();
@@ -57,7 +60,6 @@ const page: FC<pageProps> = async ({ params }) => {
 	};
 
 	const currencyRates = await fetchCurrencyRates();
-
 
 	return (
 		<main className="flex min-h-screen flex-col items-center gap-3 min-w-[800px]">

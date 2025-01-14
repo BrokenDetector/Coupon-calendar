@@ -104,6 +104,7 @@ export const authOptions: NextAuthOptions = {
 							bonds: [],
 						},
 					];
+					user.isVerified = true;
 				}
 				if (existingId) {
 					const existingUser = (await db.get(`user:${existingId}`)) as User;

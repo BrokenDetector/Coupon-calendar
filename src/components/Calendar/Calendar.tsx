@@ -1,6 +1,6 @@
 "use client";
 
-import CouponModal from "@/components/CouponModal";
+import CouponModal from "@/components/Calendar/CouponModal";
 import { Button } from "@/components/ui/button";
 import { getCurrencySymbol } from "@/helpers/getCurrencySymbol";
 import { sumCouponsByCurrency } from "@/helpers/sumCouponsByCurrency";
