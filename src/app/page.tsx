@@ -2,14 +2,14 @@ import { fetchAllBonds } from "@/actions/fetch-all-bonds";
 import Header from "@/components/Header";
 import LocalPortfolioManager from "@/components/LocalPortfolioManager";
 import { authOptions } from "@/lib/auth";
-import { db } from "@/lib/db";
+import { getUserById } from "@/lib/db-helpers";
 import { getBaseUrl } from "@/lib/utils";
 import { getServerSession } from "next-auth";
 
 export default async function Home() {
 	const session = await getServerSession(authOptions);
 
-	const user = (await db.get(`user:${session?.user.id}`)) as User | undefined;
+	const user = (await getUserById(session?.user.id || "")) as User | undefined;
 
 	const bondsList = await fetchAllBonds();
 
@@ -28,7 +28,7 @@ export default async function Home() {
 
 	return (
 		<main className="flex min-h-screen flex-col items-center gap-3 min-w-[800px] ">
-			<Header user={user} />
+			<Header />
 			<LocalPortfolioManager
 				allBonds={bondsList}
 				currencyRates={currencyRates}

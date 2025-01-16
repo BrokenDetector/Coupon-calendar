@@ -1,15 +1,15 @@
-import { db } from "@/lib/db";
+import { redis as RedisClient } from "@/lib/redis";
 import { Ratelimit } from "@upstash/ratelimit";
 
 const ratelimit = {
 	authorized: new Ratelimit({
-		redis: db,
+		redis: RedisClient,
 		limiter: Ratelimit.fixedWindow(100, "5 m"),
 		analytics: true,
 		prefix: "ratelimit:auth",
 	}),
 	notAuthorized: new Ratelimit({
-		redis: db,
+		redis: RedisClient,
 		limiter: Ratelimit.fixedWindow(50, "5 m"),
 		analytics: true,
 		prefix: "ratelimit:notauth",

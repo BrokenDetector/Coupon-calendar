@@ -37,7 +37,10 @@ interface Bondsecid {
 interface Portfolio {
 	id: string;
 	name: string;
-	bonds: Bondsecid[];
+	createdAt: Date;
+	updatedAt: Date;
+	userId: string;
+	bonds: Bond[];
 }
 
 interface User {
@@ -45,11 +48,51 @@ interface User {
 	name: string;
 	email: string;
 	image?: string;
-	portfolios: Portfolio[];
 	password?: string;
-	isVerified: boolean;
+	emailVerified?: boolean;
 	verificationToken?: string;
 	verificationTokenExpires?: Date;
 	resetPasswordToken?: string;
 	resetPasswordTokenExpires?: Date;
+	createdAt: Date;
+	updatedAt: Date;
+	portfolios: Portfolio[];
+}
+
+interface Account {
+	id: string;
+	userId: string;
+	type: string;
+	provider: string;
+	providerAccountId: string;
+	refresh_token?: string;
+	access_token?: string;
+	expires_at?: number;
+	token_type?: string;
+	scope?: string;
+	id_token?: string;
+	session_state?: string;
+	createdAt: Date;
+	updatedAt: Date;
+}
+
+interface Session {
+	id: string;
+	sessionToken: string;
+	userId: string;
+	expires: Date;
+}
+
+interface VerificationToken {
+	id: string;
+	identifier: string;
+	token: string;
+	expires: Date;
+}
+
+// For API responses
+interface Bondsecid {
+	SECID: string;
+	quantity: number;
+	purchasePrice?: string;
 }

@@ -1,11 +1,12 @@
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { getPortfolio } from "@/lib/db-helpers";
 import { isLimited } from "@/lib/rateLimit";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
-	const { portfolioId, secIdToRemove }: { portfolioId: string | number; secIdToRemove: string } = await req.json();
+	const { portfolioId, secIdToRemove }: { portfolioId: string; secIdToRemove: string } = await req.json();
 
 	const ip = req.headers.get("x-real-ip") || (req.headers.get("x-forwarded-for") as string);
 	const isAllowed = await isLimited(ip, true);
@@ -20,23 +21,24 @@ export async function POST(req: Request) {
 	}
 
 	try {
-		const userId = session.user.id;
-		const user = (await db.get(`user:${userId}`)) as User;
+		const portfolio = await getPortfolio(portfolioId);
 
-		const portfolioIndex = user.portfolios.findIndex((p: Portfolio) => p.id === portfolioId);
-		if (portfolioIndex === -1) {
+		if (!portfolio) {
 			return NextResponse.json({ error: "Портфель не найден." }, { status: 404 });
 		}
 
-		const portfolio = user.portfolios[portfolioIndex] as Portfolio;
-		const updatedBonds = portfolio.bonds.filter((bond) => bond.SECID !== secIdToRemove);
-
-		user.portfolios[portfolioIndex].bonds = updatedBonds;
-		await db.set(`user:${userId}`, JSON.stringify(user));
+		await db.bond.delete({
+			where: {
+				SECID_portfolioId: {
+					SECID: secIdToRemove,
+					portfolioId: portfolioId,
+				},
+			},
+		});
 
 		return NextResponse.json({ message: "Облигация успешно удалена." });
 	} catch (error) {
-		console.error(`❗ ERROR: ${error}`);
+		console.error(`❗ ERROR:`, error);
 		if (error instanceof Error) {
 			return NextResponse.json({ error: error.message }, { status: 500 });
 		} else {

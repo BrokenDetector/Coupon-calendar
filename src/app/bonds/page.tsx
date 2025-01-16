@@ -1,13 +1,19 @@
 import AllBondsCard from "@/components/AllBondsCard";
 import Header from "@/components/Header";
 import { authOptions } from "@/lib/auth";
-import { db } from "@/lib/db";
+import { getUserById } from "@/lib/db-helpers";
 import { getBaseUrl } from "@/lib/utils";
+import { Metadata } from "next";
 import { getServerSession } from "next-auth";
+
+export const metadata: Metadata = {
+	title: "Все облигации — Купоны Облигаций",
+	description: "Список всех облигаций, торгующихся на Московской бирже.",
+};
 
 const page = async () => {
 	const session = await getServerSession(authOptions);
-	const user = (await db.get(`user:${session?.user.id}`)) as User | null;
+	const user = (await getUserById(session?.user?.id!)) as User | undefined;
 
 	const fetchAllBonds = async () => {
 		try {
@@ -28,7 +34,7 @@ const page = async () => {
 
 	return (
 		<main className="flex min-h-screen flex-col items-center gap-3 min-w-[700px]">
-			<Header user={user || undefined} />
+			<Header />
 			<AllBondsCard allBonds={allBonds} />
 		</main>
 	);

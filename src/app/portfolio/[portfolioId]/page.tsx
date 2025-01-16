@@ -1,29 +1,39 @@
 import { fetchAllBonds } from "@/actions/fetch-all-bonds";
 import Header from "@/components/Header";
 import ServerPortfolioManager from "@/components/ServerPortfolioManager";
-import { getPortfolio } from "@/helpers/getPortfolio";
 import { authOptions } from "@/lib/auth";
-import { db } from "@/lib/db";
+import { getPortfolio, getUserById } from "@/lib/db-helpers";
 import { getBaseUrl } from "@/lib/utils";
+import { Metadata } from "next";
 import { getServerSession } from "next-auth";
 import { headers } from "next/headers";
-import { notFound } from "next/navigation";
+import { redirect } from "next/navigation";
 import { FC } from "react";
 
 interface pageProps {
-	params: { portfolioId: string };
+	params: Promise<{ portfolioId: string }>;
 }
+
+export const metadata: Metadata = {
+	title: "Портфель — Купоны Облигаций",
+};
 
 const page: FC<pageProps> = async ({ params }) => {
 	const session = await getServerSession(authOptions);
-	const user = (await db.get(`user:${session!.user.id}`)) as User;
+	const user = (await getUserById(session!.user.id)) as User;
 
 	// `params` should be awaited before using its properties.
 	// https://nextjs.org/docs/messages/sync-dynamic-apis
 	const { portfolioId } = await params;
-	const portfolio = await getPortfolio(user.id, portfolioId);
+	const portfolio = await getPortfolio(portfolioId);
 
-	if (!portfolio) return notFound();
+	if (!portfolio) {
+		if (user.portfolios?.[0]?.id) {
+			redirect(`/portfolio/${user.portfolios[0].id}`);
+		} else {
+			throw new Error("No portfolios found");
+		}
+	}
 
 	const headersList = await headers();
 	const ip = headersList.get("x-real-ip") || headersList.get("x-forwarded-for");
@@ -63,7 +73,7 @@ const page: FC<pageProps> = async ({ params }) => {
 
 	return (
 		<main className="flex min-h-screen flex-col items-center gap-3 min-w-[800px]">
-			<Header user={user} />
+			<Header />
 
 			<ServerPortfolioManager
 				portfolioId={portfolioId}

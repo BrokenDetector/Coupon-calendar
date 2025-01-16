@@ -6,13 +6,13 @@ type UserId = string;
 declare module "next-auth/jwt" {
 	interface JWT {
 		id: UserId;
-		isVerified: boolean;
+		emailVerified: boolean;
 	}
 }
 
 declare module "next-auth" {
 	interface User {
-		isVerified: boolean;
+		emailVerified?: boolean;
 		verificationToken?: string;
 		verificationTokenExpires?: Date;
 		resetPasswordToken?: string;
@@ -23,7 +23,9 @@ declare module "next-auth" {
 	interface Session {
 		user: User & {
 			id: UserId;
-			isVerified: boolean;
+			name: string;
+			emailVerified?: boolean;
+			portfolios: Portfolio[];
 		};
 	}
 }

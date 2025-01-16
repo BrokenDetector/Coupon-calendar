@@ -10,7 +10,7 @@ export async function middleware(req: NextRequest) {
 	}
 
 	if (session && (pathname.startsWith("/auth") || pathname === "/")) {
-		return NextResponse.redirect(new URL("/portfolio/1", req.url));
+		return NextResponse.redirect(new URL("/portfolio", req.url));
 	}
 
 	return NextResponse.next();

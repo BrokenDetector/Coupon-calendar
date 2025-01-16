@@ -54,7 +54,7 @@ const RegisterForm: FC = () => {
 					email,
 					password,
 				});
-				router.push("/portfolio/1");
+				router.push("/portfolio");
 			}
 		});
 	};

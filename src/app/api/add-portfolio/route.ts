@@ -1,5 +1,6 @@
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { getUserById } from "@/lib/db-helpers";
 import { isLimited } from "@/lib/rateLimit";
 import { getServerSession } from "next-auth/next";
 import { NextResponse } from "next/server";
@@ -19,9 +20,8 @@ export async function POST(req: Request) {
 
 	try {
 		const userId = session.user.id;
-		const userKey = `user:${userId}`;
 
-		const user = (await db.get(userKey)) as User;
+		const user = (await getUserById(userId)) as User;
 
 		const portfolios = user.portfolios;
 		const portfolioCount = portfolios.length;
@@ -30,17 +30,29 @@ export async function POST(req: Request) {
 			return NextResponse.json({ error: "Максимум 5 портфелей." }, { status: 400 });
 		}
 
-		const newPortfolioId = portfolioCount > 0 ? Number(portfolios[portfolioCount - 1].id) + 1 : 1;
-		const newPortfolio = {
-			id: `${newPortfolioId}`,
-			name: `Портфель ${newPortfolioId}`,
-			bonds: [],
-		};
+		const newPortfolioId = portfolioCount > 0 ? portfolioCount + 1 : 1;
+		const portfolioName = `Портфель ${newPortfolioId}`;
 
-		user.portfolios.push(newPortfolio);
-		await db.set(userKey, JSON.stringify(user));
+		const newPortfolio = await db.user.update({
+			where: { id: userId },
+			data: {
+				portfolios: {
+					create: {
+						name: portfolioName,
+						bonds: { create: [] },
+					},
+				},
+			},
+		});
 
-		return NextResponse.json({ message: "Новый портфель успешно создан.", newPortfolioId }, { status: 200 });
+		return NextResponse.json(
+			{
+				message: "Новый портфель успешно создан.",
+				newPortfolioId: newPortfolio.id,
+				portfolioName,
+			},
+			{ status: 200 }
+		);
 	} catch (error) {
 		console.error(`❗ ERROR: ${error}`);
 		if (error instanceof Error) {

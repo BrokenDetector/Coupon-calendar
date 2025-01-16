@@ -1,11 +1,12 @@
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { getPortfolio } from "@/lib/db-helpers";
 import { isLimited } from "@/lib/rateLimit";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
-	const { portfolioId, bondToAdd }: { portfolioId: string; bondToAdd: Bond } = await req.json();
+	const { portfolioId, bondToAdd }: { portfolioId: string; bondToAdd: Bondsecid } = await req.json();
 
 	const ip = req.headers.get("x-real-ip") || (req.headers.get("x-forwarded-for") as string);
 	const isAllowed = await isLimited(ip, true);
@@ -20,32 +21,37 @@ export async function POST(req: Request) {
 	}
 
 	try {
-		const userId = session.user.id;
-		const user = (await db.get(`user:${userId}`)) as User;
+		const portfolio = await getPortfolio(portfolioId);
 
-		const portfolioIndex = user.portfolios.findIndex((p: Portfolio) => p.id === portfolioId);
-		if (portfolioIndex === -1) {
+		if (!portfolio) {
 			return NextResponse.json({ error: "Портфель не найден." }, { status: 404 });
 		}
 
-		const portfolio = user.portfolios[portfolioIndex] as Portfolio;
-
-		const existingBondIndex = portfolio.bonds.findIndex((pBond) => pBond.SECID === bondToAdd.SECID);
-
-		if (existingBondIndex !== -1) {
-			portfolio.bonds[existingBondIndex].quantity = bondToAdd.quantity!;
-		} else {
-			portfolio.bonds.push({ SECID: bondToAdd.SECID, quantity: bondToAdd.quantity! });
-		}
-
-		user.portfolios[portfolioIndex] = portfolio;
-		await db.set(`user:${userId}`, JSON.stringify(user));
+		// Update or create bond
+		await db.bond.upsert({
+			where: {
+				SECID_portfolioId: {
+					SECID: bondToAdd.SECID,
+					portfolioId: portfolioId,
+				},
+			},
+			update: {
+				quantity: bondToAdd.quantity,
+				purchasePrice: bondToAdd.purchasePrice ? parseFloat(bondToAdd.purchasePrice) : null,
+			},
+			create: {
+				SECID: bondToAdd.SECID,
+				quantity: bondToAdd.quantity,
+				purchasePrice: bondToAdd.purchasePrice ? parseFloat(bondToAdd.purchasePrice) : null,
+				portfolioId: portfolioId,
+			},
+		});
 
 		return NextResponse.json({ message: "Облигации успешно добавлены." }, { status: 200 });
 	} catch (error) {
-		console.error(`❗ ERROR adding bond: ${error}`);
+		console.error(`❗ ERROR adding bond:`, error);
 		if (error instanceof Error) {
-			return NextResponse.json({ error: `Ошибка при добавлении облигации: ${error.message}` }, { status: 500 });
+			return NextResponse.json({ error: error.message }, { status: 500 });
 		} else {
 			return NextResponse.json(
 				{ error: "Произошла неизвестная ошибка при добавлении облигации." },

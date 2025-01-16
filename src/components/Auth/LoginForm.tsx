@@ -41,7 +41,7 @@ const LoginForm: FC = () => {
 			});
 
 			if (!res?.error) {
-				router.push("/");
+				router.push("/portfolio");
 			} else {
 				if (res.error.includes("Google or Yandex account")) {
 					toast.error(

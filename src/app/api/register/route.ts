@@ -2,7 +2,6 @@ import { db } from "@/lib/db";
 import { isLimited } from "@/lib/rateLimit";
 import { RegisterSchema } from "@/lib/validations/schemas";
 import bcrypt from "bcryptjs";
-import { nanoid } from "nanoid";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
@@ -23,31 +22,38 @@ export async function POST(req: Request) {
 
 		const { email, password, name } = validatedFields.data;
 
-		const existingId = (await db.get(`user:email:${email}`)) as string | null;
+		const existingUser = await db.user.findUnique({
+			where: { email },
+		});
 
-		if (existingId) {
+		if (existingUser) {
 			return NextResponse.json({ error: "Электронная почта уже используется!" }, { status: 409 });
 		}
 
 		const hashedPassword = await bcrypt.hash(password, 10);
-		const userId = nanoid();
 
-		const userData = {
-			id: userId,
-			name,
-			email,
-			password: hashedPassword,
-			portfolios: [{ id: "1", name: "Портфель 1", bonds: [] }],
-			isVerified: false,
-		} as User;
-
-		await db.set(`user:${userId}`, JSON.stringify(userData));
-
-		await db.set(`user:email:${email}`, JSON.stringify(userData.id));
+		await db.user.create({
+			data: {
+				name,
+				email,
+				password: hashedPassword,
+				emailVerified: false,
+				portfolios: {
+					create: [
+						{
+							name: "Портфель 1",
+							bonds: {
+								create: [],
+							},
+						},
+					],
+				},
+			},
+		});
 
 		return NextResponse.json({ message: "пользователь успешно создан." }, { status: 200 });
 	} catch (error) {
-		console.error(`❗ ERROR: ${error}`);
+		console.error(`❗ ERROR:`, error);
 		if (error instanceof Error) {
 			return NextResponse.json({ error: error.message }, { status: 500 });
 		} else {

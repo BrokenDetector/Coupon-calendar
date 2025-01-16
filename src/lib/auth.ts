@@ -1,11 +1,12 @@
-import { UpstashRedisAdapter } from "@auth/upstash-redis-adapter";
-import bcrypt from "bcryptjs";
+import { PrismaAdapter } from "@auth/prisma-adapter";
+import { compare } from "bcryptjs";
 import { NextAuthOptions } from "next-auth";
 import { Adapter } from "next-auth/adapters";
-import Credentials from "next-auth/providers/credentials";
+import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import YandexProvider from "next-auth/providers/yandex";
 import { db } from "./db";
+import { getUserByEmail } from "./db-helpers";
 import { LoginSchema } from "./validations/schemas";
 
 function getGoogleCredentials() {
@@ -38,8 +39,32 @@ function getYandexCredentials() {
 	return { clientId, clientSecret };
 }
 
+const prismaAdapter = PrismaAdapter(db) as Adapter;
+
+//@ts-ignore
+prismaAdapter.createUser = async (data) => {
+	const isOAuthUser = !!data.emailVerified;
+
+	const user = await db.user.create({
+		data: {
+			name: data.name,
+			email: data.email,
+			image: data.image,
+			emailVerified: isOAuthUser ? true : false,
+			portfolios: {
+				create: {
+					name: "Портфель 1",
+					bonds: { create: [] },
+				},
+			},
+		},
+	});
+
+	return user;
+};
+
 export const authOptions: NextAuthOptions = {
-	adapter: UpstashRedisAdapter(db) as Adapter,
+	adapter: prismaAdapter,
 	session: {
 		strategy: "jwt",
 	},
@@ -47,7 +72,6 @@ export const authOptions: NextAuthOptions = {
 		signIn: "/auth",
 		error: "/auth",
 	},
-	secret: process.env.NEXTAUTH_SECRET,
 	providers: [
 		GoogleProvider({
 			clientId: getGoogleCredentials().clientId,
@@ -57,10 +81,10 @@ export const authOptions: NextAuthOptions = {
 			clientId: getYandexCredentials().clientId,
 			clientSecret: getYandexCredentials().clientSecret,
 		}),
-		Credentials({
+		CredentialsProvider({
 			name: "credentials",
 			credentials: {
-				email: { label: "Email", type: "email", placeholder: "email" },
+				email: { label: "Email", type: "email" },
 				password: { label: "Password", type: "password" },
 			},
 			async authorize(credentials) {
@@ -68,21 +92,20 @@ export const authOptions: NextAuthOptions = {
 				if (validatedFields.success) {
 					const { email, password } = validatedFields.data;
 
-					const existingId = (await db.get(`user:email:${email}`)) as string | null;
+					const existingUser = (await getUserByEmail(email)) as User;
 
-					if (existingId) {
-						const user = (await db.get(`user:${existingId}`)) as User | null;
-						if (!user) return null;
+					if (existingUser) {
+						if (!existingUser) return null;
 
-						if (!user.password) {
+						if (!existingUser.password) {
 							throw new Error(
 								"This email is associated with a Google or Yandex account. Please sign in with the appropriate provider."
 							);
 						}
 
-						const passwordsMatch = await bcrypt.compare(password, user.password);
+						const passwordsMatch = await compare(password, existingUser.password);
 						if (passwordsMatch) {
-							return user;
+							return existingUser;
 						}
 					}
 				}
@@ -93,34 +116,22 @@ export const authOptions: NextAuthOptions = {
 	callbacks: {
 		async signIn({ user, account }) {
 			if (account?.provider !== "credentials") {
-				const existingId = ((await db.get(`user:email:${user.email}`)) as User) || null;
+				const existingUser = await getUserByEmail(user.email!);
 
-				// If this is a new user
-				if (!existingId) {
-					user.portfolios = [
-						{
-							id: "1",
-							name: "Портфель 1",
-							bonds: [],
-						},
-					];
-					user.isVerified = true;
-				}
-				if (existingId) {
-					const existingUser = (await db.get(`user:${existingId}`)) as User;
-					if (existingUser?.password) {
-						throw new Error("EmailInUse");
-					}
+				if (existingUser?.password) {
+					throw new Error("EmailInUse");
 				}
 			}
 			return true;
 		},
 		async jwt({ token, user, account }) {
-			const dbUser = (await db.get(`user:${token.id}`)) as User;
+			const dbUser = await getUserByEmail(token.email!);
 
-			if (!dbUser && user) {
-				token.id = user.id;
-				token.isVerified = !!account?.provider;
+			if (!dbUser) {
+				if (user) {
+					token.id = user.id;
+					token.emailVerified = !!account?.provider;
+				}
 				return token;
 			}
 
@@ -129,19 +140,21 @@ export const authOptions: NextAuthOptions = {
 				name: dbUser.name,
 				email: dbUser.email,
 				picture: dbUser.image,
-				isVerified: dbUser.isVerified,
+				emailVerified: dbUser.emailVerified || false,
 			};
 		},
-
 		async session({ session, token }) {
 			if (token) {
+				const dbUser = await getUserByEmail(session.user.email!);
+
 				session.user.id = token.id;
-				session.user.name = token.name;
+				session.user.name = token.name!;
 				session.user.email = token.email;
 				session.user.image = token.picture;
-				session.user.isVerified = token.isVerified;
+				session.user.emailVerified = token.emailVerified || false;
+				// @ts-ignore
+				session.user.portfolios = dbUser?.portfolios || [];
 			}
-
 			return session;
 		},
 	},

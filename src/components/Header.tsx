@@ -10,21 +10,19 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ChevronDown, LogOut, Menu, Plus, User, X } from "lucide-react";
-import { signOut } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { FC, useState } from "react";
+import { useState } from "react";
 import toast from "react-hot-toast";
 import ChangeThemeButton from "./ChangeThemeButton";
 
-interface HeaderProps {
-	user?: User;
-}
-
-const Header: FC<HeaderProps> = ({ user }) => {
+const Header = () => {
+	const { data: session, update } = useSession();
+	const user = session?.user;
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
-	const portfoliosCount = (user?.portfolios.length || 0) < 5;
+	const portfoliosCount = (user?.portfolios?.length || 0) < 5;
 	const router = useRouter();
 
 	const handleAddPortfolio = async () => {
@@ -41,8 +39,20 @@ const Header: FC<HeaderProps> = ({ user }) => {
 			return;
 		}
 
-		const newPortId = (await response.json()).newPortfolioId;
-		router.push(`/portfolio/${newPortId}`);
+		const data = await response.json();
+
+		await update({
+			...session,
+			user: {
+				...session?.user,
+				portfolios: [
+					...(session?.user?.portfolios || []),
+					{ id: data.newPortfolioId, name: data.portfolioName },
+				],
+			},
+		});
+
+		router.push(`/portfolio/${data.newPortfolioId}`);
 	};
 
 	return (
