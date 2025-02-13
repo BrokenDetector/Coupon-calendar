@@ -13,6 +13,11 @@ export async function middleware(req: NextRequest) {
 		return NextResponse.redirect(new URL("/portfolio", req.url));
 	}
 
+	// Public routes that don't need session checks
+	if (pathname === "/" || pathname === "/bonds") {
+		return NextResponse.next();
+	}
+
 	return NextResponse.next();
 }
 

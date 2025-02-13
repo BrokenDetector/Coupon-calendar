@@ -53,7 +53,7 @@ const CouponModal: FC<CouponModalProps> = ({
 										<span>
 											{couponValue
 												? `${(couponValue * quantity).toFixed(2)} ${currencySymbol}`
-												: "-"}
+												: "Н/Д"}
 										</span>
 									</div>
 								);

@@ -27,6 +27,10 @@ const CouponCalendar: FC<CouponCalendarProps> = ({ bonds: bondsFromProps }) => {
 	const { bonds: bondsFromContext } = useBonds();
 	const bonds = bondsFromProps || bondsFromContext;
 
+	const bondsSignature = useMemo(() => {
+		return bonds.map((bond) => `${bond.SECID}:${bond.quantity}`).join("|");
+	}, [bonds]);
+
 	const highlightedDates = useMemo(() => {
 		if (bonds.length > 0) {
 			return bonds.reduce((dates: string[], bond) => {
@@ -35,7 +39,8 @@ const CouponCalendar: FC<CouponCalendarProps> = ({ bonds: bondsFromProps }) => {
 			}, []);
 		}
 		return [];
-	}, [bonds.length]);
+		// eslint-disable-next-line
+	}, [bondsSignature]);
 
 	const parsedHighlightedDates = useMemo(() => highlightedDates.map((date) => parseISO(date)), [highlightedDates]);
 
@@ -58,7 +63,8 @@ const CouponCalendar: FC<CouponCalendarProps> = ({ bonds: bondsFromProps }) => {
 			setTotalCouponsByCurrency(totalsByCurrency);
 			setIsModalOpen(true);
 		},
-		[bonds.length]
+		// eslint-disable-next-line
+		[bondsSignature]
 	);
 
 	const changeYear = useCallback((increment: number) => {

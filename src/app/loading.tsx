@@ -7,27 +7,25 @@ import Link from "next/link";
 export default function Loading() {
 	return (
 		<main className="flex min-h-screen flex-col items-center gap-3 min-w-[800px]">
-			<header className="w-full border-b">
+			<header className="sticky top-0 z-50 w-full border-b bg-background">
 				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-1">
-					<div className="flex justify-between h-16">
-						<div className="flex items-center">
+					<div className="flex flex-1 items-center justify-between">
+						<div className="flex items-center gap-2">
 							<Link
 								href="/"
-								className="flex-shrink-0 flex items-center"
+								className="flex items-center gap-2 hover:bg-transparent"
 							>
 								<Image
-									className="size-14 dark:invert"
-									src={"/logo.svg"}
-									alt="logo"
-									width={"56"}
-									height={"56"}
+									src="/logo.svg"
+									width={32}
+									height={32}
+									alt="Logo"
+									className="dark:invert"
 								/>
-								<div className="flex flex-col ml-2 text-xl font-bold">
-									<span>Календарь</span>
-									<span>купонов</span>
-								</div>
+								<span className="hidden sm:inline-block font-bold">Купоны Облигаций</span>
 							</Link>
 						</div>
+
 						<div className="hidden sm:ml-6 sm:flex sm:items-center space-x-2">
 							<ChangeThemeButton />
 							<Skeleton className="h-10 w-[200px]" />

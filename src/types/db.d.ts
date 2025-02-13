@@ -1,4 +1,40 @@
-interface BondData {
+interface DBBond {
+	id: string;
+	SECID: string;
+	quantity: number;
+	purchasePrice: number | null;
+	portfolioId: string;
+	createdAt: Date;
+	updatedAt: Date;
+}
+
+interface DBPortfolio {
+	id: string;
+	name: string;
+	createdAt: Date;
+	updatedAt: Date;
+	userId: string;
+	bonds: DBBond[];
+}
+
+interface DBUser {
+	id: string;
+	name: string;
+	email: string;
+	image?: string;
+	password?: string;
+	emailVerified?: boolean;
+	verificationToken?: string;
+	verificationTokenExpires?: Date;
+	resetPasswordToken?: string;
+	resetPasswordTokenExpires?: Date;
+	createdAt: Date;
+	updatedAt: Date;
+	portfolios: DBPortfolio[];
+}
+
+// MOEX API Types
+interface MOEXBondData {
 	SECID: string;
 	NAME: string;
 	SHORTNAME: string;
@@ -13,8 +49,6 @@ interface BondData {
 	LAST?: number;
 	EFFECTIVEYIELD?: number;
 	ACCRUEDINT?: number;
-	quantity?: number;
-	purchasePrice?: number;
 	DURATION?: number;
 	DURATIONWAPRICE?: number;
 	COUPONPERCENT?: number;
@@ -22,41 +56,14 @@ interface BondData {
 	CURRENTYIELD?: number;
 }
 
-interface Bond extends BondData {
-	NAME?: string;
-	COUPONVALUES?: number[];
-	COUPONDATES?: string[];
+interface MOEXBondCoupons {
+	COUPONVALUES: number[];
+	COUPONDATES: string[];
 }
 
-interface Bondsecid {
-	SECID: string;
+interface Bond extends MOEXBondData, Partial<MOEXBondCoupons> {
 	quantity: number;
-	purchasePrice?: string;
-}
-
-interface Portfolio {
-	id: string;
-	name: string;
-	createdAt: Date;
-	updatedAt: Date;
-	userId: string;
-	bonds: Bond[];
-}
-
-interface User {
-	id: string;
-	name: string;
-	email: string;
-	image?: string;
-	password?: string;
-	emailVerified?: boolean;
-	verificationToken?: string;
-	verificationTokenExpires?: Date;
-	resetPasswordToken?: string;
-	resetPasswordTokenExpires?: Date;
-	createdAt: Date;
-	updatedAt: Date;
-	portfolios: Portfolio[];
+	purchasePrice?: number | null;
 }
 
 interface Account {
@@ -90,9 +97,8 @@ interface VerificationToken {
 	expires: Date;
 }
 
-// For API responses
-interface Bondsecid {
-	SECID: string;
-	quantity: number;
-	purchasePrice?: string;
-}
+// API Response Types
+type APIResponse<T> = { data: T; error?: never } | { data?: never; error: string };
+
+type BondAPIResponse = APIResponse<Bond[]>;
+type PortfolioAPIResponse = APIResponse<DBPortfolio>;

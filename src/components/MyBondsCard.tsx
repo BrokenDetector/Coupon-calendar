@@ -1,6 +1,5 @@
 "use client";
 
-import { getCurrentPrice, getCurrentYield } from "@/helpers/createBondObjectWithData";
 import { useBonds } from "@/hooks/useBondContext";
 import Link from "next/link";
 import { FC } from "react";
@@ -11,14 +10,15 @@ import { Button } from "./ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 
 interface MyBondsCardProps {
-	allBonds: Bond[];
+	bonds: Bond[];
+	allBonds: MOEXBondData[];
 	removeBond: (secId: string) => void;
 	handlePriceBlur: (bond: Bond, newPrice: number) => void;
 	addBond: (bond: Bond) => void;
 }
 
-const MyBondsCard: FC<MyBondsCardProps> = ({ allBonds, removeBond, handlePriceBlur, addBond }) => {
-	const { bonds, setBonds } = useBonds();
+const MyBondsCard: FC<MyBondsCardProps> = ({ bonds, allBonds, removeBond, handlePriceBlur, addBond }) => {
+	const { setBonds } = useBonds();
 
 	const handleQuantityChange = async (secId: string, value: number) => {
 		setBonds((prev) => prev.map((b) => (b.SECID === secId ? { ...b, quantity: value } : b)));
@@ -35,8 +35,6 @@ const MyBondsCard: FC<MyBondsCardProps> = ({ allBonds, removeBond, handlePriceBl
 		handleQuantityBlur: (bond: Bond) => addBond(bond),
 		handleQuantityChange,
 		handlePriceChange,
-		CURRENTYIELD: getCurrentYield(bond),
-		CURRENTPRICE: getCurrentPrice(bond),
 	}));
 
 	return (

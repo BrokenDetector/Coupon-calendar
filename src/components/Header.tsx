@@ -1,7 +1,8 @@
 "use client";
 
+import { addPortfolio } from "@/actions/add-portfolio";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -9,12 +10,14 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ChevronDown, LogOut, Menu, Plus, User, X } from "lucide-react";
+import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { cn } from "@/lib/utils";
+import { ChevronDown, FolderOpen, LogOut, Menu, Plus, User, X } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import ChangeThemeButton from "./ChangeThemeButton";
 
@@ -24,22 +27,30 @@ const Header = () => {
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
 	const portfoliosCount = (user?.portfolios?.length || 0) < 5;
 	const router = useRouter();
+	const pathname = usePathname();
+
+	const { getLocalData, setLocalData } = useLocalStorage("SELECTED_PORTFOLIO_ID");
+
+	const portfolioIdFromUrl = pathname?.split("/portfolio/")[1];
+	const portfolioIdFromStorage = getLocalData();
+	const portfolioId = portfolioIdFromUrl || portfolioIdFromStorage;
+
+	useEffect(() => {
+		if (portfolioIdFromUrl) {
+			setLocalData(portfolioIdFromUrl);
+		}
+	}, [portfolioIdFromUrl, setLocalData]);
+
+	const selectedPortfolio = user?.portfolios?.find((p) => p.id === portfolioId);
+	const isPortfolioPage = pathname?.includes("/portfolio/");
 
 	const handleAddPortfolio = async () => {
-		const response = await fetch("/api/add-portfolio", {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-		});
+		const response = await addPortfolio();
 
-		if (!response.ok) {
-			const error = await response.json();
-			toast.error(error.error);
+		if (!response.data) {
+			toast.error(response.error);
 			return;
 		}
-
-		const data = await response.json();
 
 		await update({
 			...session,
@@ -47,35 +58,35 @@ const Header = () => {
 				...session?.user,
 				portfolios: [
 					...(session?.user?.portfolios || []),
-					{ id: data.newPortfolioId, name: data.portfolioName },
+					{ id: response.data.newPortfolioId, name: response.data.portfolioName },
 				],
 			},
 		});
 
-		router.push(`/portfolio/${data.newPortfolioId}`);
+		setLocalData(response.data.newPortfolioId);
+		router.push(`/portfolio/${response.data.newPortfolioId}`);
 	};
 
 	return (
-		<header className="w-full border-b">
+		<header className="sticky top-0 z-50 w-full border-b bg-background">
 			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-1">
-				<div className="flex justify-between h-16">
-					<div className="flex items-center">
+				<div className="flex flex-1 items-center justify-between">
+					<div className="flex items-center gap-2">
 						<Link
 							href="/"
-							className="flex-shrink-0 flex items-center"
+							className={cn(
+								buttonVariants({ variant: "ghost" }),
+								"flex items-center gap-2 hover:bg-transparent"
+							)}
 						>
 							<Image
-								className="size-14 dark:invert"
-								src={"/logo.svg"}
-								alt="Календарь купонов"
-								width={56}
-								height={56}
-								priority
+								src="/logo.svg"
+								width={32}
+								height={32}
+								alt="Logo"
+								className="dark:invert"
 							/>
-							<div className="flex flex-col ml-2 text-xl font-bold">
-								<span>Календарь</span>
-								<span>купонов</span>
-							</div>
+							<span className="hidden sm:inline-block font-bold">Купоны Облигаций</span>
 						</Link>
 					</div>
 					<div className="hidden sm:ml-6 sm:flex sm:items-center space-x-2">
@@ -96,8 +107,19 @@ const Header = () => {
 												/>
 												<AvatarFallback>{user!.name.slice(0, 2).toUpperCase()}</AvatarFallback>
 											</Avatar>
-											<span>{user!.name}</span>
-											<ChevronDown className="size-4 text-gray-500" />
+											<div className="flex items-center gap-2">
+												<span>{user!.name}</span>
+												{selectedPortfolio && isPortfolioPage && (
+													<>
+														<span className="text-muted-foreground">/</span>
+														<span className="flex items-center gap-1 text-muted-foreground">
+															<FolderOpen className="size-4" />
+															{selectedPortfolio.name}
+														</span>
+													</>
+												)}
+												<ChevronDown className="size-4 text-gray-500" />
+											</div>
 										</div>
 									</Button>
 								</DropdownMenuTrigger>

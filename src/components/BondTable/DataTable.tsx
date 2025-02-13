@@ -1,3 +1,5 @@
+"use client";
+
 import {
 	ColumnDef,
 	ColumnFiltersState,
@@ -20,6 +22,7 @@ import { BsToggles } from "react-icons/bs";
 import { Button, buttonVariants } from "../ui/button";
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from "../ui/dropdown-menu";
 import { Input } from "../ui/input";
+import { MemoizedRow } from "./MemoizedRow";
 
 interface DataTableProps<TData, TValue> {
 	columns: ColumnDef<TData, TValue>[];
@@ -54,7 +57,7 @@ export function DataTable<TData, TValue>({
 	};
 
 	const deserializeColumnVisibility = (): VisibilityState => {
-		const hiddenColumns = searchParams?.get("hidden_columns") || "DURATION-COUPONPERIOD-MATDATE";
+		const hiddenColumns = searchParams?.get("hidden_columns") || "";
 		const hiddenColumnIds = hiddenColumns.split("-").filter((id) => id.trim() !== "");
 
 		const visibilityState: VisibilityState = {};
@@ -195,13 +198,13 @@ export function DataTable<TData, TValue>({
 						{table.getHeaderGroups().map((headerGroup) => (
 							<TableRow
 								key={headerGroup.id}
-								className="flex w-full justify-between items-center"
+								className="flex w-full border-b"
 							>
 								{headerGroup.headers.map((header) => (
 									<TableHead
 										key={header.id}
 										colSpan={header.colSpan}
-										className="max-w-24"
+										className="flex-shrink-0 border-r last:border-r-0"
 										style={{
 											width: header.getSize(),
 										}}
@@ -253,29 +256,15 @@ export function DataTable<TData, TValue>({
 							<>
 								{rowVirtualizer.getVirtualItems().map((virtualRow) => {
 									const row = table.getRowModel().rows[virtualRow.index];
-
 									return (
-										<TableRow
+										<MemoizedRow
 											key={row.id}
-											data-state={row.getIsSelected() && "selected"}
-											className="whitespace-nowrap absolute flex w-full justify-between items-center"
-											style={{
-												height: `${virtualRow.size}px`,
-												top: `${virtualRow.start}px`,
-											}}
-										>
-											{row.getVisibleCells().map((cell) => (
-												<TableCell
-													key={cell.id}
-													style={{
-														width: cell.column.getSize(),
-													}}
-													className="text-center text-sm"
-												>
-													{flexRender(cell.column.columnDef.cell, cell.getContext())}
-												</TableCell>
-											))}
-										</TableRow>
+											row={row}
+											virtualRow={virtualRow}
+											columnFilters={columnFilters}
+											columnVisibility={columnVisibility}
+											sorting={sorting}
+										/>
 									);
 								})}
 							</>

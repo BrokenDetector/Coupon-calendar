@@ -1,26 +1,13 @@
-"use client";
-
-import { getCurrentPrice, getCurrentYield } from "@/helpers/createBondObjectWithData";
-import { FC, useMemo } from "react";
+import { FC } from "react";
 import { columns } from "./BondTable/AllBondsColumns";
 import { DataTable } from "./BondTable/DataTable";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 
 interface AllBondsCardProps {
-	allBonds: Bond[];
+	allBonds: MOEXBondData[];
 }
 
 const AllBondsCard: FC<AllBondsCardProps> = ({ allBonds }) => {
-	const preprocessedData = useMemo(
-		() =>
-			allBonds.map((bond) => ({
-				...bond,
-				CURRENTYIELD: getCurrentYield(bond),
-				CURRENTPRICE: getCurrentPrice(bond),
-			})),
-		[allBonds]
-	);
-
 	return (
 		<div className="flex justify-center">
 			<Card className="rounded-lg w-[600px] md:w-[800px] lg:w-[1000px] xl:w-[1200px]">
@@ -30,7 +17,7 @@ const AllBondsCard: FC<AllBondsCardProps> = ({ allBonds }) => {
 				<CardContent className="max-h-[700px]">
 					<DataTable
 						columns={columns}
-						data={preprocessedData}
+						data={allBonds}
 						filterPlaceholder="Поиск"
 						maxHeight={"max-h-[600px]"}
 					/>

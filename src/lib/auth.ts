@@ -92,7 +92,7 @@ export const authOptions: NextAuthOptions = {
 				if (validatedFields.success) {
 					const { email, password } = validatedFields.data;
 
-					const existingUser = (await getUserByEmail(email)) as User;
+					const existingUser = (await getUserByEmail(email)) as DBUser;
 
 					if (existingUser) {
 						if (!existingUser) return null;

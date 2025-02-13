@@ -1,13 +1,16 @@
+"use client";
+
 import { getCurrencySymbol } from "@/helpers/getCurrencySymbol";
 import { ColumnDef } from "@tanstack/react-table";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
 
-export const columns: ColumnDef<Bond>[] = [
+export const columns: ColumnDef<MOEXBondData>[] = [
 	{
 		accessorKey: "SHORTNAME",
 		header: "Облигация",
+		size: 170,
 		cell: ({ row }) => (
-			<div className="flex flex-col text-left ml-2">
+			<div className="flex flex-col text-left">
 				<span className="font-bold text-sm">{row.original.SHORTNAME}</span>
 				<span className="text-xs text-muted-foreground">{row.original.ISIN}</span>
 			</div>
@@ -32,6 +35,7 @@ export const columns: ColumnDef<Bond>[] = [
 				</Tooltip>
 			</TooltipProvider>
 		),
+		size: 110,
 		cell: ({ row }) => `${row.original.FACEVALUE} ${getCurrencySymbol(row.original.FACEUNIT)}`,
 	},
 	{
@@ -46,6 +50,7 @@ export const columns: ColumnDef<Bond>[] = [
 				</Tooltip>
 			</TooltipProvider>
 		),
+		size: 100,
 		cell: ({ row }) => {
 			const bond = row.original;
 			return bond.CURRENTPRICE ? `${bond.CURRENTPRICE.toFixed(2)}%` : "Н/Д";
@@ -68,6 +73,7 @@ export const columns: ColumnDef<Bond>[] = [
 				</Tooltip>
 			</TooltipProvider>
 		),
+		size: 100,
 		cell: ({ row }) => {
 			const bond = row.original;
 			return bond.COUPONVALUE ? `${bond.COUPONVALUE} ${getCurrencySymbol(bond.FACEUNIT)}` : "Н/Д";
@@ -90,6 +96,7 @@ export const columns: ColumnDef<Bond>[] = [
 				</Tooltip>
 			</TooltipProvider>
 		),
+		size: 90,
 		cell: ({ row }) => {
 			const bond = row.original;
 			return bond.COUPONPERCENT ? `${bond.COUPONPERCENT.toFixed(2)}%` : "Н/Д";
@@ -112,6 +119,7 @@ export const columns: ColumnDef<Bond>[] = [
 				</Tooltip>
 			</TooltipProvider>
 		),
+		size: 80,
 		cell: ({ row }) => row.original.COUPONFREQUENCY || "Н/Д",
 		sortingFn: (rowA, rowB) => {
 			const periodA = rowA.original.COUPONFREQUENCY || 0;
@@ -131,6 +139,7 @@ export const columns: ColumnDef<Bond>[] = [
 				</Tooltip>
 			</TooltipProvider>
 		),
+		size: 110,
 		cell: ({ row }) => {
 			const bond = row.original;
 			return bond.CURRENTYIELD ? `${bond.CURRENTYIELD.toFixed(2)} %` : "Н/Д";
@@ -153,6 +162,7 @@ export const columns: ColumnDef<Bond>[] = [
 				</Tooltip>
 			</TooltipProvider>
 		),
+		size: 100,
 		cell: ({ row }) => {
 			const bond = row.original;
 			return bond.EFFECTIVEYIELD ? `${bond.EFFECTIVEYIELD.toFixed(2)} %` : "Н/Д";
@@ -179,6 +189,7 @@ export const columns: ColumnDef<Bond>[] = [
 				</Tooltip>
 			</TooltipProvider>
 		),
+		size: 80,
 		cell: ({ row }) => row.original.DURATION || "Н/Д",
 		sortingFn: (rowA, rowB) => {
 			const durationA = rowA.original.DURATION || 0;
@@ -198,6 +209,7 @@ export const columns: ColumnDef<Bond>[] = [
 				</Tooltip>
 			</TooltipProvider>
 		),
+		size: 100,
 		cell: ({ row }) => `${row.original.ACCRUEDINT?.toFixed(2)} ${getCurrencySymbol("RUB")}`,
 		sortingFn: (rowA, rowB) => {
 			const accruedIntA = rowA.original.ACCRUEDINT || 0;
@@ -217,6 +229,7 @@ export const columns: ColumnDef<Bond>[] = [
 				</Tooltip>
 			</TooltipProvider>
 		),
+		size: 110,
 		cell: ({ row }) => <span className="text-xs">{row.original.NEXTCOUPON}</span>,
 	},
 	{
@@ -231,6 +244,7 @@ export const columns: ColumnDef<Bond>[] = [
 				</Tooltip>
 			</TooltipProvider>
 		),
+		size: 100,
 		cell: ({ row }) => <span className="text-xs">{row.original.MATDATE}</span>,
 	},
 ];

@@ -1,5 +1,6 @@
 "use client";
 
+import { register } from "@/actions/register";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -36,17 +37,10 @@ const RegisterForm: FC = () => {
 		const { email, password } = validatedFields.data;
 
 		startPending(async () => {
-			const res = await fetch("/api/register", {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify(values),
-			});
+			const response = await register(values);
 
-			if (!res.ok) {
-				const error = await res.json();
-				toast.error(error.error);
+			if (!response.data) {
+				toast.error(response.error);
 				return;
 			} else {
 				await signIn("credentials", {

@@ -1,13 +1,13 @@
 "use client";
 
-import { fetchBonds } from "@/actions/fetch-bond";
+import { fetchBonds } from "@/actions/fetch-bonds";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { Search } from "lucide-react";
 import { FC, memo, useEffect, useMemo, useRef, useState } from "react";
 import { Input } from "./ui/input";
 
 interface SelectListProps {
-	options: Bond[];
+	options: MOEXBondData[];
 	onBondUpdate: (bond: Bond) => void;
 	bonds: Bond[];
 }
@@ -38,8 +38,8 @@ const SelectList: FC<SelectListProps> = memo(({ options, onBondUpdate, bonds }) 
 		overscan: 5,
 	});
 
-	const handleSelect = async (bond: Bond) => {
-		const selectedBond = await fetchBonds([bond], true);
+	const handleSelect = async (bond: MOEXBondData) => {
+		const selectedBond = await fetchBonds([{ SECID: bond.SECID, quantity: 1, purchasePrice: null }], true);
 		const bondExist = bonds.find((b) => b.SECID === bond.SECID);
 		const quantity = bondExist ? bondExist.quantity! + 1 : 1;
 		const bondWithQuantity = { ...selectedBond[0], quantity };

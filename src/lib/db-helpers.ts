@@ -43,6 +43,9 @@ export const getPortfolio = async (id: string) => {
 			where: {
 				id,
 			},
+			orderBy: {
+				createdAt: "desc",
+			},
 			include: {
 				bonds: true,
 			},

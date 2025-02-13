@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { getCurrencySymbol } from "@/helpers/getCurrencySymbol";
+import { cn } from "@/lib/utils";
 import { ColumnDef } from "@tanstack/react-table";
 import { Trash } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
@@ -17,12 +18,16 @@ export const columns: ColumnDef<ExtendedBond>[] = [
 	{
 		accessorKey: "SHORTNAME",
 		header: "Облигация",
-		cell: ({ row }) => (
-			<div className="flex flex-col text-left ml-2">
-				<span className="font-bold text-sm">{row.original.SHORTNAME}</span>
-				<span className="text-xs text-muted-foreground">{row.original.ISIN}</span>
-			</div>
-		),
+		size: 170,
+		cell: ({ row }) => {
+			const bond = row.original;
+			return (
+				<div className="flex flex-col text-left">
+					<span className="font-bold text-sm">{bond.SHORTNAME}</span>
+					<span className="text-xs text-muted-foreground">{bond.ISIN}</span>
+				</div>
+			);
+		},
 		filterFn: (row, columnId, filterValue) => {
 			const { SHORTNAME, ISIN } = row.original;
 			return (
@@ -43,7 +48,11 @@ export const columns: ColumnDef<ExtendedBond>[] = [
 				</Tooltip>
 			</TooltipProvider>
 		),
-		cell: ({ row }) => `${row.original.FACEVALUE} ${getCurrencySymbol(row.original.FACEUNIT)}`,
+		size: 110,
+		cell: ({ row }) => {
+			const bond = row.original;
+			return `${bond.FACEVALUE || 0} ${getCurrencySymbol(bond.FACEUNIT)}`;
+		},
 	},
 	{
 		accessorKey: "PURCHASEPRICE",
@@ -62,25 +71,27 @@ export const columns: ColumnDef<ExtendedBond>[] = [
 				</Tooltip>
 			</TooltipProvider>
 		),
+		size: 100,
 		cell: ({ row }) => {
 			const bond = row.original;
 			return (
 				<Input
 					type="number"
+					inputMode="decimal"
+					step={0.01}
 					placeholder="Введите %"
-					value={bond.purchasePrice}
+					value={bond.purchasePrice || ""}
 					onBlur={(e) => {
-						// If input is empty, reset to 100 and update both state and server
 						const newValue = e.target.value === "" ? 100 : parseFloat(e.target.value);
-						bond.handlePriceChange(bond.SECID, newValue);
-						bond.handlePriceBlur(bond, newValue);
+						if (!isNaN(newValue)) {
+							bond.handlePriceBlur(bond, newValue);
+						}
 					}}
 					aria-label={`Цена покупки ${bond.SHORTNAME}`}
-					onChange={(e) => bond.handlePriceChange(bond.SECID, parseFloat(e.target.value))}
-					className="w-20"
+					onChange={(e) => bond.handlePriceChange(bond.SECID, parseFloat(e.target.value.replace(",", ".")))}
+					className="w-16"
 					onKeyDown={(e) => {
 						if (e.key === "Enter") {
-							bond.handlePriceBlur(bond, bond.purchasePrice!);
 							(e.target as HTMLElement).blur();
 						}
 					}}
@@ -105,6 +116,7 @@ export const columns: ColumnDef<ExtendedBond>[] = [
 				</Tooltip>
 			</TooltipProvider>
 		),
+		size: 100,
 		cell: ({ row }) => {
 			const bond = row.original;
 			return bond.CURRENTPRICE ? `${bond.CURRENTPRICE.toFixed(2)}%` : "Н/Д";
@@ -127,6 +139,7 @@ export const columns: ColumnDef<ExtendedBond>[] = [
 				</Tooltip>
 			</TooltipProvider>
 		),
+		size: 100,
 		cell: ({ row }) => {
 			const bond = row.original;
 			return bond.COUPONVALUE ? `${bond.COUPONVALUE} ${getCurrencySymbol(bond.FACEUNIT)}` : "Н/Д";
@@ -149,6 +162,7 @@ export const columns: ColumnDef<ExtendedBond>[] = [
 				</Tooltip>
 			</TooltipProvider>
 		),
+		size: 90,
 		cell: ({ row }) => {
 			const bond = row.original;
 			return bond.COUPONPERCENT ? `${bond.COUPONPERCENT.toFixed(2)}%` : "Н/Д";
@@ -171,7 +185,11 @@ export const columns: ColumnDef<ExtendedBond>[] = [
 				</Tooltip>
 			</TooltipProvider>
 		),
-		cell: ({ row }) => row.original.COUPONFREQUENCY || "Н/Д",
+		size: 80,
+		cell: ({ row }) => {
+			const bond = row.original;
+			return bond.COUPONFREQUENCY || "Н/Д";
+		},
 		sortingFn: (rowA, rowB) => {
 			const periodA = rowA.original.COUPONFREQUENCY || 0;
 			const periodB = rowB.original.COUPONFREQUENCY || 0;
@@ -190,6 +208,7 @@ export const columns: ColumnDef<ExtendedBond>[] = [
 				</Tooltip>
 			</TooltipProvider>
 		),
+		size: 110,
 		cell: ({ row }) => {
 			const bond = row.original;
 			return bond.CURRENTYIELD ? `${bond.CURRENTYIELD.toFixed(2)} %` : "Н/Д";
@@ -212,6 +231,7 @@ export const columns: ColumnDef<ExtendedBond>[] = [
 				</Tooltip>
 			</TooltipProvider>
 		),
+		size: 100,
 		cell: ({ row }) => {
 			const bond = row.original;
 			return bond.EFFECTIVEYIELD ? `${bond.EFFECTIVEYIELD.toFixed(2)} %` : "Н/Д";
@@ -238,7 +258,11 @@ export const columns: ColumnDef<ExtendedBond>[] = [
 				</Tooltip>
 			</TooltipProvider>
 		),
-		cell: ({ row }) => row.original.DURATION || "Н/Д",
+		size: 80,
+		cell: ({ row }) => {
+			const bond = row.original;
+			return bond.DURATION || "Н/Д";
+		},
 		sortingFn: (rowA, rowB) => {
 			const durationA = rowA.original.DURATION || 0;
 			const durationB = rowB.original.DURATION || 0;
@@ -257,7 +281,11 @@ export const columns: ColumnDef<ExtendedBond>[] = [
 				</Tooltip>
 			</TooltipProvider>
 		),
-		cell: ({ row }) => `${row.original.ACCRUEDINT?.toFixed(2)} ${getCurrencySymbol("RUB")}`,
+		size: 100,
+		cell: ({ row }) => {
+			const bond = row.original;
+			return `${bond.ACCRUEDINT?.toFixed(2) || 0} ${getCurrencySymbol("RUB")}`;
+		},
 		sortingFn: (rowA, rowB) => {
 			const accruedIntA = rowA.original.ACCRUEDINT || 0;
 			const accruedIntB = rowB.original.ACCRUEDINT || 0;
@@ -276,7 +304,8 @@ export const columns: ColumnDef<ExtendedBond>[] = [
 				</Tooltip>
 			</TooltipProvider>
 		),
-		cell: ({ row }) => <span className="text-xs">{row.original.NEXTCOUPON}</span>,
+		size: 110,
+		cell: ({ row }) => <span className={cn("text-xs")}>{row.original.NEXTCOUPON || "Погашена"}</span>,
 	},
 	{
 		accessorKey: "MATDATE",
@@ -291,7 +320,10 @@ export const columns: ColumnDef<ExtendedBond>[] = [
 				</Tooltip>
 			</TooltipProvider>
 		),
-		cell: ({ row }) => <span className="text-xs">{row.original.MATDATE}</span>,
+		size: 100,
+		cell: ({ row }) => {
+			return <span className={cn("text-xs")}>{row.original.MATDATE || "Погашена"}</span>;
+		},
 	},
 	{
 		accessorKey: "QUANTITY",
@@ -305,12 +337,13 @@ export const columns: ColumnDef<ExtendedBond>[] = [
 				</Tooltip>
 			</TooltipProvider>
 		),
+		size: 80,
 		cell: ({ row }) => {
 			const bond = row.original;
 			return (
 				<Input
 					type="number"
-					value={bond.quantity}
+					value={bond.quantity || ""}
 					onChange={(e) => bond.handleQuantityChange(bond.SECID, parseInt(e.target.value))}
 					onBlur={(e) => {
 						// If input is empty, reset to 1 and update both state and server
@@ -338,6 +371,7 @@ export const columns: ColumnDef<ExtendedBond>[] = [
 	{
 		id: "ACTIONS",
 		header: "Действие",
+		size: 80,
 		cell: ({ row }) => {
 			const bond = row.original;
 			return (

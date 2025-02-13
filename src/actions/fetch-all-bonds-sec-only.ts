@@ -1,9 +1,11 @@
-import { NextResponse } from "next/server";
+"use server";
 
-const fetchBondDataFromMoex = async (): Promise<Bond[]> => {
+const fetchBondDataFromMoex = async (): Promise<MOEXBondData[]> => {
 	const response = await fetch(
 		"https://iss.moex.com/iss/engines/stock/markets/bonds/securities.json?marketprice_board=1&iss.json=extended&iss.meta=off&iss.only=securities&securities.columns=SECID,SHORTNAME,ISIN",
-		{ next: { revalidate: 3600 } }
+		{
+			next: { revalidate: 3600 },
+		}
 	);
 
 	if (!response.ok) {
@@ -22,20 +24,14 @@ const fetchBondDataFromMoex = async (): Promise<Bond[]> => {
 		.sort((a: Bond, b: Bond) => a.SHORTNAME.localeCompare(b.SHORTNAME));
 };
 
-export async function GET(req: Request) {
+export const fetchAllBonds = async (): Promise<APIResponse<MOEXBondData[]>> => {
 	try {
 		const bonds = await fetchBondDataFromMoex();
-
-		return NextResponse.json(bonds);
+		return { data: bonds };
 	} catch (error) {
-		console.error(`❗ ERROR: ${error}`);
-		if (error instanceof Error) {
-			return NextResponse.json(
-				{ error: `Ошибка при получении всех облигаций: ${error.message}` },
-				{ status: 500 }
-			);
-		} else {
-			return NextResponse.json({ error: "Произошла ошибка при получении всех облигаций." }, { status: 500 });
-		}
+		console.error("❗ERROR fetching all bonds: ", error);
+		return {
+			error: error instanceof Error ? error.message : "Произошла неизвестная ошибка.",
+		};
 	}
-}
+};

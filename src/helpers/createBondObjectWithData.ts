@@ -1,4 +1,4 @@
-export const getCurrentYield = (bond: Bond): number => {
+const getCurrentYield = (bond: MOEXBondData): number => {
 	const nominalValue = bond.FACEVALUE || 0;
 	const currentPrice = bond.LAST || bond.PREVWAPRICE || 0;
 	const couponFrequency = bond.COUPONFREQUENCY || 365;
@@ -11,7 +11,7 @@ export const getCurrentYield = (bond: Bond): number => {
 	return 0;
 };
 
-export const getCurrentPrice = (bond: Bond): number => {
+const getCurrentPrice = (bond: MOEXBondData): number => {
 	return bond.LAST || bond.PREVWAPRICE || 0;
 };
 
@@ -22,7 +22,7 @@ const mapColumns = (columns: string[]): Record<string, number> => {
 	}, {} as Record<string, number>);
 };
 
-export const createBondsWithData = async (data: any): Promise<BondData[]> => {
+export const createBondsWithData = async (data: any): Promise<MOEXBondData[]> => {
 	const securitiesColumns = mapColumns(data.securities.columns);
 	const marketDataColumns = mapColumns(data.marketdata.columns);
 	const yieldDataColumns = mapColumns(data.marketdata_yields.columns);
@@ -40,7 +40,7 @@ export const createBondsWithData = async (data: any): Promise<BondData[]> => {
 		const marketData = data.marketdata.data.find((md: any) => md[marketDataColumns["SECID"]] === secid) || {};
 		const yieldData = yieldDataMap.get(secid) || {};
 
-		return {
+		const bond = {
 			SECID: secid,
 			NAME: bondData[securitiesColumns["SECNAME"]],
 			SHORTNAME: bondData[securitiesColumns["SHORTNAME"]],
@@ -59,27 +59,30 @@ export const createBondsWithData = async (data: any): Promise<BondData[]> => {
 			EFFECTIVEYIELD: yieldData[yieldDataColumns["EFFECTIVEYIELD"]],
 			DURATIONWAPRICE: yieldData[yieldDataColumns["DURATIONWAPRICE"]] || undefined,
 		};
+
+		return {
+			...bond,
+			CURRENTPRICE: getCurrentPrice(bond),
+			CURRENTYIELD: getCurrentYield(bond),
+		};
 	});
 };
 
-export const createBondObjectWithCoupons = (data: any): Bond => {
+export const createBondObjectWithCoupons = (data: any): MOEXBondCoupons & { SECID: string } => {
 	const coupons = data[1]?.coupons;
 
 	if (!coupons.length) {
 		throw new Error("❗No coupon data available.");
 	}
 
-	const { isin: ISIN, name: SHORTNAME, secid: SECID, faceunit: FACEUNIT } = coupons[0];
+	const { secid: SECID } = coupons[0];
 
 	const COUPONVALUES: number[] = coupons.map((coupon: any) => coupon.value);
 	const COUPONDATES: string[] = coupons.map((coupon: any) => coupon.coupondate);
 
 	return {
-		SHORTNAME,
 		COUPONVALUES,
 		SECID,
-		ISIN,
-		FACEUNIT,
 		COUPONDATES,
 	};
 };

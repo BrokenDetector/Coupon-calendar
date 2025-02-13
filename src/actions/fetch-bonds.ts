@@ -1,4 +1,9 @@
+"use server";
+
 import { createBondObjectWithCoupons, createBondsWithData } from "@/helpers/createBondObjectWithData";
+import { checkProtection } from "@/lib/protection";
+
+type BondInput = Pick<DBBond, "SECID" | "quantity" | "purchasePrice">;
 
 const createMOEXUrl = (secids: string[], type: "coupons" | "data"): string => {
 	const baseUrl = `https://iss.moex.com/iss/engines/stock/markets/bonds`;
@@ -12,7 +17,7 @@ const createMOEXUrl = (secids: string[], type: "coupons" | "data"): string => {
 	)}`;
 };
 
-const chunkBonds = (bonds: Bond[]): string[][] => {
+const chunkBonds = (bonds: BondInput[]): string[][] => {
 	const chunkSize = 10;
 	const chunks: string[][] = [];
 	for (let i = 0; i < bonds.length; i += chunkSize) {
@@ -21,7 +26,7 @@ const chunkBonds = (bonds: Bond[]): string[][] => {
 	return chunks;
 };
 
-const fetchBondCoupons = async (secid: string): Promise<Bond> => {
+const fetchBondCoupons = async (secid: string): Promise<MOEXBondCoupons & { SECID: string }> => {
 	try {
 		const response = await fetch(createMOEXUrl([secid], "coupons"), { next: { revalidate: 3600 } });
 		if (!response.ok) {
@@ -35,7 +40,7 @@ const fetchBondCoupons = async (secid: string): Promise<Bond> => {
 	}
 };
 
-const fetchBondData = async (secids: string[]): Promise<BondData[]> => {
+const fetchBondData = async (secids: string[]): Promise<MOEXBondData[]> => {
 	try {
 		const response = await fetch(createMOEXUrl(secids, "data"), { next: { revalidate: 3600 } });
 		if (!response.ok) {
@@ -50,7 +55,12 @@ const fetchBondData = async (secids: string[]): Promise<BondData[]> => {
 	}
 };
 
-export const fetchBonds = async (bonds: Bond[], fetchCoupons: boolean = false): Promise<Bond[] | BondData[]> => {
+export const fetchBonds = async (bonds: BondInput[], fetchCoupons: boolean = false): Promise<Bond[]> => {
+	const protection = await checkProtection();
+	if (protection.error) {
+		throw new Error(protection.error);
+	}
+
 	const chunks = chunkBonds(bonds);
 
 	const bondDataPromises = chunks.map((secids) => fetchBondData(secids));

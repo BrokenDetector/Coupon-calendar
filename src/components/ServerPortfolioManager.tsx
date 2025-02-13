@@ -1,5 +1,6 @@
 "use client";
 
+import { addOrUpdateBond, removeBondFromPortfolio } from "@/actions/bond-actions";
 import CouponCalendar from "@/components/Calendar/Calendar";
 import MyBondsCard from "@/components/MyBondsCard";
 import SummaryCard from "@/components/SummaryCard";
@@ -7,8 +8,9 @@ import { calculatePortfolioSummary } from "@/helpers/calculatePortfolioSummary";
 import { useBonds } from "@/hooks/useBondContext";
 import { FC, useCallback, useEffect, useMemo } from "react";
 import toast from "react-hot-toast";
+
 interface ServerPortfolioManagerProps {
-	allBonds: Bond[];
+	allBonds: MOEXBondData[];
 	currencyRates: {
 		[key: string]: { rate: number; name: string; charCode: string };
 	};
@@ -32,6 +34,31 @@ const ServerPortfolioManager: FC<ServerPortfolioManagerProps> = ({
 		return calculatePortfolioSummary(bonds, currencyRates);
 	}, [bonds, currencyRates]);
 
+	const checkAndRemoveMaturedBonds = useCallback(async () => {
+		try {
+			// Find bonds that no longer exist in MOEX
+			const maturedBonds = initialBonds.filter((bond) => !allBonds.some((b) => b.SECID === bond.SECID));
+			// If found any matured bonds, remove them
+			if (maturedBonds.length > 0) {
+				setBonds((prevBonds) =>
+					prevBonds.filter((bond) => !maturedBonds.some((mb) => mb.SECID === bond.SECID))
+				);
+
+				for (const bond of maturedBonds) {
+					await removeBondFromPortfolio(portfolioId, bond.SECID);
+				}
+
+				toast.success("Погашенные облигации удалены из портфеля");
+			}
+		} catch (error) {
+			console.error("Failed to check matured bonds:", error);
+		}
+	}, [initialBonds, portfolioId, setBonds, allBonds]);
+
+	useEffect(() => {
+		checkAndRemoveMaturedBonds();
+	}, [checkAndRemoveMaturedBonds]);
+
 	const addBond = useCallback(
 		async (bondToAdd: Bond) => {
 			const { SECID, quantity } = bondToAdd;
@@ -42,24 +69,24 @@ const ServerPortfolioManager: FC<ServerPortfolioManagerProps> = ({
 				return;
 			}
 
+			const previousBonds = [...bonds];
 			setBonds((prevBonds) =>
 				bondExists
 					? prevBonds.map((bond) => (bond.SECID === SECID ? { ...bond, quantity } : bond))
 					: [...prevBonds, bondToAdd]
 			);
 
-			const response = await fetch("/api/add-bond", {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify({ portfolioId, bondToAdd }),
-			});
+			try {
+				const response = await addOrUpdateBond(portfolioId, bondToAdd);
 
-			if (!response.ok) {
-				const error = await response.json();
-				console.error(error);
-				toast.error(error.error);
+				if (response.error) {
+					setBonds(previousBonds);
+					toast.error(response.error);
+				}
+			} catch (error) {
+				setBonds(previousBonds);
+				toast.error("Ошибка при добавлении облигации");
+				console.error("Failed to add bond:", error);
 			}
 		},
 		[setBonds, portfolioId, bonds]
@@ -67,17 +94,11 @@ const ServerPortfolioManager: FC<ServerPortfolioManagerProps> = ({
 
 	const removeBond = useCallback(
 		async (SECID: string) => {
-			const response = await fetch("/api/remove-bond", {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify({ portfolioId, secIdToRemove: SECID }),
-			});
+			const response = await removeBondFromPortfolio(portfolioId, SECID);
 
-			if (!response.ok) {
-				const error = await response.json();
-				toast.error(error.error);
+			if (response.error) {
+				console.error(response.error);
+				toast.error(response.error);
 			} else {
 				setBonds((prevBonds) => prevBonds.filter((bond) => bond.SECID !== SECID));
 			}
@@ -87,18 +108,15 @@ const ServerPortfolioManager: FC<ServerPortfolioManagerProps> = ({
 
 	const handlePriceBlur = useCallback(
 		async (bond: Bond, newPrice: number) => {
+			if (typeof newPrice !== "number") {
+				return;
+			}
 			try {
-				const response = await fetch("/api/update-purchase-price", {
-					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-					},
-					body: JSON.stringify({ portfolioId, secid: bond.SECID, newPrice }),
-				});
+				const response = await addOrUpdateBond(portfolioId, { ...bond, purchasePrice: newPrice });
 
-				if (!response.ok) {
-					const error = await response.json();
-					toast.error(error.error);
+				if (response.error) {
+					console.error(response.error);
+					toast.error(response.error);
 				}
 			} catch (error) {
 				console.error("❗Error updating purchase price", error);
@@ -113,6 +131,7 @@ const ServerPortfolioManager: FC<ServerPortfolioManagerProps> = ({
 			<div className="grid grid-cols-1 xl:grid-cols-4 gap-3">
 				<SummaryCard portfolioSummary={portfolioSummary} />
 				<MyBondsCard
+					bonds={bonds}
 					allBonds={allBonds}
 					handlePriceBlur={handlePriceBlur}
 					addBond={addBond}
