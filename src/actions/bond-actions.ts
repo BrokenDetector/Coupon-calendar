@@ -3,7 +3,6 @@
 import { db } from "@/lib/db";
 import { getPortfolio } from "@/lib/db-helpers";
 import { checkProtection } from "@/lib/protection";
-import { revalidatePath } from "next/cache";
 
 export async function addOrUpdateBond(
 	portfolioId: string,
@@ -41,7 +40,6 @@ export async function addOrUpdateBond(
 			},
 		});
 
-		revalidatePath("/portfolio/[id]", "page");
 		return { data: { success: true } };
 	} catch (error) {
 		return {
@@ -75,7 +73,6 @@ export async function removeBondFromPortfolio(
 			},
 		});
 
-		revalidatePath("/portfolio/[id]", "page");
 		return { data: { success: true } };
 	} catch (error) {
 		return {

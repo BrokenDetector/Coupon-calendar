@@ -35,18 +35,20 @@ const page: FC<pageProps> = async ({ params }) => {
 		}
 	}
 
-	const portfolioBonds = await fetchBonds(portfolio.bonds, true);
+	const [portfolioBonds, allBonds, currencyRates] = await Promise.all([
+		fetchBonds(portfolio.bonds, true),
+		fetchAllBonds(),
+		fetchCurrencyRates(),
+	]);
 
 	if (portfolioBonds instanceof Error) {
 		console.error(`❗Error fetching bonds: ${portfolioBonds.message}`);
 	}
 
-	const allBonds = await fetchAllBonds();
 	if (allBonds.error) {
 		console.error(`❗Error fetching all bonds: ${allBonds.error}`);
 	}
 
-	const currencyRates = await fetchCurrencyRates();
 	if (currencyRates.error) {
 		console.error(`❗Error fetching currency rates: ${currencyRates.error}`);
 	}
@@ -57,7 +59,7 @@ const page: FC<pageProps> = async ({ params }) => {
 
 			<ServerPortfolioManager
 				portfolioId={portfolioId}
-				allBonds={allBonds.data!}
+				allBonds={allBonds.data || []}
 				currencyRates={currencyRates.data || {}}
 				initialBonds={portfolioBonds}
 			/>

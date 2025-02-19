@@ -9,9 +9,9 @@ import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { FC, useTransition } from "react";
 import { useForm } from "react-hook-form";
-import toast from "react-hot-toast";
 import * as z from "zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "../ui/form";
+import { customToast } from "../ui/toast/toast-variants";
 
 const LoginForm: FC = () => {
 	const router = useRouter();
@@ -28,7 +28,7 @@ const LoginForm: FC = () => {
 	const onSubmit = async (values: z.infer<typeof LoginSchema>) => {
 		const validatedFields = LoginSchema.safeParse(values);
 		if (!validatedFields.success) {
-			return toast.error("Необходимо указать пароль или почту");
+			return customToast.error("Необходимо указать пароль или почту");
 		}
 
 		const { email, password } = validatedFields.data;
@@ -44,11 +44,11 @@ const LoginForm: FC = () => {
 				router.push("/portfolio");
 			} else {
 				if (res.error.includes("Google or Yandex account")) {
-					toast.error(
+					customToast.error(
 						"Этот email связан с аккаунтом Google или Yandex. Пожалуйста, войдите через соответствующий сервис."
 					);
 				} else {
-					toast.error("Неверный email или пароль");
+					customToast.error("Неверный email или пароль");
 				}
 			}
 		});

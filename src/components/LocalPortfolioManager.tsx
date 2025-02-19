@@ -1,15 +1,16 @@
 "use client";
 
 import { fetchBonds } from "@/actions/fetch-bonds";
-import CouponCalendar from "@/components/Calendar/Calendar";
 import { calculatePortfolioSummary } from "@/helpers/calculatePortfolioSummary";
-import { useBonds } from "@/hooks/useBondContext";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { AlertCircle } from "lucide-react";
 import Link from "next/link";
-import { FC, useCallback, useEffect, useMemo, useRef } from "react";
-import toast from "react-hot-toast";
+import { FC, useCallback, useEffect, useMemo, useState } from "react";
+import CouponCalendar from "./Calendar/Calendar";
 import MyBondsCard from "./MyBondsCard";
 import SummaryCard from "./SummaryCard";
+import { customToast } from "./ui/toast/toast-variants";
+import { toast } from "./ui/toast/use-toast";
 
 interface LocalPortfolioManagerProps {
 	allBonds: MOEXBondData[];
@@ -19,9 +20,8 @@ interface LocalPortfolioManagerProps {
 }
 
 const LocalPortfolioManager: FC<LocalPortfolioManagerProps> = ({ allBonds, currencyRates }) => {
-	const { bonds, setBonds } = useBonds();
+	const [bonds, setBonds] = useState<Bond[]>([]);
 	const { getLocalData, setLocalData } = useLocalStorage("BONDSECIDS");
-	const initialLoadComplete = useRef(false);
 
 	const checkAndRemoveMaturedBonds = useCallback(() => {
 		const storedBonds = getLocalData() as Bond[];
@@ -33,69 +33,75 @@ const LocalPortfolioManager: FC<LocalPortfolioManagerProps> = ({ allBonds, curre
 			const updatedBonds = storedBonds.filter((bond) => !maturedBonds.some((mb) => mb.SECID === bond.SECID));
 			setLocalData(updatedBonds);
 			setBonds((prevBonds) => prevBonds.filter((bond) => !maturedBonds.some((mb) => mb.SECID === bond.SECID)));
-			toast.success("Погашенные облигации удалены из портфеля");
+			customToast.success("Погашенные облигации удалены из портфеля");
 		}
 	}, [allBonds, getLocalData, setLocalData, setBonds]);
 
 	useEffect(() => {
-		const fetchLocalBonds = async () => {
-			const bondSecids = getLocalData();
-			const limitedBondSecids = bondSecids.slice(0, 10);
-
-			if (limitedBondSecids.length > 0) {
-				const toastId = toast.loading("Загрузка облигаций...");
-
+		const loadBonds = async () => {
+			const storedBonds = getLocalData();
+			if (storedBonds.length > 0) {
 				try {
-					const response = await fetchBonds(limitedBondSecids, true);
-					if (response instanceof Error) {
-						throw new Error(`status: ${response.message}`);
+					const response = await customToast.promise(fetchBonds(storedBonds.slice(0, 10), true), {
+						loading: "Загрузка облигаций...",
+						success: "Облигации загружены",
+						error: "Не удалось загрузить облигации",
+					});
+					if (!(response instanceof Error)) {
+						setBonds(response);
+						checkAndRemoveMaturedBonds();
 					}
-					setBonds(response);
-					toast.success("Облигации загружены");
-
-					// Check for matured bonds only after initial load
-					initialLoadComplete.current = true;
-					checkAndRemoveMaturedBonds();
 				} catch (error) {
-					console.error(`❗Error fetching bonds`, error);
-					toast.error("Не удалось загрузить облигации");
-				} finally {
-					toast.dismiss(toastId);
+					console.error("❗Error loading bonds:", error);
 				}
-			} else {
-				initialLoadComplete.current = true;
 			}
 		};
+		loadBonds();
+	}, [getLocalData, checkAndRemoveMaturedBonds]);
 
-		fetchLocalBonds();
-	}, [getLocalData, setBonds, checkAndRemoveMaturedBonds]);
+	const portfolioSummary = useMemo(() => calculatePortfolioSummary(bonds, currencyRates), [bonds, currencyRates]);
 
-	// Additional check for matured bonds on allBonds changes
-	useEffect(() => {
-		if (initialLoadComplete.current) {
-			checkAndRemoveMaturedBonds();
-		}
-	}, [allBonds, checkAndRemoveMaturedBonds]);
+	const handleQuantityChange = useCallback(
+		(secId: string, value: number) => {
+			setBonds((prev) => prev.map((b) => (b.SECID === secId ? { ...b, quantity: value } : b)));
+		},
+		[setBonds]
+	);
 
-	const portfolioSummary = useMemo(() => {
-		return calculatePortfolioSummary(bonds, currencyRates);
-	}, [bonds, currencyRates]);
+	const handlePriceChange = useCallback(
+		(secId: string, price: number) => {
+			setBonds((prev) => prev.map((b) => (b.SECID === secId ? { ...b, purchasePrice: price } : b)));
+		},
+		[setBonds]
+	);
 
-	const addBond = useCallback(
-		(bondToAdd: Bond) => {
-			const { SECID, quantity, purchasePrice } = bondToAdd;
+	const handlePriceBlur = useCallback(
+		(bond: Bond, newPrice: number) => {
 			const currentBonds = getLocalData();
-			const bondExists = bonds.find((bond) => bond.SECID === SECID);
+			const bondIndex = currentBonds.findIndex((b: Bond) => b.SECID === bond.SECID);
+			if (bondIndex > -1) {
+				currentBonds[bondIndex] = { ...currentBonds[bondIndex], purchasePrice: newPrice };
+				setLocalData(currentBonds);
+			}
+		},
+		[getLocalData, setLocalData]
+	);
 
-			if (currentBonds.length >= 10 && !bondExists) {
-				toast((t) => (
-					<div className="text-sm">
-						<p className="text-base font bold">Вы достигли предела облигаций!</p>
+	const handleBondAdd = useCallback(
+		(bondToAdd: Bond) => {
+			const currentBonds = getLocalData();
+			const { SECID, quantity, purchasePrice } = bondToAdd;
+			const alreadyExists = bonds.some((b) => b.SECID === SECID);
+
+			if (currentBonds.length >= 10 && !alreadyExists) {
+				toast({
+					variant: "default",
+					title: "Вы достигли предела облигаций!",
+					description: (
 						<p>
 							<Link
 								href="/auth?view=register"
 								className="underline font-bold"
-								onClick={() => toast.dismiss(t.id)}
 							>
 								Зарегистрируйтесь
 							</Link>{" "}
@@ -103,20 +109,21 @@ const LocalPortfolioManager: FC<LocalPortfolioManagerProps> = ({ allBonds, curre
 							<Link
 								href="/auth?view=login"
 								className="underline font-bold"
-								onClick={() => toast.dismiss(t.id)}
 							>
 								войдите в аккаунт
 							</Link>{" "}
 							для увеличения лимита.
 						</p>
-					</div>
-				));
-
+					),
+					icon: <AlertCircle className="size-5 text-yellow-500 dark:text-yellow-400" />,
+					className: "border-yellow-500 dark:border-yellow-400",
+					duration: 10000,
+				});
 				return;
 			}
 
 			setBonds((prevBonds) =>
-				bondExists
+				alreadyExists
 					? prevBonds.map((bond) => (bond.SECID === SECID ? { ...bond, quantity } : bond))
 					: [...prevBonds, bondToAdd]
 			);
@@ -129,17 +136,17 @@ const LocalPortfolioManager: FC<LocalPortfolioManagerProps> = ({ allBonds, curre
 			}
 			setLocalData(currentBonds);
 		},
-		[setBonds, bonds, getLocalData, setLocalData]
+		[getLocalData, setLocalData, bonds]
 	);
 
-	const removeBond = useCallback(
-		(secid: string) => {
-			const updatedStorage = bonds.filter((bond: Bond) => bond.SECID !== secid);
-			setBonds((prev) => prev.filter((bond) => bond.SECID !== secid));
+	const handleBondRemove = useCallback(
+		(secId: string) => {
+			const updatedStorage = bonds.filter((bond: Bond) => bond.SECID !== secId);
+			setBonds((prev) => prev.filter((bond) => bond.SECID !== secId));
 
 			setLocalData(updatedStorage);
 		},
-		[setBonds, setLocalData, bonds]
+		[setLocalData, bonds]
 	);
 
 	return (
@@ -149,12 +156,14 @@ const LocalPortfolioManager: FC<LocalPortfolioManagerProps> = ({ allBonds, curre
 				<MyBondsCard
 					bonds={bonds}
 					allBonds={allBonds}
-					handlePriceBlur={(bond: Bond, newPrice: number) => addBond({ ...bond, purchasePrice: newPrice })}
-					addBond={addBond}
-					removeBond={removeBond}
+					handleQuantityChange={handleQuantityChange}
+					handlePriceChange={handlePriceChange}
+					handlePriceBlur={handlePriceBlur}
+					handleBondAdd={handleBondAdd}
+					handleBondRemove={handleBondRemove}
 				/>
 			</div>
-			<CouponCalendar />
+			<CouponCalendar bonds={bonds} />
 		</div>
 	);
 };

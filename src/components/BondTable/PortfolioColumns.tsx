@@ -9,7 +9,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/
 interface ExtendedBond extends Bond {
 	handleQuantityBlur: (bond: Bond) => void;
 	handlePriceBlur: (bond: Bond, newPrice: number) => void;
-	removeBond: (SECID: string) => void;
+	handleBondRemove: (SECID: string) => void;
 	handleQuantityChange: (secId: string, value: number) => void;
 	handlePriceChange: (secId: string, price: number) => void;
 }
@@ -22,7 +22,7 @@ export const columns: ColumnDef<ExtendedBond>[] = [
 		cell: ({ row }) => {
 			const bond = row.original;
 			return (
-				<div className="flex flex-col text-left">
+				<div className="flex flex-col text-left items-start justify-start px-9 w-full">
 					<span className="font-bold text-sm">{bond.SHORTNAME}</span>
 					<span className="text-xs text-muted-foreground">{bond.ISIN}</span>
 				</div>
@@ -76,19 +76,28 @@ export const columns: ColumnDef<ExtendedBond>[] = [
 			const bond = row.original;
 			return (
 				<Input
-					type="number"
-					inputMode="decimal"
-					step={0.01}
+					type="text"
 					placeholder="Введите %"
 					value={bond.purchasePrice || ""}
 					onBlur={(e) => {
-						const newValue = e.target.value === "" ? 100 : parseFloat(e.target.value);
-						if (!isNaN(newValue)) {
-							bond.handlePriceBlur(bond, newValue);
+						let value = e.target.value;
+						if ((value.endsWith(".") || value.endsWith(",")) && /^\d+[.,]$/.test(value)) {
+							value = value.slice(0, -1);
+						}
+						const numValue = value === "" ? 100 : parseFloat(value.replace(",", "."));
+						if (!isNaN(numValue)) {
+							bond.handlePriceBlur(bond, numValue);
 						}
 					}}
 					aria-label={`Цена покупки ${bond.SHORTNAME}`}
-					onChange={(e) => bond.handlePriceChange(bond.SECID, parseFloat(e.target.value.replace(",", ".")))}
+					onChange={(e) => {
+						const value = e.target.value;
+						// Allow numbers and single dot or comma
+						if (/^$|^\d*[.,]?\d*$/.test(value)) {
+							// @ts-ignore
+							bond.handlePriceChange(bond.SECID, value.replace(",", "."));
+						}
+					}}
 					className="w-16"
 					onKeyDown={(e) => {
 						if (e.key === "Enter") {
@@ -342,18 +351,23 @@ export const columns: ColumnDef<ExtendedBond>[] = [
 			const bond = row.original;
 			return (
 				<Input
-					type="number"
+					type="text"
 					value={bond.quantity || ""}
-					onChange={(e) => bond.handleQuantityChange(bond.SECID, parseInt(e.target.value))}
+					onChange={(e) => {
+						const value = e.target.value;
+						if (/^$|^\d*$/.test(value)) {
+							bond.handleQuantityChange(bond.SECID, parseInt(value));
+						}
+					}}
 					onBlur={(e) => {
 						// If input is empty, reset to 1 and update both state and server
 						const newValue = e.target.value === "" ? 1 : parseInt(e.target.value);
-						bond.handleQuantityChange(bond.SECID, newValue);
-						bond.handleQuantityBlur({ ...bond, quantity: newValue });
+						if (!isNaN(newValue)) {
+							bond.handleQuantityBlur({ ...bond, quantity: newValue });
+						}
 					}}
 					onKeyDown={(e) => {
 						if (e.key === "Enter") {
-							bond.handleQuantityBlur(bond);
 							(e.target as HTMLElement).blur();
 						}
 					}}
@@ -376,7 +390,7 @@ export const columns: ColumnDef<ExtendedBond>[] = [
 			const bond = row.original;
 			return (
 				<Button
-					onClick={() => bond.removeBond(bond.SECID)}
+					onClick={() => bond.handleBondRemove(bond.SECID)}
 					variant={"ghost"}
 					className="text-destructive hover:text-destructive/90 rounded-lg h-fit"
 					aria-label={`Удалить ${bond.SHORTNAME} из портфеля`}

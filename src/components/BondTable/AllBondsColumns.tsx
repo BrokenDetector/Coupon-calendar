@@ -10,7 +10,7 @@ export const columns: ColumnDef<MOEXBondData>[] = [
 		header: "Облигация",
 		size: 170,
 		cell: ({ row }) => (
-			<div className="flex flex-col text-left">
+			<div className="flex flex-col text-left items-start justify-start px-9 w-full">
 				<span className="font-bold text-sm">{row.original.SHORTNAME}</span>
 				<span className="text-xs text-muted-foreground">{row.original.ISIN}</span>
 			</div>

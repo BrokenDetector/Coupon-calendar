@@ -4,7 +4,6 @@ import CouponModal from "@/components/Calendar/CouponModal";
 import { Button } from "@/components/ui/button";
 import { getCurrencySymbol } from "@/helpers/getCurrencySymbol";
 import { sumCouponsByCurrency } from "@/helpers/sumCouponsByCurrency";
-import { useBonds } from "@/hooks/useBondContext";
 import { addMonths, getYear, isSameDay, parseISO, startOfYear } from "date-fns";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useSession } from "next-auth/react";
@@ -13,19 +12,16 @@ import { FC, useCallback, useMemo, useState } from "react";
 import MonthCalendar from "./MonthCalendar";
 
 interface CouponCalendarProps {
-	bonds?: Bond[];
+	bonds: Bond[];
 }
 
-const CouponCalendar: FC<CouponCalendarProps> = ({ bonds: bondsFromProps }) => {
+const CouponCalendar: FC<CouponCalendarProps> = ({ bonds }) => {
 	const [currentYear, setCurrentYear] = useState(getYear(new Date()));
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 	const [bondsForSelectedDate, setBondsForSelectedDate] = useState<Bond[]>([]);
 	const [totalCouponsByCurrency, setTotalCouponsByCurrency] = useState<Record<string, number>>({});
 	const session = useSession();
-
-	const { bonds: bondsFromContext } = useBonds();
-	const bonds = bondsFromProps || bondsFromContext;
 
 	const bondsSignature = useMemo(() => {
 		return bonds.map((bond) => `${bond.SECID}:${bond.quantity}`).join("|");

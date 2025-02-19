@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { signIn } from "next-auth/react";
 import Image from "next/image";
 import { FC, useState } from "react";
-import toast from "react-hot-toast";
+import { customToast } from "../ui/toast/toast-variants";
 
 export const OAuthButtons: FC = () => {
 	const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -16,10 +16,10 @@ export const OAuthButtons: FC = () => {
 
 			if (result?.error) {
 				console.log(result.error);
-				toast.error("Произошла ошибка при входе");
+				customToast.error("Произошла ошибка при входе");
 			}
 		} catch (error) {
-			toast.error("Произошла ошибка при входе");
+			customToast.error("Произошла ошибка при входе");
 		} finally {
 			setIsLoading(false);
 		}

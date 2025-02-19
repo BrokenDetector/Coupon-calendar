@@ -18,8 +18,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import toast from "react-hot-toast";
 import ChangeThemeButton from "./ChangeThemeButton";
+import { customToast } from "./ui/toast/toast-variants";
 
 const Header = () => {
 	const { data: session, update } = useSession();
@@ -48,7 +48,7 @@ const Header = () => {
 		const response = await addPortfolio();
 
 		if (!response.data) {
-			toast.error(response.error);
+			customToast.error(response.error);
 			return;
 		}
 
@@ -65,6 +65,7 @@ const Header = () => {
 
 		setLocalData(response.data.newPortfolioId);
 		router.push(`/portfolio/${response.data.newPortfolioId}`);
+		customToast.success("Портфель успешно создан");
 	};
 
 	return (

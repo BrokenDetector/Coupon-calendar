@@ -1,5 +1,7 @@
 "use client";
 
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { cn } from "@/lib/utils";
 import {
 	ColumnDef,
 	ColumnFiltersState,
@@ -11,12 +13,9 @@ import {
 	useReactTable,
 	VisibilityState,
 } from "@tanstack/react-table";
-
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { cn } from "@/lib/utils";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { ArrowDown, ArrowUp, ArrowUpDown, Search } from "lucide-react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useRef, useState } from "react";
 import { BsToggles } from "react-icons/bs";
 import { Button, buttonVariants } from "../ui/button";
@@ -38,7 +37,6 @@ export function DataTable<TData, TValue>({
 	filterPlaceholder,
 }: DataTableProps<TData, TValue>) {
 	const searchParams = useSearchParams();
-	const router = useRouter();
 
 	const deserializeSortingState = (): SortingState => {
 		const sortingState: SortingState = [];
@@ -105,7 +103,9 @@ export function DataTable<TData, TValue>({
 			params.set(key, value);
 		}
 
-		router.push(`?${params.toString()}`);
+		// Replace current URL without page rerender in local portfolio
+		// (otherwise it show toast notification about loading bonds again)
+		window.history.replaceState(null, "", `?${params.toString()}`);
 	};
 
 	const table = useReactTable({

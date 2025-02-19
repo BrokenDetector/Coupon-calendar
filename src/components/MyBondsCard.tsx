@@ -1,8 +1,4 @@
-"use client";
-
-import { useBonds } from "@/hooks/useBondContext";
 import Link from "next/link";
-import { FC } from "react";
 import { DataTable } from "./BondTable/DataTable";
 import { columns } from "./BondTable/PortfolioColumns";
 import SelectList from "./SelectList";
@@ -12,27 +8,27 @@ import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 interface MyBondsCardProps {
 	bonds: Bond[];
 	allBonds: MOEXBondData[];
-	removeBond: (secId: string) => void;
+	handleQuantityChange: (secId: string, value: number) => void;
+	handlePriceChange: (secId: string, price: number) => void;
 	handlePriceBlur: (bond: Bond, newPrice: number) => void;
-	addBond: (bond: Bond) => void;
+	handleBondAdd: (bond: Bond) => void;
+	handleBondRemove: (secId: string) => void;
 }
 
-const MyBondsCard: FC<MyBondsCardProps> = ({ bonds, allBonds, removeBond, handlePriceBlur, addBond }) => {
-	const { setBonds } = useBonds();
-
-	const handleQuantityChange = async (secId: string, value: number) => {
-		setBonds((prev) => prev.map((b) => (b.SECID === secId ? { ...b, quantity: value } : b)));
-	};
-
-	const handlePriceChange = (secId: string, price: number) => {
-		setBonds((prevBonds) => prevBonds.map((b) => (b.SECID === secId ? { ...b, purchasePrice: price } : b)));
-	};
-
-	const dataWithHandlers = bonds.map((bond) => ({
+const MyBondsCard = ({
+	bonds,
+	allBonds,
+	handleBondRemove,
+	handlePriceBlur,
+	handleBondAdd,
+	handleQuantityChange,
+	handlePriceChange,
+}: MyBondsCardProps) => {
+	const tableData = bonds.map((bond: Bond) => ({
 		...bond,
-		removeBond: (secId: string) => removeBond(secId),
-		handlePriceBlur: (bond: Bond, newPrice: number) => handlePriceBlur(bond, newPrice),
-		handleQuantityBlur: (bond: Bond) => addBond(bond),
+		handleBondRemove,
+		handlePriceBlur,
+		handleQuantityBlur: handleBondAdd,
 		handleQuantityChange,
 		handlePriceChange,
 	}));
@@ -51,7 +47,7 @@ const MyBondsCard: FC<MyBondsCardProps> = ({ bonds, allBonds, removeBond, handle
 					</Button>
 					<SelectList
 						options={allBonds}
-						onBondUpdate={addBond}
+						onBondUpdate={handleBondAdd}
 						bonds={bonds}
 					/>
 				</div>
@@ -59,7 +55,7 @@ const MyBondsCard: FC<MyBondsCardProps> = ({ bonds, allBonds, removeBond, handle
 			<CardContent className="max-h-[400px]">
 				<DataTable
 					columns={columns}
-					data={dataWithHandlers}
+					data={tableData}
 					filterPlaceholder="Поиск по портфелю"
 					maxHeight={"max-h-[320px]"}
 				/>

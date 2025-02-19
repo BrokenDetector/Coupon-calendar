@@ -5,9 +5,8 @@ import CouponCalendar from "@/components/Calendar/Calendar";
 import MyBondsCard from "@/components/MyBondsCard";
 import SummaryCard from "@/components/SummaryCard";
 import { calculatePortfolioSummary } from "@/helpers/calculatePortfolioSummary";
-import { useBonds } from "@/hooks/useBondContext";
-import { FC, useCallback, useEffect, useMemo } from "react";
-import toast from "react-hot-toast";
+import { FC, useCallback, useEffect, useMemo, useState } from "react";
+import { customToast } from "./ui/toast/toast-variants";
 
 interface ServerPortfolioManagerProps {
 	allBonds: MOEXBondData[];
@@ -24,31 +23,21 @@ const ServerPortfolioManager: FC<ServerPortfolioManagerProps> = ({
 	initialBonds,
 	portfolioId,
 }) => {
-	const { bonds, setBonds } = useBonds();
-
-	useEffect(() => {
-		setBonds(initialBonds);
-	}, [initialBonds, setBonds]);
-
-	const portfolioSummary = useMemo(() => {
-		return calculatePortfolioSummary(bonds, currencyRates);
-	}, [bonds, currencyRates]);
+	const [bonds, setBonds] = useState<Bond[]>([]);
 
 	const checkAndRemoveMaturedBonds = useCallback(async () => {
 		try {
 			// Find bonds that no longer exist in MOEX
 			const maturedBonds = initialBonds.filter((bond) => !allBonds.some((b) => b.SECID === bond.SECID));
-			// If found any matured bonds, remove them
-			if (maturedBonds.length > 0) {
-				setBonds((prevBonds) =>
-					prevBonds.filter((bond) => !maturedBonds.some((mb) => mb.SECID === bond.SECID))
-				);
 
+			// If found any matured bonds, remove them
+			setBonds(initialBonds.filter((bond) => !maturedBonds.some((mb) => mb.SECID === bond.SECID)));
+			if (maturedBonds.length > 0) {
 				for (const bond of maturedBonds) {
 					await removeBondFromPortfolio(portfolioId, bond.SECID);
 				}
 
-				toast.success("Погашенные облигации удалены из портфеля");
+				customToast.success("Погашенные облигации удалены из портфеля");
 			}
 		} catch (error) {
 			console.error("Failed to check matured bonds:", error);
@@ -59,71 +48,66 @@ const ServerPortfolioManager: FC<ServerPortfolioManagerProps> = ({
 		checkAndRemoveMaturedBonds();
 	}, [checkAndRemoveMaturedBonds]);
 
-	const addBond = useCallback(
-		async (bondToAdd: Bond) => {
-			const { SECID, quantity } = bondToAdd;
-			const bondExists = bonds.find((bond) => bond.SECID === SECID);
+	const portfolioSummary = useMemo(() => calculatePortfolioSummary(bonds, currencyRates), [bonds, currencyRates]);
 
-			if (bonds.length >= 50 && !bondExists) {
-				toast.error("Максимум 50 облигаций");
-				return;
-			}
-
-			const previousBonds = [...bonds];
-			setBonds((prevBonds) =>
-				bondExists
-					? prevBonds.map((bond) => (bond.SECID === SECID ? { ...bond, quantity } : bond))
-					: [...prevBonds, bondToAdd]
-			);
-
-			try {
-				const response = await addOrUpdateBond(portfolioId, bondToAdd);
-
-				if (response.error) {
-					setBonds(previousBonds);
-					toast.error(response.error);
-				}
-			} catch (error) {
-				setBonds(previousBonds);
-				toast.error("Ошибка при добавлении облигации");
-				console.error("Failed to add bond:", error);
-			}
+	const handleQuantityChange = useCallback(
+		(secId: string, value: number) => {
+			setBonds((prev) => prev.map((b) => (b.SECID === secId ? { ...b, quantity: value } : b)));
 		},
-		[setBonds, portfolioId, bonds]
+		[setBonds]
 	);
 
-	const removeBond = useCallback(
-		async (SECID: string) => {
-			const response = await removeBondFromPortfolio(portfolioId, SECID);
-
-			if (response.error) {
-				console.error(response.error);
-				toast.error(response.error);
-			} else {
-				setBonds((prevBonds) => prevBonds.filter((bond) => bond.SECID !== SECID));
-			}
+	const handlePriceChange = useCallback(
+		(secId: string, price: number) => {
+			setBonds((prev) => prev.map((b) => (b.SECID === secId ? { ...b, purchasePrice: price } : b)));
 		},
-		[portfolioId, setBonds]
+		[setBonds]
 	);
 
 	const handlePriceBlur = useCallback(
 		async (bond: Bond, newPrice: number) => {
-			if (typeof newPrice !== "number") {
-				return;
-			}
-			try {
-				const response = await addOrUpdateBond(portfolioId, { ...bond, purchasePrice: newPrice });
-
-				if (response.error) {
-					console.error(response.error);
-					toast.error(response.error);
-				}
-			} catch (error) {
-				console.error("❗Error updating purchase price", error);
-				toast.error("Ошибка при обновлении цены покупки");
+			const response = await addOrUpdateBond(portfolioId, {
+				...bond,
+				purchasePrice: newPrice,
+			});
+			if (response.error) {
+				customToast.error("Ошибка при обновлении цены покупки");
 			}
 		},
 		[portfolioId]
+	);
+
+	const handleBondAdd = useCallback(
+		async (bondToAdd: Bond) => {
+			const prevBonds = [...bonds];
+
+			setBonds((prev) => {
+				const alreadyExists = prev.some((b) => b.SECID === bondToAdd.SECID);
+				return alreadyExists
+					? prev.map((b) => (b.SECID === bondToAdd.SECID ? bondToAdd : b))
+					: [...prev, bondToAdd];
+			});
+			const response = await addOrUpdateBond(portfolioId, bondToAdd);
+			if (response.error) {
+				customToast.error("Ошибка при добавлении облигации");
+				setBonds(prevBonds);
+			}
+		},
+		[portfolioId, bonds]
+	);
+
+	const handleBondRemove = useCallback(
+		async (secId: string) => {
+			const prevBonds = [...bonds];
+
+			setBonds((prev) => prev.filter((b) => b.SECID !== secId));
+			const response = await removeBondFromPortfolio(portfolioId, secId);
+			if (response.error) {
+				customToast.error("Ошибка при удалении облигации");
+				setBonds(prevBonds);
+			}
+		},
+		[portfolioId, bonds]
 	);
 
 	return (
@@ -133,12 +117,14 @@ const ServerPortfolioManager: FC<ServerPortfolioManagerProps> = ({
 				<MyBondsCard
 					bonds={bonds}
 					allBonds={allBonds}
+					handleQuantityChange={handleQuantityChange}
+					handlePriceChange={handlePriceChange}
 					handlePriceBlur={handlePriceBlur}
-					addBond={addBond}
-					removeBond={removeBond}
+					handleBondAdd={handleBondAdd}
+					handleBondRemove={handleBondRemove}
 				/>
 			</div>
-			<CouponCalendar />
+			<CouponCalendar bonds={bonds} />
 		</div>
 	);
 };

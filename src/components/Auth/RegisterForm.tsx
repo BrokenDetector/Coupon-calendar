@@ -11,8 +11,8 @@ import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { FC, useTransition } from "react";
 import { useForm } from "react-hook-form";
-import toast from "react-hot-toast";
 import * as z from "zod";
+import { customToast } from "../ui/toast/toast-variants";
 
 const RegisterForm: FC = () => {
 	const [isPending, startPending] = useTransition();
@@ -31,7 +31,7 @@ const RegisterForm: FC = () => {
 	const onSubmit = (values: z.infer<typeof RegisterSchema>) => {
 		const validatedFields = RegisterSchema.safeParse(values);
 		if (!validatedFields.success) {
-			return toast.error("Заполните необходимые поля");
+			return customToast.error("Заполните необходимые поля");
 		}
 
 		const { email, password } = validatedFields.data;
@@ -40,7 +40,7 @@ const RegisterForm: FC = () => {
 			const response = await register(values);
 
 			if (!response.data) {
-				toast.error(response.error);
+				customToast.error(response.error);
 				return;
 			} else {
 				await signIn("credentials", {
