@@ -11,7 +11,7 @@ export default async function Home() {
 	}
 
 	return (
-		<main className="flex min-h-screen flex-col items-center gap-3 min-w-[800px]">
+		<main className="flex min-h-screen flex-col items-center gap-3 min-w-[500px]">
 			<Header />
 			<LocalPortfolioManager
 				allBonds={bondsList.data || []}

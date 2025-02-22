@@ -23,28 +23,36 @@ const SummaryCard: FC<SummaryCardProps> = ({ portfolioSummary }) => {
 	return (
 		<Card className="col-span-4 xl:col-span-1 rounded-lg">
 			<CardHeader>
-				<CardTitle className="text-2xl font-bold">Общая информация по портфелю</CardTitle>
+				<CardTitle className="text-xl sm:text-2xl font-bold">Общая информация по портфелю</CardTitle>
 			</CardHeader>
 			<CardContent>
-				<div className="flex flex-row xl:flex-col gap-3 justify-between items-baseline">
+				<div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-1 gap-6">
 					<div>
-						<p className="text-md font-semibold">Сумма инвестиций</p>
-						<p className="font-bold">{portfolioSummary.totalPurchasePrice} ₽</p>
+						<p className="text-sm sm:text-md font-semibold text-muted-foreground">Сумма инвестиций</p>
+						<p className="text-lg sm:text-xl font-bold mt-1">{portfolioSummary.totalPurchasePrice} ₽</p>
 					</div>
 					<div>
-						<p className="text-md font-semibold">Текущая стоимость портфеля</p>
-						<p className="font-bold">{portfolioSummary.totalCurrentPrice} ₽</p>
+						<p className="text-sm sm:text-md font-semibold text-muted-foreground">
+							Текущая стоимость портфеля
+						</p>
+						<p className="text-lg sm:text-xl font-bold mt-1">{portfolioSummary.totalCurrentPrice} ₽</p>
 					</div>
-					<div className="mt-4">
-						<p className="text-md font-semibold">Результат</p>
-						<p className={`text-xl font-bold ${isProfit ? "text-green-600" : "text-red-600"}`}>
+					<div>
+						<p className="text-sm sm:text-md font-semibold text-muted-foreground">Результат</p>
+						<p
+							className={`text-lg sm:text-xl font-bold mt-1 ${
+								isProfit ? "text-green-600" : "text-red-600"
+							}`}
+						>
 							{isProfit ? "+" : ""}
 							{priceDifference}
 						</p>
 					</div>
-					<div className="mt-4">
-						<p className="text-md font-semibold">Средняя текущая доходность</p>
-						<p className="font-bold">{portfolioSummary.averageCurrentYield}%</p>
+					<div>
+						<p className="text-sm sm:text-md font-semibold text-muted-foreground">
+							Средняя текущая доходность
+						</p>
+						<p className="text-lg sm:text-xl font-bold mt-1">{portfolioSummary.averageCurrentYield}%</p>
 					</div>
 				</div>
 			</CardContent>

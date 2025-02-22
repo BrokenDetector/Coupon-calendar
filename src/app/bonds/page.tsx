@@ -16,7 +16,7 @@ const page = async () => {
 	}
 
 	return (
-		<main className="flex min-h-screen flex-col items-center gap-3 min-w-[700px]">
+		<main className="flex min-h-screen flex-col items-center gap-3 min-w-[500px]">
 			<Header />
 			<AllBondsCard allBonds={allBonds.data} />
 		</main>
