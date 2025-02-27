@@ -1,6 +1,5 @@
 import { fetchAllBondsFullData } from "@/actions/fetch-all-bonds-full-data";
 import AllBondsCard from "@/components/AllBondsCard";
-import Header from "@/components/Header";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -16,8 +15,7 @@ const page = async () => {
 	}
 
 	return (
-		<main className="flex min-h-screen flex-col items-center gap-3 min-w-[500px]">
-			<Header />
+		<main className="min-h-screen min-w-[500px] w-full flex flex-col items-center">
 			<AllBondsCard allBonds={allBonds.data} />
 		</main>
 	);

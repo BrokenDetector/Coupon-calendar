@@ -3,7 +3,7 @@
 import { LoaderCircle, Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
-import { Button } from "./ui/button";
+import { Button } from "../ui/button";
 
 const ChangeThemeButton = () => {
 	const [mounted, setMounted] = useState(false);

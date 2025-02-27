@@ -29,7 +29,7 @@ export const MemoizedRow = memo(
 						style={{
 							width: cell.column.getSize(),
 						}}
-						className="flex items-center justify-center text-sm border-r last:border-r-0 overflow-x-scroll overflow-y-hidden whitespace-nowrap"
+						className="flex items-center justify-center text-sm border-r last:border-r-0 overflow-y-hidden overflow-x-auto whitespace-nowrap"
 					>
 						{flexRender(cell.column.columnDef.cell, cell.getContext())}
 					</TableCell>

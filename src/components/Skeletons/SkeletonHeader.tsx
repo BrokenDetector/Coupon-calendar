@@ -1,4 +1,4 @@
-import ChangeThemeButton from "@/components/ChangeThemeButton";
+import ChangeThemeButton from "@/components/Header/ChangeThemeButton";
 import { Skeleton } from "@/components/ui/skeleton";
 import Image from "next/image";
 import Link from "next/link";

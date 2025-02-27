@@ -1,7 +1,6 @@
 import { fetchAllBonds } from "@/actions/fetch-all-bonds-sec-only";
 import { fetchBonds } from "@/actions/fetch-bonds";
 import { fetchCurrencyRates } from "@/actions/fetch-currency-rates";
-import Header from "@/components/Header";
 import ServerPortfolioManager from "@/components/ServerPortfolioManager";
 import { authOptions } from "@/lib/auth";
 import { getPortfolio, getUserById } from "@/lib/db-helpers";
@@ -54,9 +53,7 @@ const page: FC<pageProps> = async ({ params }) => {
 	}
 
 	return (
-		<main className="flex min-h-screen flex-col items-center gap-3 min-w-[500px]">
-			<Header />
-
+		<main className="min-h-screen min-w-[500px]">
 			<ServerPortfolioManager
 				portfolioId={portfolioId}
 				allBonds={allBonds.data || []}

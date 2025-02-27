@@ -1,6 +1,5 @@
 import { fetchAllBonds } from "@/actions/fetch-all-bonds-sec-only";
 import { fetchCurrencyRates } from "@/actions/fetch-currency-rates";
-import Header from "@/components/Header";
 import LocalPortfolioManager from "@/components/LocalPortfolioManager";
 
 export default async function Home() {
@@ -11,8 +10,7 @@ export default async function Home() {
 	}
 
 	return (
-		<main className="flex min-h-screen flex-col items-center gap-3 min-w-[500px]">
-			<Header />
+		<main className="min-h-screen min-w-[500px]">
 			<LocalPortfolioManager
 				allBonds={bondsList.data || []}
 				currencyRates={currencyRatesResponse.data || {}}

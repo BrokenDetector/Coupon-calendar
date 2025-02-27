@@ -1,3 +1,4 @@
+import Header from "@/components/Header/Header";
 import Providers from "@/components/Providers";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import type { Metadata } from "next";
@@ -22,7 +23,10 @@ export default function RootLayout({
 			suppressHydrationWarning
 		>
 			<body className={inter.className}>
-				<Providers>{children}</Providers>
+				<Providers>
+					<Header />
+					{children}
+				</Providers>
 			</body>
 			<GoogleAnalytics gaId="G-CGKKZ2R2XG" />
 		</html>
