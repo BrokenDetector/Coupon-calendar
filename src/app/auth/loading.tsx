@@ -2,9 +2,6 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default async function Loading() {
-	const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
-	await delay(2000);
 	return (
 		<main className="min-h-screen flex items-center justify-center">
 			<div className="container flex flex-col items-center justify-center">

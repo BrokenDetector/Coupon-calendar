@@ -15,7 +15,7 @@ const page = async () => {
 	}
 
 	return (
-		<main className="min-h-screen min-w-[500px] w-full flex flex-col items-center">
+		<main className="min-h-screen min-w-[500px] w-full flex flex-col items-center px-4">
 			<AllBondsCard allBonds={allBonds.data} />
 		</main>
 	);

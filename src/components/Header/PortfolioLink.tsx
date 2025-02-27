@@ -7,7 +7,6 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { cn } from "@/lib/utils";
 import { FolderOpen, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import Link from "next/link";
 
@@ -16,7 +15,7 @@ interface PortfolioLinkProps {
 	setSelectedPortfolioToEdit: (portfolio: DBPortfolio) => void;
 	setIsEditDialogOpen: (isEditDialogOpen: boolean) => void;
 	handleDeletePortfolio: (portfolioId: string) => void;
-	isMobile?: boolean;
+	onPortfolioSelect?: () => void;
 }
 
 const PortfolioLink = ({
@@ -24,13 +23,14 @@ const PortfolioLink = ({
 	setSelectedPortfolioToEdit,
 	setIsEditDialogOpen,
 	handleDeletePortfolio,
-	isMobile = false,
+	onPortfolioSelect,
 }: PortfolioLinkProps) => {
 	return (
 		<div className="flex items-center justify-between w-full group">
 			<Link
 				href={`/portfolio/${portfolio.id}`}
 				className="flex items-center gap-2 flex-1"
+				onClick={onPortfolioSelect}
 			>
 				<div
 					className="size-3 rounded-full"
@@ -43,10 +43,7 @@ const PortfolioLink = ({
 				<DropdownMenuTrigger asChild>
 					<Button
 						variant="ghost"
-						className={cn(
-							"size-8 p-0 hover:bg-muted",
-							isMobile ? "opacity-100" : "opacity-0 group-hover:opacity-100"
-						)}
+						className="size-8 p-0 hover:bg-muted"
 					>
 						<MoreHorizontal className="size-4" />
 					</Button>

@@ -115,6 +115,7 @@ const MobileNav = ({
 												setSelectedPortfolioToEdit={setSelectedPortfolioToEdit}
 												setIsEditDialogOpen={setIsEditDialogOpen}
 												handleDeletePortfolio={handleDeletePortfolio}
+												onPortfolioSelect={() => setIsMenuOpen(false)}
 											/>
 										))}
 

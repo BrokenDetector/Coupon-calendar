@@ -1,12 +1,9 @@
-import SkeletonHeader from "@/components/Skeletons/SkeletonHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Loading() {
 	return (
-		<main className="flex min-h-screen flex-col items-center gap-3 min-w-[500px]">
-			<SkeletonHeader />
-
+		<main className="min-h-screen min-w-[500px]">
 			<div className="flex justify-center">
 				<Card className="rounded-lg w-[600px] md:w-[800px] lg:w-[1000px] xl:w-[1200px]">
 					<CardHeader>
