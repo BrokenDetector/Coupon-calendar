@@ -10,7 +10,7 @@ export default async function Home() {
 	}
 
 	return (
-		<main className="min-h-screen min-w-[500px]">
+		<main>
 			<LocalPortfolioManager
 				allBonds={bondsList.data || []}
 				currencyRates={currencyRatesResponse.data || {}}

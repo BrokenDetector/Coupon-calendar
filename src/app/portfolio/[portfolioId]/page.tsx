@@ -53,7 +53,7 @@ const page: FC<pageProps> = async ({ params }) => {
 	}
 
 	return (
-		<main className="min-h-screen min-w-[500px]">
+		<main>
 			<ServerPortfolioManager
 				portfolioId={portfolioId}
 				allBonds={allBonds.data || []}

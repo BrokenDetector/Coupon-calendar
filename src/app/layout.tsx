@@ -1,5 +1,6 @@
 import Header from "@/components/Header/Header";
 import Providers from "@/components/Providers";
+import { cn } from "@/lib/utils";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
@@ -22,7 +23,7 @@ export default function RootLayout({
 			lang="ru"
 			suppressHydrationWarning
 		>
-			<body className={inter.className}>
+			<body className={cn("min-h-screen min-w-[500px] flex flex-col justify-between", inter.className)}>
 				<Providers>
 					<Header />
 					{children}
