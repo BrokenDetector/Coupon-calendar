@@ -20,8 +20,9 @@ interface DesktopNavProps {
 	isPortfolioPage: boolean;
 	setSelectedPortfolioToEdit: (portfolio: DBPortfolio) => void;
 	setIsEditDialogOpen: (isEditDialogOpen: boolean) => void;
-	handleDeletePortfolio: (portfolioId: string) => void;
 	setIsCreateDialogOpen: (isCreateDialogOpen: boolean) => void;
+	setIsDeleteDialogOpen: (isDeleteDialogOpen: boolean) => void;
+	setPortfolioIdToDelete: (portfolioId: string) => void;
 }
 
 const DesktopNav = ({
@@ -29,8 +30,9 @@ const DesktopNav = ({
 	isPortfolioPage,
 	setSelectedPortfolioToEdit,
 	setIsEditDialogOpen,
-	handleDeletePortfolio,
 	setIsCreateDialogOpen,
+	setIsDeleteDialogOpen,
+	setPortfolioIdToDelete,
 }: DesktopNavProps) => {
 	const { data: session } = useSession();
 	const userSession = session?.user;
@@ -85,7 +87,8 @@ const DesktopNav = ({
 									portfolio={port}
 									setSelectedPortfolioToEdit={setSelectedPortfolioToEdit}
 									setIsEditDialogOpen={setIsEditDialogOpen}
-									handleDeletePortfolio={handleDeletePortfolio}
+									setIsDeleteDialogOpen={setIsDeleteDialogOpen}
+									setPortfolioIdToDelete={setPortfolioIdToDelete}
 								/>
 							</DropdownMenuItem>
 						))}

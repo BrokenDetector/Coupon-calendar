@@ -18,6 +18,7 @@ Coupon Calendar is a bond portfolio management service focused on the Russian ma
   - Duration and maturity dates
   - Current yield and accumulated coupon income
 - Virtualized scrolling for large datasets
+- Create, edit and delete portfolios
 
 ## Built with
 
@@ -26,6 +27,6 @@ Coupon Calendar is a bond portfolio management service focused on the Russian ma
 - Tailwind CSS
 - Shadcn-ui
 - Upstash Redis
-- React Hot Toast
 - Next Auth (Auth.js)
 - Tanstack Table
+- Prisma ORM

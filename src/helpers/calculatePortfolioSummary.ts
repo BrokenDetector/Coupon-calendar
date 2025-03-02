@@ -25,7 +25,7 @@ export const calculatePortfolioSummary = (
 		const purchaseValueInRUB = (purchasePricePercent / 100) * nominalValue * quantity * conversionRate;
 		totalPurchasePrice += purchaseValueInRUB;
 
-		const currentPricePercent = bond.LAST || bond.PREVWAPRICE || 0;
+		const currentPricePercent = bond.LAST || bond.PREVPRICE || 0;
 		const currentMarketValueInRUB = (currentPricePercent / 100) * nominalValue * quantity * conversionRate;
 		totalCurrentPrice += currentMarketValueInRUB;
 

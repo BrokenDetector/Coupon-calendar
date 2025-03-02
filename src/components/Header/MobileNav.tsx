@@ -15,7 +15,8 @@ interface MobileNavProps {
 	isPortfolioPage: boolean;
 	setSelectedPortfolioToEdit: (portfolio: DBPortfolio) => void;
 	setIsEditDialogOpen: (isEditDialogOpen: boolean) => void;
-	handleDeletePortfolio: (portfolioId: string) => void;
+	setIsDeleteDialogOpen: (isDeleteDialogOpen: boolean) => void;
+	setPortfolioIdToDelete: (portfolioId: string) => void;
 	setIsCreateDialogOpen: (isCreateDialogOpen: boolean) => void;
 }
 
@@ -24,7 +25,8 @@ const MobileNav = ({
 	isPortfolioPage,
 	setSelectedPortfolioToEdit,
 	setIsEditDialogOpen,
-	handleDeletePortfolio,
+	setIsDeleteDialogOpen,
+	setPortfolioIdToDelete,
 	setIsCreateDialogOpen,
 }: MobileNavProps) => {
 	const { data: session } = useSession();
@@ -114,7 +116,8 @@ const MobileNav = ({
 												portfolio={port}
 												setSelectedPortfolioToEdit={setSelectedPortfolioToEdit}
 												setIsEditDialogOpen={setIsEditDialogOpen}
-												handleDeletePortfolio={handleDeletePortfolio}
+												setIsDeleteDialogOpen={setIsDeleteDialogOpen}
+												setPortfolioIdToDelete={setPortfolioIdToDelete}
 												onPortfolioSelect={() => setIsMenuOpen(false)}
 											/>
 										))}

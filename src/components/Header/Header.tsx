@@ -8,9 +8,10 @@ import { useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { customToast } from "../ui/toast/toast-variants";
 import CreatePortfolioDialog from "./CreatePortfolioDialog";
+import DeletePortfolioDialog from "./DeletePortfolioDialog";
 import DesktopNav from "./DesktopNav";
 import EditPortfolioDialog from "./EditPortfolioDialog";
 import MobileNav from "./MobileNav";
@@ -25,7 +26,7 @@ const Header = () => {
 
 	const portfolioIdFromUrl = pathname?.split("/portfolio/")[1];
 	const portfolioIdFromStorage = getLocalData();
-	const portfolioId = portfolioIdFromUrl || portfolioIdFromStorage;
+	const currentPortfolioId = portfolioIdFromUrl || portfolioIdFromStorage;
 
 	useEffect(() => {
 		if (portfolioIdFromUrl) {
@@ -33,53 +34,73 @@ const Header = () => {
 		}
 	}, [portfolioIdFromUrl, setLocalData]);
 
-	const selectedPortfolio = user?.portfolios?.find((p) => p.id === portfolioId);
+	const selectedPortfolio = user?.portfolios?.find((p) => p.id === currentPortfolioId);
 	const isPortfolioPage = pathname?.includes("/portfolio/") || false;
 
 	const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 	const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 	const [selectedPortfolioToEdit, setSelectedPortfolioToEdit] = useState<DBPortfolio | null>(null);
+	const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+	const [portfolioIdToDelete, setPortfolioIdToDelete] = useState<string | null>(null);
 
-	const handlePortfolioCreated = async (portfolioId: string, portfolioName: string) => {
-		await update({
-			...session,
-			user: {
-				...session?.user,
-				portfolios: [...(session?.user?.portfolios || []), { id: portfolioId, name: portfolioName }],
-			},
-		});
-
-		setLocalData(portfolioId);
-		router.push(`/portfolio/${portfolioId}`);
-	};
-
-	const handleDeletePortfolio = async (portfolioId: string) => {
-		try {
-			const response = await deletePortfolio(portfolioId);
-			if (!response.data) {
-				throw new Error(response.error);
-			}
-
+	const handlePortfolioCreated = useCallback(
+		async (portfolioId: string, portfolioName: string) => {
 			await update({
 				...session,
 				user: {
 					...session?.user,
-					portfolios: session?.user?.portfolios.filter((p) => p.id !== portfolioId) || [],
+					portfolios: [...(session?.user?.portfolios || []), { id: portfolioId, name: portfolioName }],
 				},
 			});
 
-			if (portfolioId === portfolioIdFromUrl) {
-				const remainingPortfolios = session?.user?.portfolios.filter((p) => p.id !== portfolioId);
-				if (remainingPortfolios?.length) {
-					router.push(`/portfolio/${remainingPortfolios[0].id}`);
-				}
+			setLocalData(portfolioId);
+			router.push(`/portfolio/${portfolioId}`);
+		},
+		[session, router, update, setLocalData]
+	);
+
+	const handleDeletePortfolio = useCallback(
+		async (portfolioId: string) => {
+			if (session?.user?.portfolios.length === 1) {
+				customToast.error("Нельзя удалить единственный портфель");
+				return;
 			}
 
-			customToast.success("Портфель успешно удален");
-		} catch (error) {
-			customToast.error(error instanceof Error ? error.message : "Произошла ошибка при удалении портфеля");
-		}
-	};
+			try {
+				const response = await deletePortfolio(portfolioId);
+				if (!response.data) {
+					throw new Error(response.error);
+				}
+
+				await update({
+					...session,
+					user: {
+						...session?.user,
+						portfolios: session?.user?.portfolios.filter((p) => p.id !== portfolioId) || [],
+					},
+				});
+
+				setIsDeleteDialogOpen(false);
+				setPortfolioIdToDelete(null);
+
+				if (portfolioId === currentPortfolioId) {
+					const remainingPortfolios = session?.user?.portfolios.filter((p) => p.id !== portfolioId);
+					if (remainingPortfolios?.length) {
+						router.push(`/portfolio/${remainingPortfolios[0].id}`);
+					} else {
+						router.push("/");
+					}
+				}
+
+				customToast.success("Портфель успешно удален");
+			} catch (error) {
+				setIsDeleteDialogOpen(false);
+				setPortfolioIdToDelete(null);
+				customToast.error(error instanceof Error ? error.message : "Произошла ошибка при удалении портфеля");
+			}
+		},
+		[session, currentPortfolioId, router, update]
+	);
 
 	return (
 		<header className="sticky top-0 z-50 w-full border-b bg-background mb-4">
@@ -109,7 +130,8 @@ const Header = () => {
 						isPortfolioPage={isPortfolioPage}
 						setSelectedPortfolioToEdit={setSelectedPortfolioToEdit}
 						setIsEditDialogOpen={setIsEditDialogOpen}
-						handleDeletePortfolio={handleDeletePortfolio}
+						setIsDeleteDialogOpen={setIsDeleteDialogOpen}
+						setPortfolioIdToDelete={setPortfolioIdToDelete}
 						setIsCreateDialogOpen={setIsCreateDialogOpen}
 					/>
 					<MobileNav
@@ -117,7 +139,8 @@ const Header = () => {
 						isPortfolioPage={isPortfolioPage}
 						setSelectedPortfolioToEdit={setSelectedPortfolioToEdit}
 						setIsEditDialogOpen={setIsEditDialogOpen}
-						handleDeletePortfolio={handleDeletePortfolio}
+						setIsDeleteDialogOpen={setIsDeleteDialogOpen}
+						setPortfolioIdToDelete={setPortfolioIdToDelete}
 						setIsCreateDialogOpen={setIsCreateDialogOpen}
 					/>
 				</div>
@@ -140,6 +163,18 @@ const Header = () => {
 						await update();
 					}}
 					portfolio={selectedPortfolioToEdit}
+				/>
+			)}
+
+			{portfolioIdToDelete && (
+				<DeletePortfolioDialog
+					isOpen={isDeleteDialogOpen}
+					onClose={() => {
+						setIsDeleteDialogOpen(false);
+						setPortfolioIdToDelete(null);
+					}}
+					handleDeletePortfolio={handleDeletePortfolio}
+					portfolioId={portfolioIdToDelete}
 				/>
 			)}
 		</header>

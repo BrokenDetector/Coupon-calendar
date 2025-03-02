@@ -1,6 +1,6 @@
 const getCurrentYield = (bond: MOEXBondData): number => {
 	const nominalValue = bond.FACEVALUE || 0;
-	const currentPrice = bond.LAST || bond.PREVWAPRICE || 0;
+	const currentPrice = bond.LAST || bond.PREVPRICE || 0;
 	const couponFrequency = bond.COUPONFREQUENCY || 365;
 	const annualCouponPayment = (bond.COUPONVALUE || 0) * (365 / couponFrequency);
 
@@ -12,7 +12,7 @@ const getCurrentYield = (bond: MOEXBondData): number => {
 };
 
 const getCurrentPrice = (bond: MOEXBondData): number => {
-	return bond.LAST || bond.PREVWAPRICE || 0;
+	return bond.LAST || bond.PREVPRICE || 0;
 };
 
 const mapColumns = (columns: string[]): Record<string, number> => {
@@ -53,7 +53,7 @@ export const createBondsWithData = async (data: any): Promise<MOEXBondData[]> =>
 			ACCRUEDINT: bondData[securitiesColumns["ACCRUEDINT"]],
 			FACEUNIT: bondData[securitiesColumns["FACEUNIT"]],
 			COUPONPERCENT: bondData[securitiesColumns["COUPONPERCENT"]],
-			PREVWAPRICE: marketData[marketDataColumns["WAPRICE"]] || undefined,
+			PREVPRICE: bondData[securitiesColumns["PREVPRICE"]] || undefined,
 			LAST: marketData[marketDataColumns["LAST"]] || undefined,
 			DURATION: marketData[marketDataColumns["DURATION"]],
 			EFFECTIVEYIELD: yieldData[yieldDataColumns["EFFECTIVEYIELD"]],

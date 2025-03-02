@@ -46,7 +46,7 @@ interface MOEXBondData {
 	COUPONVALUE?: number;
 	COUPONFREQUENCY?: number;
 	MATDATE?: string;
-	PREVWAPRICE?: number;
+	PREVPRICE?: number;
 	LAST?: number;
 	EFFECTIVEYIELD?: number;
 	ACCRUEDINT?: number;
