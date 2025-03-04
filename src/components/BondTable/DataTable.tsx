@@ -23,14 +23,14 @@ import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMe
 import { Input } from "../ui/input";
 import { MemoizedRow } from "./MemoizedRow";
 
-interface DataTableProps<TData, TValue> {
+interface DataTableProps<TData extends { SECID: string }, TValue> {
 	columns: ColumnDef<TData, TValue>[];
 	data: TData[];
 	maxHeight?: string;
 	filterPlaceholder?: string;
 }
 
-export function DataTable<TData, TValue>({
+export function DataTable<TData extends { SECID: string }, TValue>({
 	columns,
 	data,
 	maxHeight,
@@ -169,7 +169,10 @@ export function DataTable<TData, TValue>({
 							Настроить столбцы
 						</Button>
 					</DropdownMenuTrigger>
-					<DropdownMenuContent align="end">
+					<DropdownMenuContent
+						align="end"
+						className="max-h-[300px] overflow-y-auto"
+					>
 						{table
 							.getAllColumns()
 							.filter((column) => column.getCanHide())
@@ -258,7 +261,7 @@ export function DataTable<TData, TValue>({
 									const row = table.getRowModel().rows[virtualRow.index];
 									return (
 										<MemoizedRow
-											key={row.id}
+											key={row.original.SECID || row.id}
 											row={row}
 											virtualRow={virtualRow}
 											columnFilters={columnFilters}

@@ -15,7 +15,6 @@ export const MemoizedRow = memo(
 	function RowComponent<TData>({ row, virtualRow }: MemoizedRowProps<TData>) {
 		return (
 			<TableRow
-				key={row.id}
 				data-state={row.getIsSelected() && "selected"}
 				className="absolute flex w-full border-b"
 				style={{
