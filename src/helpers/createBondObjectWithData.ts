@@ -15,6 +15,22 @@ const getCurrentPrice = (bond: MOEXBondData): number => {
 	return bond.LAST || bond.PREVPRICE || 0;
 };
 
+const getTypeName = (secType: string): string => {
+	switch (secType) {
+		case "3":
+			return "ofz_bond";
+		case "6":
+		case "7":
+		case "8":
+			return "corporate_bond";
+		case "4":
+		case "C":
+			return "subfederal_bond";
+		default:
+			return "unknown";
+	}
+};
+
 const mapColumns = (columns: string[]): Record<string, number> => {
 	return columns.reduce((acc, column, index) => {
 		acc[column] = index;
@@ -58,6 +74,7 @@ export const createBondsWithData = async (data: any): Promise<MOEXBondData[]> =>
 			DURATION: marketData[marketDataColumns["DURATION"]],
 			EFFECTIVEYIELD: yieldData[yieldDataColumns["EFFECTIVEYIELD"]],
 			DURATIONWAPRICE: yieldData[yieldDataColumns["DURATIONWAPRICE"]] || undefined,
+			TYPE: getTypeName(bondData[securitiesColumns["SECTYPE"]]),
 		};
 
 		return {

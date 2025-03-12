@@ -1,3 +1,5 @@
+"use client";
+
 import { FC } from "react";
 import { columns } from "./BondTable/AllBondsColumns";
 import { DataTable } from "./BondTable/DataTable";
@@ -13,12 +15,11 @@ const AllBondsCard: FC<AllBondsCardProps> = ({ allBonds }) => {
 			<CardHeader>
 				<CardTitle className="text-2xl font-bold">Все облигации</CardTitle>
 			</CardHeader>
-			<CardContent className="max-h-[700px]">
+			<CardContent>
 				<DataTable
-					columns={columns}
 					data={allBonds}
-					filterPlaceholder="Поиск"
-					maxHeight={"max-h-[600px]"}
+					columns={columns}
+					className="h-[650px]"
 				/>
 			</CardContent>
 		</Card>

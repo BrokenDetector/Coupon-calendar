@@ -14,6 +14,21 @@ interface ExtendedBond extends Bond {
 	handlePriceChange: (secId: string, price: number) => void;
 }
 
+const COUPON_FREQUENCIES = [
+	{ value: 365, range: [300, 400] },
+	{ value: 182, range: [150, 200] },
+	{ value: 91, range: [80, 100] },
+	{ value: 30, range: [25, 35] },
+];
+
+const calculateYearsToMaturity = (maturityDate: string): number => {
+	const now = new Date();
+	const diffTime = new Date(maturityDate).getTime() - now.getTime();
+	return diffTime / (1000 * 60 * 60 * 24 * 365.25);
+};
+
+
+
 export const columns: ColumnDef<ExtendedBond>[] = [
 	{
 		accessorKey: "SHORTNAME",
@@ -204,6 +219,15 @@ export const columns: ColumnDef<ExtendedBond>[] = [
 			const periodB = rowB.original.COUPONFREQUENCY || 0;
 			return periodA - periodB;
 		},
+		filterFn:(row, columnId, filterValue) => {
+			if (!filterValue?.length) return true;
+			return filterValue.some((freq: string) => {
+				const frequencyRange = COUPON_FREQUENCIES.find((f) => f.value === parseInt(freq))?.range;
+				if (!frequencyRange) return false;
+				const couponPeriod = row.original.COUPONFREQUENCY || 0;
+				return couponPeriod >= frequencyRange[0] && couponPeriod <= frequencyRange[1];
+			});
+		},
 	},
 	{
 		accessorKey: "CURRENTYIELD",
@@ -333,6 +357,25 @@ export const columns: ColumnDef<ExtendedBond>[] = [
 		cell: ({ row }) => {
 			return <span className={cn("text-xs")}>{row.original.MATDATE || "Погашена"}</span>;
 		},
+		filterFn: (row, columnId, filterValue) => {
+			if (!filterValue?.length) return true;
+			const yearsToMaturity = calculateYearsToMaturity(row.original.MATDATE || "");
+
+			return filterValue.some((range: string) => {
+				if (range === "5+") return yearsToMaturity > 5;
+				const [min, max] = range.split("-").map(Number);
+				return yearsToMaturity >= min && yearsToMaturity <= max;
+			});
+		},
+	},
+	{
+		accessorKey: "TYPE",
+		filterFn: (row, columnId, filterValue) => {
+			if (!filterValue?.length) return true;
+			return filterValue.includes(row.original.TYPE);
+		},
+		enableHiding: false,
+		size: 0,
 	},
 	{
 		accessorKey: "QUANTITY",

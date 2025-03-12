@@ -52,12 +52,11 @@ const MyBondsCard = ({
 					/>
 				</div>
 			</CardHeader>
-			<CardContent className="max-h-[400px]">
+			<CardContent>
 				<DataTable
-					columns={columns}
 					data={tableData}
-					filterPlaceholder="Поиск по портфелю"
-					maxHeight={"max-h-[320px]"}
+					columns={columns}
+					className="h-[320px]"
 				/>
 			</CardContent>
 		</Card>

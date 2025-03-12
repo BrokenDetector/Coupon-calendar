@@ -55,6 +55,7 @@ interface MOEXBondData {
 	COUPONPERCENT?: number;
 	CURRENTPRICE?: number;
 	CURRENTYIELD?: number;
+	TYPE?: string;
 }
 
 interface MOEXBondCoupons {
