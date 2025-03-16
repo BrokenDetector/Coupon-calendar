@@ -13,7 +13,7 @@ export const fetchAllBondsFullData = async (): Promise<APIResponse<MOEXBondData[
 		}
 
 		const allBondsData = await response.json();
-		const bonds = await createBondsWithData(allBondsData);
+		const bonds = createBondsWithData(allBondsData);
 		return { data: bonds };
 	} catch (error) {
 		console.error("❗ERROR fetching all bonds with full data: ", error);

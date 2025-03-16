@@ -1,4 +1,4 @@
-const getCurrentYield = (bond: MOEXBondData): number => {
+export const getCurrentYield = (bond: MOEXBondData): number => {
 	const nominalValue = bond.FACEVALUE || 0;
 	const currentPrice = bond.LAST || bond.PREVPRICE || 0;
 	const couponFrequency = bond.COUPONFREQUENCY || 365;
@@ -38,7 +38,7 @@ const mapColumns = (columns: string[]): Record<string, number> => {
 	}, {} as Record<string, number>);
 };
 
-export const createBondsWithData = async (data: any): Promise<MOEXBondData[]> => {
+export const createBondsWithData = (data: any): MOEXBondData[] => {
 	const securitiesColumns = mapColumns(data.securities.columns);
 	const marketDataColumns = mapColumns(data.marketdata.columns);
 	const yieldDataColumns = mapColumns(data.marketdata_yields.columns);

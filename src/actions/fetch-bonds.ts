@@ -47,7 +47,7 @@ const fetchBondData = async (secids: string[]): Promise<MOEXBondData[]> => {
 			throw new Error(`❗Failed to fetch bond data for ${secids.join(", ")}, status: ${response.status}`);
 		}
 		const data = await response.json();
-		const bonds = await createBondsWithData(data);
+		const bonds = createBondsWithData(data);
 		return bonds;
 	} catch (error) {
 		console.error(`❗Error fetching data for bonds ${secids.join(", ")}:`, error);
