@@ -16,9 +16,10 @@ import { Input } from "../ui/input";
 
 interface DataTableToolbarProps<TData> {
 	table: Table<TData>;
+	placeholder?: string;
 }
 
-export function DataTableToolbar<TData>({ table }: DataTableToolbarProps<TData>) {
+export function DataTableToolbar<TData>({ table, placeholder = "Поиск" }: DataTableToolbarProps<TData>) {
 	const hasFilters = table.getState().columnFilters
 		? table.getState().columnFilters.filter((f) => f.id !== "SHORTNAME").length > 0
 		: false;
@@ -62,7 +63,7 @@ export function DataTableToolbar<TData>({ table }: DataTableToolbarProps<TData>)
 		<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 			<div className="flex flex-1 items-center gap-2">
 				<Input
-					placeholder="Search..."
+					placeholder={placeholder}
 					value={(table.getColumn("SHORTNAME")?.getFilterValue() as string) ?? ""}
 					onChange={(event) => table.getColumn("SHORTNAME")?.setFilterValue(event.target.value)}
 					className="max-w-sm"

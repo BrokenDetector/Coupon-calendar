@@ -7,12 +7,14 @@ interface DataTableProps<TData extends { SECID: string }, TValue> {
 	data: TData[];
 	columns: ColumnDef<TData, TValue>[];
 	className?: string;
+	placeholder?: string;
 }
 
 export function DataTable<TData extends { SECID: string }, TValue>({
 	data,
 	columns,
 	className,
+	placeholder,
 }: DataTableProps<TData, TValue>) {
 	const { table, virtualizer, tableContainerRef } = useDataTable<TData, TValue>({
 		data,
@@ -21,7 +23,12 @@ export function DataTable<TData extends { SECID: string }, TValue>({
 
 	return (
 		<div className="flex flex-col gap-4">
-			<DataTableToolbar table={table} />
+			<div className="flex items-center py-4">
+				<DataTableToolbar
+					table={table}
+					placeholder={placeholder}
+				/>
+			</div>
 			<DataTableContent
 				table={table}
 				virtualizer={virtualizer}

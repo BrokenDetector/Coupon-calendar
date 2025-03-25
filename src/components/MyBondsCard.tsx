@@ -57,6 +57,7 @@ const MyBondsCard = ({
 					data={tableData}
 					columns={columns}
 					className="h-[320px]"
+					placeholder="Поиск по портфелю"
 				/>
 			</CardContent>
 		</Card>
