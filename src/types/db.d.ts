@@ -41,26 +41,28 @@ interface MOEXBondData {
 	SHORTNAME: string;
 	ISIN: string;
 	FACEUNIT: string;
-	FACEVALUE?: number;
-	NEXTCOUPON?: string;
+	FACEVALUE: number;
+	NEXTCOUPON: string;
 	COUPONVALUE?: number;
 	COUPONFREQUENCY?: number;
-	MATDATE?: string;
-	PREVPRICE?: number;
-	LAST?: number;
-	EFFECTIVEYIELD?: number;
-	ACCRUEDINT?: number;
-	DURATION?: number;
-	DURATIONWAPRICE?: number;
-	COUPONPERCENT?: number;
-	CURRENTPRICE?: number;
-	CURRENTYIELD?: number;
-	TYPE?: string;
+	MATDATE: string;
+	PREVPRICE: number;
+	LAST: number;
+	EFFECTIVEYIELD: number;
+	ACCRUEDINT: number;
+	DURATION: number;
+	DURATIONWAPRICE: number;
+	COUPONPERCENT: number;
+	CURRENTPRICE: number;
+	CURRENTYIELD: number;
+	TYPE: string;
 }
 
 interface MOEXBondCoupons {
 	COUPONVALUES: number[];
 	COUPONDATES: string[];
+	AMORTIZATIONVALUES?: number[];
+	AMORTIZATIONDATES?: string[];
 }
 
 interface Bond extends MOEXBondData, Partial<MOEXBondCoupons> {

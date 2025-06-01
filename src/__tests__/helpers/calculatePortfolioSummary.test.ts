@@ -16,6 +16,15 @@ describe("calculatePortfolioSummary", () => {
 			COUPONVALUE: 50,
 			COUPONFREQUENCY: 180,
 			quantity: 10,
+			NEXTCOUPON: "2025-01-01",
+			MATDATE: "2025-01-01",
+			EFFECTIVEYIELD: 0,
+			ACCRUEDINT: 0,
+			DURATION: 0,
+			DURATIONWAPRICE: 0,
+			COUPONPERCENT: 0,
+			CURRENTYIELD: 0,
+			TYPE: "Bond",
 		},
 	];
 
@@ -35,30 +44,14 @@ describe("calculatePortfolioSummary", () => {
 	});
 
 	test("should handle bonds with different currencies", () => {
-		const mockBondsWithUSD: Bond[] = [
-			{
-				SECID: "BOND2",
-				NAME: "Test Bond 2",
-				ISIN: "RU000A0001",
-				SHORTNAME: "Test Bond 2",
-				FACEVALUE: 1000,
-				FACEUNIT: "USD",
-				CURRENTPRICE: 110,
-				purchasePrice: 100,
-				LAST: 110,
-				PREVPRICE: 100,
-				COUPONVALUE: 50,
-				COUPONFREQUENCY: 365,
-				quantity: 5,
-			},
-		];
+		const mockBondsWithUSD: Bond[] = [...mockBonds, { ...mockBonds[0], FACEUNIT: "USD", quantity: 1 }];
 
 		const summary = calculatePortfolioSummary(mockBondsWithUSD, mockCurrencyRates);
 
 		expect(summary).toEqual({
-			totalPurchasePrice: "450000.00",
-			totalCurrentPrice: "495000.00",
-			averageCurrentYield: "4.55",
+			totalPurchasePrice: "100000.00",
+			totalCurrentPrice: "110000.00",
+			averageCurrentYield: "9.22",
 		});
 	});
 
@@ -83,50 +76,20 @@ describe("calculatePortfolioSummary", () => {
 	});
 
 	test("should handle bonds with missing or zero quantity", () => {
-		const mockBondsWithZeroQuantity: Bond[] = [
-			{
-				SECID: "BOND3",
-				NAME: "Test Bond 3",
-				ISIN: "RU000A0002",
-				SHORTNAME: "Test Bond 3",
-				FACEVALUE: 1000,
-				FACEUNIT: "RUB",
-				CURRENTPRICE: 110,
-				purchasePrice: 100,
-				LAST: 110,
-				PREVPRICE: 100,
-				COUPONVALUE: 50,
-				COUPONFREQUENCY: 120,
-				quantity: 0,
-			},
-		];
+		const mockBondsWithZeroQuantity: Bond[] = [...mockBonds, { ...mockBonds[0], quantity: 0 }];
 
 		const summary = calculatePortfolioSummary(mockBondsWithZeroQuantity, mockCurrencyRates);
 
 		expect(summary).toEqual({
-			totalPurchasePrice: "1000.00",
-			totalCurrentPrice: "1100.00",
-			averageCurrentYield: "13.83",
+			totalPurchasePrice: "11000.00",
+			totalCurrentPrice: "12100.00",
+			averageCurrentYield: "9.22",
 		});
 	});
 
 	test("should handle bonds with missing COUPONVALUE or COUPONFREQUENCY", () => {
 		const mockBondsWithMissingCouponData: Bond[] = [
-			{
-				SECID: "BOND5",
-				NAME: "Test Bond 5",
-				ISIN: "RU000A0004",
-				SHORTNAME: "Test Bond 5",
-				FACEVALUE: 1000,
-				FACEUNIT: "RUB",
-				CURRENTPRICE: 110,
-				purchasePrice: 100,
-				LAST: 110,
-				PREVPRICE: 100,
-				COUPONVALUE: undefined,
-				COUPONFREQUENCY: undefined,
-				quantity: 10,
-			},
+			{ ...mockBonds[0], COUPONVALUE: undefined, COUPONFREQUENCY: undefined },
 		];
 
 		const summary = calculatePortfolioSummary(mockBondsWithMissingCouponData, mockCurrencyRates);

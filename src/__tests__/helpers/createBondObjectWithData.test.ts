@@ -80,7 +80,7 @@ describe("Bond Data Helper Functions", () => {
 
 	describe("getCurrentYield", () => {
 		test("should calculate current yield correctly", () => {
-			const bond: MOEXBondData = {
+			const bond: Partial<MOEXBondData> = {
 				FACEVALUE: 1000,
 				LAST: 100,
 				COUPONVALUE: 50,
@@ -100,7 +100,7 @@ describe("Bond Data Helper Functions", () => {
 		});
 
 		test("should handle zero current price", () => {
-			const bond: MOEXBondData = {
+			const bond: Partial<MOEXBondData> = {
 				FACEVALUE: 1000,
 				LAST: 0,
 				PREVPRICE: 0,
@@ -118,7 +118,7 @@ describe("Bond Data Helper Functions", () => {
 		});
 
 		test("should handle missing or zero COUPONVALUE", () => {
-			const bond: MOEXBondData = {
+			const bond: Partial<MOEXBondData> = {
 				FACEVALUE: 1000,
 				LAST: 100,
 				COUPONVALUE: 0,
@@ -135,7 +135,7 @@ describe("Bond Data Helper Functions", () => {
 		});
 
 		test("should default to COUPONFREQUENCY of 365 if missing", () => {
-			const bond: MOEXBondData = {
+			const bond: Partial<MOEXBondData> = {
 				FACEVALUE: 1000,
 				LAST: 100,
 				COUPONVALUE: 50,

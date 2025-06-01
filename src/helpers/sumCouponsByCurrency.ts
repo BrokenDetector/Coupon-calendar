@@ -13,6 +13,17 @@ export const sumCouponsByCurrency = (bonds: Bond[], dateFilter: (date: Date) => 
 				totals[currency] += couponValue;
 			}
 		});
+		bond.AMORTIZATIONDATES?.forEach((amortizationDate, index) => {
+			const date = parseISO(amortizationDate);
+			if (dateFilter(date)) {
+				const currency = bond.FACEUNIT;
+				const amortizationValue = bond.AMORTIZATIONVALUES![index] * (bond.quantity || 1);
+				if (!totals[currency]) {
+					totals[currency] = 0;
+				}
+				totals[currency] += amortizationValue;
+			}
+		});
 		return totals;
 	}, {} as Record<string, number>);
 };

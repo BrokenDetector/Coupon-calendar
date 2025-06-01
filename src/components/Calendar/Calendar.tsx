@@ -31,6 +31,7 @@ const CouponCalendar: FC<CouponCalendarProps> = ({ bonds }) => {
 		if (bonds.length > 0) {
 			return bonds.reduce((dates: string[], bond) => {
 				bond.COUPONDATES?.forEach((date) => dates.push(date));
+				bond.AMORTIZATIONDATES?.forEach((date) => dates.push(date));
 				return dates;
 			}, []);
 		}
@@ -47,9 +48,12 @@ const CouponCalendar: FC<CouponCalendarProps> = ({ bonds }) => {
 
 	const handleDayClick = useCallback(
 		(date: Date) => {
-			const bondsWithCoupons = bonds.filter((bond) =>
-				bond.COUPONDATES?.some((couponDate) => isSameDay(parseISO(couponDate), date))
+			const bondsWithCoupons = bonds.filter(
+				(bond) =>
+					bond.COUPONDATES?.some((couponDate) => isSameDay(parseISO(couponDate), date)) ||
+					bond.AMORTIZATIONDATES?.some((amortizationDate) => isSameDay(parseISO(amortizationDate), date))
 			);
+			console.log(bondsWithCoupons);
 			const totalsByCurrency = sumCouponsByCurrency(bondsWithCoupons, (couponDate) =>
 				isSameDay(couponDate, date)
 			);
@@ -67,7 +71,7 @@ const CouponCalendar: FC<CouponCalendarProps> = ({ bonds }) => {
 		setCurrentYear((prevYear) => prevYear + increment);
 	}, []);
 
-	const calculateMonthlyCouponTotal = useCallback(
+	const calculateMonthlyTotal = useCallback(
 		(month: Date) => {
 			return sumCouponsByCurrency(
 				bonds,
@@ -90,7 +94,7 @@ const CouponCalendar: FC<CouponCalendarProps> = ({ bonds }) => {
 			</div>
 			<div className="grid grid-cols-[repeat(auto-fit,_minmax(250px,_1fr))] gap-2 mb-6">
 				{months.map((month, index) => {
-					const monthlyTotals = calculateMonthlyCouponTotal(month);
+					const monthlyTotals = calculateMonthlyTotal(month);
 
 					return (
 						<div
@@ -103,7 +107,7 @@ const CouponCalendar: FC<CouponCalendarProps> = ({ bonds }) => {
 								onDayClick={handleDayClick}
 							/>
 							<h5 className="text-sm font-bold px-4 pb-4 text-balance">
-								Сумма купонов за месяц:
+								Сумма выплат за месяц:
 								{Object.entries(monthlyTotals).map(([currency, total]) => (
 									<div key={currency}>
 										{total.toFixed(2)} {getCurrencySymbol(currency)}

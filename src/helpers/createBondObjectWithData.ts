@@ -1,4 +1,4 @@
-export const getCurrentYield = (bond: MOEXBondData): number => {
+export const getCurrentYield = (bond: Partial<MOEXBondData>): number => {
 	const nominalValue = bond.FACEVALUE || 0;
 	const currentPrice = bond.LAST || bond.PREVPRICE || 0;
 	const couponFrequency = bond.COUPONFREQUENCY || 365;
@@ -11,7 +11,7 @@ export const getCurrentYield = (bond: MOEXBondData): number => {
 	return 0;
 };
 
-const getCurrentPrice = (bond: MOEXBondData): number => {
+const getCurrentPrice = (bond: Partial<MOEXBondData>): number => {
 	return bond.LAST || bond.PREVPRICE || 0;
 };
 
@@ -87,6 +87,7 @@ export const createBondsWithData = (data: any): MOEXBondData[] => {
 
 export const createBondObjectWithCoupons = (data: any): MOEXBondCoupons & { SECID: string } => {
 	const coupons = data[1]?.coupons;
+	const amortizations = data[1]?.amortizations || [];
 
 	if (!coupons.length) {
 		throw new Error("❗No coupon data available.");
@@ -97,9 +98,14 @@ export const createBondObjectWithCoupons = (data: any): MOEXBondCoupons & { SECI
 	const COUPONVALUES: number[] = coupons.map((coupon: any) => coupon.value);
 	const COUPONDATES: string[] = coupons.map((coupon: any) => coupon.coupondate);
 
+	const AMORTIZATIONVALUES: number[] = amortizations.map((amortization: any) => amortization.value);
+	const AMORTIZATIONDATES: string[] = amortizations.map((amortization: any) => amortization.amortdate);
+
 	return {
 		COUPONVALUES,
 		SECID,
 		COUPONDATES,
+		AMORTIZATIONVALUES,
+		AMORTIZATIONDATES,
 	};
 };

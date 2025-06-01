@@ -9,7 +9,7 @@ const createMOEXUrl = (secids: string[], type: "coupons" | "data"): string => {
 	const baseUrl = `https://iss.moex.com/iss/engines/stock/markets/bonds`;
 
 	if (type === "coupons") {
-		return `https://iss.moex.com/iss/securities/${secids[0]}/bondization.json?iss.json=extended&iss.meta=off&iss.only=coupons&lang=ru&limit=unlimited`;
+		return `https://iss.moex.com/iss/securities/${secids[0]}/bondization.json?iss.json=extended&iss.meta=off&lang=ru&limit=unlimited`;
 	}
 
 	return `${baseUrl}/securities.json?iss.meta=off&iss.only=securities,marketdata,marketdata_yields&lang=ru&marketprice_board=1&securities=${secids.join(
@@ -48,6 +48,7 @@ const fetchBondData = async (secids: string[]): Promise<MOEXBondData[]> => {
 		}
 		const data = await response.json();
 		const bonds = createBondsWithData(data);
+
 		return bonds;
 	} catch (error) {
 		console.error(`❗Error fetching data for bonds ${secids.join(", ")}:`, error);

@@ -28,49 +28,55 @@ const CouponModal: FC<CouponModalProps> = ({
 			<DialogContent>
 				<DialogHeader>
 					<DialogTitle>
-						Купоны на {selectedDate ? format(selectedDate, "d MMMM, yyyy", { locale: ru }) : ""}
+						Выплаты на {selectedDate ? format(selectedDate, "d MMMM, yyyy", { locale: ru }) : ""}
 					</DialogTitle>
 				</DialogHeader>
-				<div className="grid gap-4 py-4">
+				<div className="space-y-4">
 					{bondsForSelectedDate.length > 0 ? (
-						<div className="grid gap-2">
+						<>
 							{bondsForSelectedDate.map((bond, index) => {
-								const couponIndex = bond.COUPONDATES!.findIndex((couponDate) =>
-									isSameDay(parseISO(couponDate), selectedDate!)
+								const hasCoupon = bond.COUPONDATES?.some((date) =>
+									isSameDay(parseISO(date), selectedDate!)
 								);
-								const couponValue = bond.COUPONVALUES![couponIndex];
-								const quantity = bond.quantity || 1;
-								const currencySymbol = getCurrencySymbol(bond.FACEUNIT || "RUB");
+								const hasAmortization = bond.AMORTIZATIONDATES?.some((date) =>
+									isSameDay(parseISO(date), selectedDate!)
+								);
 
 								return (
 									<div
-										key={index}
-										className="flex justify-between"
+										key={bond.SECID}
+										className="border rounded-lg p-4 flex flex-row justify-between items-center"
 									>
-										<span>
-											{bond.SHORTNAME} (x{quantity})
-										</span>
-										<span>
-											{couponValue
-												? `${(couponValue * quantity).toFixed(2)} ${currencySymbol}`
-												: "Н/Д"}
-										</span>
+										<div>
+											<h3 className="font-bold">{bond.SHORTNAME}</h3>
+											{hasCoupon && (
+												<div className="text-sm">
+													Купон: {bond.COUPONVALUES![index].toFixed(2)}
+													{getCurrencySymbol(bond.FACEUNIT)}
+												</div>
+											)}
+											{hasAmortization && (
+												<div className="text-sm">
+													Амортизация: {bond.AMORTIZATIONVALUES![index].toFixed(2)}
+													{getCurrencySymbol(bond.FACEUNIT)}
+												</div>
+											)}
+										</div>
+										<span>x{bond.quantity}</span>
 									</div>
 								);
 							})}
-							<div className="flex justify-between font-bold">
-								<span>Сумма купонов за день:</span>
-								<div>
-									{Object.entries(totalCouponsByCurrency).map(([currency, total]) => (
-										<div key={currency}>
-											{total.toFixed(2)} {getCurrencySymbol(currency)}
-										</div>
-									))}
-								</div>
+							<div className="font-bold">
+								Итого:
+								{Object.entries(totalCouponsByCurrency).map(([currency, total]) => (
+									<div key={currency}>
+										{total.toFixed(2)} {getCurrencySymbol(currency)}
+									</div>
+								))}
 							</div>
-						</div>
+						</>
 					) : (
-						<p>Нет купонов в этот день.</p>
+						<p>Нет выплат на этот день</p>
 					)}
 				</div>
 				<DialogFooter>
