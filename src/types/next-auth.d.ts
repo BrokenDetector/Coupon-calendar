@@ -7,6 +7,7 @@ declare module "next-auth/jwt" {
 	interface JWT {
 		id: UserId;
 		emailVerified: boolean;
+		portfolios: Portfolio[];
 	}
 }
 

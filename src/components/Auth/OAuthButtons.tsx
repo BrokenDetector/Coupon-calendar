@@ -1,28 +1,27 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { signIn } from "next-auth/react";
+import { getSession, signIn } from "next-auth/react";
 import Image from "next/image";
-import { FC, useState } from "react";
+import { useRouter } from "next/navigation";
+import { FC, useTransition } from "react";
 import { customToast } from "../ui/toast/toast-variants";
 
 export const OAuthButtons: FC = () => {
-	const [isLoading, setIsLoading] = useState<boolean>(false);
+	const [isPending, startPending] = useTransition();
+	const router = useRouter();
 
 	const handleOAuthSignIn = async (provider: "google" | "yandex") => {
-		try {
-			setIsLoading(true);
-			const result = await signIn(provider, { redirect: false });
+		startPending(async () => {
+			const res = await signIn(provider, { redirect: false });
 
-			if (result?.error) {
-				console.log(result.error);
+			if (!res?.error) {
+				const session = await getSession();
+				router.push(`/portfolio/${session?.user.portfolios?.[0]?.id}`);
+			} else {
 				customToast.error("Произошла ошибка при входе");
 			}
-		} catch (error) {
-			customToast.error("Произошла ошибка при входе");
-		} finally {
-			setIsLoading(false);
-		}
+		});
 	};
 
 	return (
@@ -30,7 +29,7 @@ export const OAuthButtons: FC = () => {
 			<Button
 				variant="outline"
 				onClick={() => handleOAuthSignIn("google")}
-				disabled={isLoading}
+				disabled={isPending}
 				className="w-full"
 			>
 				<Image
@@ -44,7 +43,7 @@ export const OAuthButtons: FC = () => {
 			<Button
 				variant="outline"
 				onClick={() => handleOAuthSignIn("yandex")}
-				disabled={isLoading}
+				disabled={isPending}
 				className="w-full"
 			>
 				<Image

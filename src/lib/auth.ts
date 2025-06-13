@@ -141,19 +141,17 @@ export const authOptions: NextAuthOptions = {
 				email: dbUser.email,
 				picture: dbUser.image,
 				emailVerified: dbUser.emailVerified || false,
+				portfolios: dbUser.portfolios || [],
 			};
 		},
 		async session({ session, token }) {
 			if (token) {
-				const dbUser = await getUserByEmail(session.user.email!);
-
 				session.user.id = token.id;
 				session.user.name = token.name!;
 				session.user.email = token.email;
 				session.user.image = token.picture;
 				session.user.emailVerified = token.emailVerified || false;
-				// @ts-ignore
-				session.user.portfolios = dbUser?.portfolios || [];
+				session.user.portfolios = token.portfolios;
 			}
 			return session;
 		},

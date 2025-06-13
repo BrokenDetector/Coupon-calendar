@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { RegisterSchema } from "@/lib/validations/schemas";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader } from "lucide-react";
-import { signIn } from "next-auth/react";
+import { getSession, signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { FC, useTransition } from "react";
 import { useForm } from "react-hook-form";
@@ -48,7 +48,8 @@ const RegisterForm: FC = () => {
 					email,
 					password,
 				});
-				router.push("/portfolio");
+				const session = await getSession();
+				router.push(`/portfolio/${session?.user.portfolios?.[0]?.id}`);
 			}
 		});
 	};

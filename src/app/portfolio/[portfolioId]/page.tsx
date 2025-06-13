@@ -3,7 +3,7 @@ import { fetchBonds } from "@/actions/fetch-bonds";
 import { fetchCurrencyRates } from "@/actions/fetch-currency-rates";
 import ServerPortfolioManager from "@/components/ServerPortfolioManager";
 import { authOptions } from "@/lib/auth";
-import { getPortfolio, getUserById } from "@/lib/db-helpers";
+import { getPortfolio } from "@/lib/db-helpers";
 import { Metadata } from "next";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
@@ -19,7 +19,8 @@ export const metadata: Metadata = {
 
 const page: FC<pageProps> = async ({ params }) => {
 	const session = await getServerSession(authOptions);
-	const user = (await getUserById(session!.user.id)) as DBUser;
+
+	const user = session!.user;
 
 	// `params` should be awaited before using its properties.
 	// https://nextjs.org/docs/messages/sync-dynamic-apis

@@ -10,12 +10,7 @@ export async function middleware(req: NextRequest) {
 	}
 
 	if (session && (pathname.startsWith("/auth") || pathname === "/")) {
-		return NextResponse.redirect(new URL("/portfolio", req.url));
-	}
-
-	// Public routes that don't need session checks
-	if (pathname === "/" || pathname === "/bonds") {
-		return NextResponse.next();
+		return NextResponse.redirect(new URL(`/portfolio/${session.portfolios[0].id}`, req.url));
 	}
 
 	return NextResponse.next();
