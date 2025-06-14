@@ -35,9 +35,14 @@ const MyBondsCard = ({
 
 	return (
 		<Card className="rounded-lg col-span-4 xl:col-span-3">
-			<CardHeader className="flex flex-row items-center justify-between">
+			<CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between">
 				<CardTitle className="text-2xl font-bold">Мои облигации</CardTitle>
 				<div>
+					<SelectList
+						options={allBonds}
+						onBondUpdate={handleBondAdd}
+						bonds={bonds}
+					/>
 					<Button
 						variant="link"
 						asChild
@@ -45,11 +50,6 @@ const MyBondsCard = ({
 					>
 						<Link href="/bonds">Список всех облигаций</Link>
 					</Button>
-					<SelectList
-						options={allBonds}
-						onBondUpdate={handleBondAdd}
-						bonds={bonds}
-					/>
 				</div>
 			</CardHeader>
 			<CardContent>

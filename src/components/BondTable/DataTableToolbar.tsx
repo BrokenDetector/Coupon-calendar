@@ -60,20 +60,20 @@ export function DataTableToolbar<TData>({ table, placeholder = "Поиск" }: D
 	];
 
 	return (
-		<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-			<div className="flex flex-1 items-center gap-2">
+		<div className="flex gap-2 flex-row sm:items-center sm:justify-between w-full">
+			<div className="flex flex-1 items-center gap-2 flex-wrap">
 				<Input
 					placeholder={placeholder}
 					value={(table.getColumn("SHORTNAME")?.getFilterValue() as string) ?? ""}
 					onChange={(event) => table.getColumn("SHORTNAME")?.setFilterValue(event.target.value)}
-					className="max-w-sm"
+					className="max-w-full sm:max-w-sm min-w-[150px] flex-1 bg-muted"
 				/>
 
-				<DropdownMenu modal={false}>
+				<DropdownMenu>
 					<DropdownMenuTrigger asChild>
 						<Button
 							variant="outline"
-							size="icon"
+							size="sm"
 							className={cn(hasFilters && "text-primary")}
 						>
 							<SlidersHorizontal className="size-4" />
@@ -134,11 +134,11 @@ export function DataTableToolbar<TData>({ table, placeholder = "Поиск" }: D
 				<DropdownMenuTrigger asChild>
 					<Button
 						variant="outline"
-						className="ml-auto"
+						className="ml-auto mt-0.5 sm:mt-0"
 						size="sm"
 					>
-						<BsToggles className="mr-1 size-4" />
-						Настроить столбцы
+						<BsToggles className="sm:mr-1 size-4" />
+						<span className="hidden sm:flex">Настроить столбцы</span>
 					</Button>
 				</DropdownMenuTrigger>
 				<DropdownMenuContent

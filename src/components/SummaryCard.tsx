@@ -15,11 +15,8 @@ const SummaryCard: FC<SummaryCardProps> = ({ portfolioSummary }) => {
 	const priceDifference = Number(portfolioSummary.totalCurrentPrice) - Number(portfolioSummary.totalPurchasePrice);
 
 	const isProfit = priceDifference > 0;
-	const returnPercentage = (priceDifference / Number(portfolioSummary.totalPurchasePrice)) * 100;
+	const returnPercentage = (priceDifference / Number(portfolioSummary.totalPurchasePrice)) * 100 || 0;
 	const returnSymbol = isProfit ? "▲" : "▼";
-
-	console.log(priceDifference);
-	console.log(portfolioSummary);
 
 	return (
 		<Card className="col-span-4 xl:col-span-1 rounded-lg">

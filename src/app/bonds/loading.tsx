@@ -9,10 +9,15 @@ export default function Loading() {
 					<CardHeader>
 						<CardTitle className="text-2xl font-bold">Все облигации</CardTitle>
 					</CardHeader>
-					<CardContent className="max-h-[700px]">
-						<div className="flex flex-row w-full items-center justify-between py-4">
-							<Skeleton className="h-6 w-36" />
-							<Skeleton className="h-6 w-28" />
+
+					<CardContent>
+						<div className="flex flex-row gap-2 sm:items-center sm:justify-between w-full mb-4">
+							<div className="flex flex-1 items-center gap-2 flex-wrap">
+								<Skeleton className="h-8 max-w-full sm:max-w-sm min-w-[150px] flex-1" />
+								<Skeleton className="size-8" />
+							</div>
+
+							<Skeleton className="size-8 sm:w-[150px] ml-auto" />
 						</div>
 
 						{/* Table rows skeleton */}
