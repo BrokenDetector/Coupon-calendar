@@ -41,7 +41,7 @@ const MobileNav = ({
 				<ChangeThemeButton />
 				<Button
 					variant="outline"
-					className="inline-flex items-center justify-center p-2 rounded-md text-muted-foreground hover:bg-muted focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary border shadow-sm"
+					className="inline-flex items-center justify-center p-2 rounded-md text-muted-foreground hover:bg-muted focus:outline-hidden focus:ring-2 focus:ring-inset focus:ring-primary border shadow-xs"
 					onClick={() => setIsMenuOpen(!isMenuOpen)}
 					aria-label="Меню"
 				>
@@ -61,7 +61,7 @@ const MobileNav = ({
 
 			{isMenuOpen && (
 				<div
-					className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 sm:hidden"
+					className="fixed inset-0 bg-background/80 backdrop-blur-xs z-50 sm:hidden"
 					onClick={() => setIsMenuOpen(false)}
 				/>
 			)}
@@ -142,7 +142,7 @@ const MobileNav = ({
 											router.push("/auth?view=login");
 											setIsMenuOpen(false);
 										}}
-										className="border shadow-sm"
+										className="border shadow-xs"
 										aria-label="Вход"
 									>
 										<User className="size-5 mr-2" />
@@ -154,7 +154,7 @@ const MobileNav = ({
 											router.push("/auth?view=register");
 											setIsMenuOpen(false);
 										}}
-										className="shadow-sm"
+										className="shadow-xs"
 										aria-label="Регистрация"
 									>
 										Регистрация

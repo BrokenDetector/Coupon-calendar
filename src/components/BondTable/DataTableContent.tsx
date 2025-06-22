@@ -28,7 +28,7 @@ export function DataTableContent<TData extends { SECID: string }, TValue>({
 				divClassname={cn("overflow-auto", className)}
 				ref={tableContainerRef}
 			>
-				<TableHeader className="sticky top-0 shadow-lg text-xs bg-card z-10">
+				<TableHeader className="sticky top-0 z-10 text-xs shadow-lg bg-card">
 					{table.getHeaderGroups().map((headerGroup) => (
 						<TableRow
 							key={headerGroup.id}
@@ -38,7 +38,7 @@ export function DataTableContent<TData extends { SECID: string }, TValue>({
 								<TableHead
 									key={header.id}
 									colSpan={header.colSpan}
-									className="flex-shrink-0 border-r last:border-r-0 p-1"
+									className="p-1 border-r shrink-0 last:border-r-0"
 									style={{
 										width: header.getSize(),
 									}}
@@ -65,11 +65,11 @@ export function DataTableContent<TData extends { SECID: string }, TValue>({
 											{header.column.getCanSort() && (
 												<>
 													{header.column.getIsSorted() === "asc" ? (
-														<ArrowUp className="ml-2 size-3 flex-shrink-0" />
+														<ArrowUp className="ml-2 size-3 shrink-0" />
 													) : header.column.getIsSorted() === "desc" ? (
-														<ArrowDown className="ml-2 size-3 flex-shrink-0" />
+														<ArrowDown className="ml-2 size-3 shrink-0" />
 													) : (
-														<ArrowUpDown className="ml-2 size-3 flex-shrink-0 text-muted-foreground" />
+														<ArrowUpDown className="ml-2 size-3 shrink-0 text-muted-foreground" />
 													)}
 												</>
 											)}
@@ -81,7 +81,7 @@ export function DataTableContent<TData extends { SECID: string }, TValue>({
 					))}
 				</TableHeader>
 				<TableBody
-					className="z-[1] relative"
+					className="relative z-1"
 					style={{
 						height: `${virtualizer.getTotalSize()}px`,
 					}}

@@ -25,7 +25,7 @@ export const OAuthButtons: FC = () => {
 	};
 
 	return (
-		<div className="flex flex-row items-center justify-between gap-3 w-full">
+		<div className="flex flex-row gap-3 justify-between items-center">
 			<Button
 				variant="outline"
 				onClick={() => handleOAuthSignIn("google")}

@@ -25,7 +25,7 @@ export function Toaster() {
 							{...props}
 						>
 							<div className="flex gap-3">
-								{icon && <div className="flex-shrink-0">{icon}</div>}
+								{icon && <div className="shrink-0">{icon}</div>}
 								<div className="grid gap-1">
 									{title && <ToastTitle>{title}</ToastTitle>}
 									{description && <ToastDescription>{description}</ToastDescription>}

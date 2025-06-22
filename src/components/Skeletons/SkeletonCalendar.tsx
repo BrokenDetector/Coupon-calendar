@@ -10,7 +10,7 @@ const SkeletonCalendar = () => {
 				<Skeleton className="h-9 w-9" />
 			</div>
 
-			<div className="grid grid-cols-[repeat(auto-fit,_minmax(250px,_1fr))] gap-2 mb-6">
+			<div className="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-2 mb-6">
 				{Array(12)
 					.fill(null)
 					.map((_, i) => (

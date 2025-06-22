@@ -62,12 +62,12 @@ const SelectList: FC<SelectListProps> = memo(({ options, onBondUpdate, bonds }) 
 	}, []);
 
 	return (
-		<div className="flex flex-col space-y-2 w-full max-w-80 p-2">
+		<div className="flex flex-col p-2 space-y-2 w-full max-w-80">
 			<div
 				className="relative"
 				ref={dropdownRef}
 			>
-				<div className="relative grid grid-cols-4 items-center cursor-pointer border rounded-md shadow-sm min-w-50">
+				<div className="grid relative grid-cols-4 items-center rounded-md cursor-pointer shadow-xs min-w-50">
 					<Search className="absolute left-2 top-1/2 transform -translate-y-1/2 text-muted-foreground size-4" />
 
 					<Input
@@ -75,7 +75,7 @@ const SelectList: FC<SelectListProps> = memo(({ options, onBondUpdate, bonds }) 
 						value={searchTerm}
 						onChange={handleInputChange}
 						placeholder="Быстрый поиск облигаций"
-						className="p-2 pl-10 rounded-md col-span-4 bg-muted"
+						className="col-span-4 p-2 pl-10 rounded-md bg-muted"
 						aria-label="Search bonds"
 						onClick={(e) => e.stopPropagation()}
 						onFocus={() => setIsListVisible(true)}
@@ -84,7 +84,7 @@ const SelectList: FC<SelectListProps> = memo(({ options, onBondUpdate, bonds }) 
 				{isListVisible && filteredOptions.length > 0 && (
 					<div
 						ref={listRef}
-						className="absolute z-50 w-full mt-1 bg-muted border rounded-md shadow-lg max-h-60 overflow-auto"
+						className="overflow-auto absolute z-50 mt-1 w-full max-h-60 rounded-md border shadow-lg bg-muted"
 					>
 						<div
 							className="relative"
@@ -105,10 +105,10 @@ const SelectList: FC<SelectListProps> = memo(({ options, onBondUpdate, bonds }) 
 									>
 										<div
 											onClick={() => handleSelect(bond)}
-											className="p-2 hover:bg-muted-foreground/30 cursor-pointer flex flex-col text-left h-full"
+											className="flex flex-col p-2 h-full text-left cursor-pointer hover:bg-muted-foreground/30"
 										>
 											<span>{bond.SHORTNAME}</span>
-											<span className="text-xs ml-0 text-muted-foreground">{bond.ISIN}</span>
+											<span className="ml-0 text-xs text-muted-foreground">{bond.ISIN}</span>
 										</div>
 									</div>
 								);

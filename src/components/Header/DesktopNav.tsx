@@ -40,7 +40,7 @@ const DesktopNav = ({
 	const router = useRouter();
 
 	return (
-		<div className="hidden sm:ml-6 sm:flex sm:items-center space-x-2">
+		<div className="hidden space-x-2 sm:ml-6 sm:flex sm:items-center">
 			<ChangeThemeButton />
 			{userSession ? (
 				<DropdownMenu>
@@ -50,7 +50,7 @@ const DesktopNav = ({
 							asChild
 							aria-label="Профиль"
 						>
-							<div className="flex items-center space-x-2 h-fit py-1">
+							<div className="flex items-center py-1 space-x-2 h-fit">
 								<Avatar className="size-8">
 									<AvatarImage
 										src={userSession!.image || "/placeholder-user.jpg"}
@@ -58,18 +58,18 @@ const DesktopNav = ({
 									/>
 									<AvatarFallback>{userSession!.name.slice(0, 2).toUpperCase()}</AvatarFallback>
 								</Avatar>
-								<div className="flex items-center gap-2">
+								<div className="flex gap-2 items-center">
 									<span>{userSession!.name}</span>
 									{selectedPortfolio && isPortfolioPage && (
 										<>
 											<span className="text-muted-foreground">/</span>
-											<span className="flex items-center gap-1 text-muted-foreground">
+											<span className="flex gap-1 items-center text-muted-foreground">
 												<FolderOpen className="size-4" />
 												{selectedPortfolio.name}
 											</span>
 										</>
 									)}
-									<ChevronDown className="size-4 text-gray-500" />
+									<ChevronDown className="text-gray-500 size-4" />
 								</div>
 							</div>
 						</Button>
@@ -98,14 +98,14 @@ const DesktopNav = ({
 								onClick={() => setIsCreateDialogOpen(true)}
 								aria-label="Новый портфель"
 							>
-								<Plus className="size-4 mr-2" />
+								<Plus className="mr-2 size-4" />
 								<span>Новый портфель</span>
 							</DropdownMenuItem>
 						)}
 						<DropdownMenuSeparator />
 						<DropdownMenuItem
 							onClick={async () => await signOut()}
-							className="hover:cursor-pointer size-full text-red-600 hover:text-red-700"
+							className="text-red-600 hover:cursor-pointer size-full hover:text-red-700"
 							aria-label="Выйти"
 						>
 							<LogOut className="mr-2 size-4" />
@@ -118,16 +118,16 @@ const DesktopNav = ({
 					<Button
 						variant="outline"
 						onClick={() => router.push("/auth?view=login")}
-						className="border shadow-sm"
+						className="border shadow-xs"
 						aria-label="Вход"
 					>
-						<User className="size-5 mr-2" />
+						<User className="mr-2 size-5" />
 						Вход
 					</Button>
 					<Button
 						variant="default"
 						onClick={() => router.push("/auth?view=register")}
-						className="ml-4 shadow-sm"
+						className="ml-4 shadow-xs"
 						aria-label="Регистрация"
 					>
 						Регистрация
