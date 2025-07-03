@@ -61,7 +61,10 @@ interface MOEXBondData {
 interface MOEXBondCoupons {
 	COUPONVALUES: number[];
 	COUPONDATES: string[];
-	AMORTIZATIONVALUES?: number[];
+	AMORTIZATIONVALUES?: {
+		value: number;
+		percent: number;
+	}[];
 	AMORTIZATIONDATES?: string[];
 }
 

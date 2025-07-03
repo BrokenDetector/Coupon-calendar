@@ -98,7 +98,10 @@ export const createBondObjectWithCoupons = (data: any): MOEXBondCoupons & { SECI
 	const COUPONVALUES: number[] = coupons.map((coupon: any) => coupon.value);
 	const COUPONDATES: string[] = coupons.map((coupon: any) => coupon.coupondate);
 
-	const AMORTIZATIONVALUES: number[] = amortizations.map((amortization: any) => amortization.value);
+	const AMORTIZATIONVALUES: { value: number; percent: number }[] = amortizations.map((amortization: any) => ({
+		value: amortization.value,
+		percent: amortization.valueprc,
+	}));
 	const AMORTIZATIONDATES: string[] = amortizations.map((amortization: any) => amortization.amortdate);
 
 	return {

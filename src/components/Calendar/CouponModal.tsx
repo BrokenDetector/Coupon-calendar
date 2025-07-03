@@ -34,31 +34,42 @@ const CouponModal: FC<CouponModalProps> = ({
 				<div className="space-y-4">
 					{bondsForSelectedDate.length > 0 ? (
 						<>
-							{bondsForSelectedDate.map((bond, index) => {
-								const hasCoupon = bond.COUPONDATES?.some((date) =>
-									isSameDay(parseISO(date), selectedDate!)
-								);
-								const hasAmortization = bond.AMORTIZATIONDATES?.some((date) =>
-									isSameDay(parseISO(date), selectedDate!)
-								);
+							{bondsForSelectedDate.map((bond) => {
+								const couponIndex =
+									bond.COUPONDATES?.findIndex((date) => isSameDay(parseISO(date), selectedDate!)) ??
+									-1;
+
+								const amortizationIndex =
+									bond.AMORTIZATIONDATES?.findIndex((date) =>
+										isSameDay(parseISO(date), selectedDate!)
+									) ?? -1;
+
+								const hasCoupon = couponIndex !== -1;
+								const hasAmortization = amortizationIndex !== -1;
 
 								return (
 									<div
 										key={bond.SECID}
-										className="border rounded-lg p-4 flex flex-row justify-between items-center"
+										className="flex flex-row justify-between items-center p-4 rounded-lg border"
 									>
 										<div>
 											<h3 className="font-bold">{bond.SHORTNAME}</h3>
 											{hasCoupon && (
 												<div className="text-sm">
-													Купон: {bond.COUPONVALUES![index].toFixed(2)}
+													Купон: {bond.COUPONVALUES?.[couponIndex].toFixed(2)}
 													{getCurrencySymbol(bond.FACEUNIT)}
 												</div>
 											)}
 											{hasAmortization && (
 												<div className="text-sm">
-													Амортизация: {bond.AMORTIZATIONVALUES![index].toFixed(2)}
-													{getCurrencySymbol(bond.FACEUNIT)}
+													Амортизация:{" "}
+													{bond.AMORTIZATIONVALUES?.[amortizationIndex].value.toFixed(2)}
+													{getCurrencySymbol(bond.FACEUNIT)}{" "}
+													<span className="text-muted-foreground">
+														{`(${bond.AMORTIZATIONVALUES?.[
+															amortizationIndex
+														].percent.toFixed(2)}%)`}
+													</span>
 												</div>
 											)}
 										</div>

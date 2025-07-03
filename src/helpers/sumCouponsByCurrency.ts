@@ -17,7 +17,7 @@ export const sumCouponsByCurrency = (bonds: Bond[], dateFilter: (date: Date) => 
 			const date = parseISO(amortizationDate);
 			if (dateFilter(date)) {
 				const currency = bond.FACEUNIT;
-				const amortizationValue = bond.AMORTIZATIONVALUES![index] * (bond.quantity || 1);
+				const amortizationValue = bond.AMORTIZATIONVALUES![index].value * (bond.quantity || 1);
 				if (!totals[currency]) {
 					totals[currency] = 0;
 				}
