@@ -53,7 +53,7 @@ const CouponCalendar: FC<CouponCalendarProps> = ({ bonds }) => {
 					bond.COUPONDATES?.some((couponDate) => isSameDay(parseISO(couponDate), date)) ||
 					bond.AMORTIZATIONDATES?.some((amortizationDate) => isSameDay(parseISO(amortizationDate), date))
 			);
-			console.log(bondsWithCoupons);
+
 			const totalsByCurrency = sumCouponsByCurrency(bondsWithCoupons, (couponDate) =>
 				isSameDay(couponDate, date)
 			);
@@ -82,14 +82,14 @@ const CouponCalendar: FC<CouponCalendarProps> = ({ bonds }) => {
 	);
 
 	return (
-		<div className="col-span-3 border rounded-lg bg-card/30 p-4">
+		<div className="col-span-3 p-4 rounded-lg border bg-card/30">
 			<div className="flex justify-between items-center mb-6">
 				<Button onClick={() => changeYear(-1)}>
-					<ChevronLeft className="h-4 w-4" />
+					<ChevronLeft className="w-4 h-4" />
 				</Button>
 				<h1 className="text-2xl font-bold text-center">Календарь на {currentYear}</h1>
 				<Button onClick={() => changeYear(1)}>
-					<ChevronRight className="h-4 w-4" />
+					<ChevronRight className="w-4 h-4" />
 				</Button>
 			</div>
 			<div className="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-2 mb-6">
@@ -99,14 +99,14 @@ const CouponCalendar: FC<CouponCalendarProps> = ({ bonds }) => {
 					return (
 						<div
 							key={index}
-							className="flex flex-col gap-4 border rounded-lg items-center justify-between"
+							className="flex flex-col gap-4 justify-between items-center rounded-lg border"
 						>
 							<MonthCalendar
 								date={month}
 								highlightedDates={parsedHighlightedDates}
 								onDayClick={handleDayClick}
 							/>
-							<h5 className="text-sm font-bold px-4 pb-4 text-balance">
+							<h5 className="px-4 pb-4 text-sm font-bold text-balance">
 								Сумма выплат за месяц:
 								{Object.entries(monthlyTotals).map(([currency, total]) => (
 									<div key={currency}>
@@ -118,7 +118,7 @@ const CouponCalendar: FC<CouponCalendarProps> = ({ bonds }) => {
 					);
 				})}
 			</div>
-			<div className="flex flex-col text-xs text-muted-foreground italic p-4">
+			<div className="flex flex-col p-4 text-xs italic text-muted-foreground">
 				<span>*Все платежи указаны без вычета налогов и комиссий.</span>
 				{!session?.data?.user && (
 					<div>

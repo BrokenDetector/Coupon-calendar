@@ -55,9 +55,16 @@ const CouponModal: FC<CouponModalProps> = ({
 										<div>
 											<h3 className="font-bold">{bond.SHORTNAME}</h3>
 											{hasCoupon && (
-												<div className="text-sm">
-													Купон: {bond.COUPONVALUES?.[couponIndex].toFixed(2)}
-													{getCurrencySymbol(bond.FACEUNIT)}
+												<div className="flex flex-row gap-2 items-center text-sm">
+													Купон:
+													{bond.COUPONVALUES?.[couponIndex] ? (
+														<div>
+															{bond.COUPONVALUES?.[couponIndex].toFixed(2)}{" "}
+															{getCurrencySymbol(bond.FACEUNIT)}
+														</div>
+													) : (
+														<span>Не определён</span>
+													)}
 												</div>
 											)}
 											{hasAmortization && (
