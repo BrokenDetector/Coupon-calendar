@@ -5,7 +5,9 @@ import CouponCalendar from "@/components/Calendar/Calendar";
 import MyBondsCard from "@/components/MyBondsCard";
 import SummaryCard from "@/components/SummaryCard";
 import { calculatePortfolioSummary } from "@/helpers/calculatePortfolioSummary";
+import { getErrorMessage } from "@/helpers/getErrorMessage";
 import { FC, useCallback, useEffect, useMemo, useState } from "react";
+import { Button } from "./ui/button";
 import { customToast } from "./ui/toast/toast-variants";
 
 interface ServerPortfolioManagerProps {
@@ -15,6 +17,7 @@ interface ServerPortfolioManagerProps {
 	};
 	portfolioId: string;
 	initialBonds: Bond[];
+	error?: string;
 }
 
 const ServerPortfolioManager: FC<ServerPortfolioManagerProps> = ({
@@ -22,6 +25,7 @@ const ServerPortfolioManager: FC<ServerPortfolioManagerProps> = ({
 	currencyRates,
 	initialBonds,
 	portfolioId,
+	error,
 }) => {
 	const [bonds, setBonds] = useState<Bond[]>([]);
 
@@ -45,8 +49,10 @@ const ServerPortfolioManager: FC<ServerPortfolioManagerProps> = ({
 	}, [initialBonds, portfolioId, setBonds, allBonds]);
 
 	useEffect(() => {
-		checkAndRemoveMaturedBonds();
-	}, [checkAndRemoveMaturedBonds]);
+		if (!error) {
+			checkAndRemoveMaturedBonds();
+		}
+	}, [checkAndRemoveMaturedBonds, error]);
 
 	const portfolioSummary = useMemo(() => calculatePortfolioSummary(bonds, currencyRates), [bonds, currencyRates]);
 
@@ -109,6 +115,21 @@ const ServerPortfolioManager: FC<ServerPortfolioManagerProps> = ({
 		},
 		[portfolioId, bonds]
 	);
+
+	if (error) {
+		return (
+			<div className="flex flex-col items-center justify-center min-h-[300px] text-red-600">
+				<p className="mb-2 text-lg font-semibold">Ошибка загрузки портфеля</p>
+				<p className="mb-4 max-w-lg text-center">{getErrorMessage(error)}</p>
+				<Button
+					onClick={() => window.location.reload()}
+					variant={"secondary"}
+				>
+					Попробовать снова
+				</Button>
+			</div>
+		);
+	}
 
 	return (
 		<div className="flex flex-col mx-10 space-y-4">

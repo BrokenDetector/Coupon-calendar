@@ -2,6 +2,7 @@
 
 import { fetchBonds } from "@/actions/bond-service";
 import { calculatePortfolioSummary } from "@/helpers/calculatePortfolioSummary";
+import { getErrorMessage } from "@/helpers/getErrorMessage";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { AlertCircle } from "lucide-react";
 import Link from "next/link";
@@ -9,6 +10,7 @@ import { FC, useCallback, useEffect, useMemo, useState } from "react";
 import CouponCalendar from "./Calendar/Calendar";
 import MyBondsCard from "./MyBondsCard";
 import SummaryCard from "./SummaryCard";
+import { Button } from "./ui/button";
 import { customToast } from "./ui/toast/toast-variants";
 import { toast } from "./ui/toast/use-toast";
 
@@ -17,9 +19,10 @@ interface LocalPortfolioManagerProps {
 	currencyRates: {
 		[key: string]: { rate: number; name: string; charCode: string };
 	};
+	error?: string;
 }
 
-const LocalPortfolioManager: FC<LocalPortfolioManagerProps> = ({ allBonds, currencyRates }) => {
+const LocalPortfolioManager: FC<LocalPortfolioManagerProps> = ({ allBonds, currencyRates, error }) => {
 	const [bonds, setBonds] = useState<Bond[]>([]);
 	const { getLocalData, setLocalData } = useLocalStorage("BONDSECIDS");
 
@@ -42,20 +45,23 @@ const LocalPortfolioManager: FC<LocalPortfolioManagerProps> = ({ allBonds, curre
 			const storedBonds = getLocalData();
 			if (storedBonds.length > 0) {
 				try {
-					const response = await customToast.promise(
-						fetchBonds(storedBonds.slice(0, 10), { includeCoupons: true }),
-						{
-							loading: "Загрузка облигаций...",
-							success: "Облигации загружены",
-							error: "Не удалось загрузить облигации",
-						}
-					);
-					if (response.data) {
+					const loadingToast = customToast.loading("Загрузка обллигаций...");
+
+					const response = await fetchBonds(storedBonds.slice(0, 10), { includeCoupons: true });
+					if (response.error) {
+						loadingToast.dismiss();
+
+						customToast.error(getErrorMessage(response.error));
+					} else if (response.data) {
+						loadingToast.dismiss();
+
+						customToast.success("Облигации загружены");
 						setBonds(response.data as Bond[]);
 						checkAndRemoveMaturedBonds();
 					}
 				} catch (error) {
 					console.error("❗Error loading bonds:", error);
+					customToast.error("Не удалось загрузить облигации");
 				}
 			}
 		};
@@ -151,6 +157,21 @@ const LocalPortfolioManager: FC<LocalPortfolioManagerProps> = ({ allBonds, curre
 		},
 		[setLocalData, bonds]
 	);
+
+	if (error) {
+		return (
+			<div className="flex flex-col items-center justify-center min-h-[300px] text-red-600">
+				<p className="mb-2 text-lg font-semibold">Ошибка загрузки портфеля</p>
+				<p className="mb-4 max-w-lg text-center">{getErrorMessage(error)}</p>
+				<Button
+					onClick={() => window.location.reload()}
+					variant={"secondary"}
+				>
+					Попробовать снова
+				</Button>
+			</div>
+		);
+	}
 
 	return (
 		<div className="flex flex-col mx-10 space-y-4">

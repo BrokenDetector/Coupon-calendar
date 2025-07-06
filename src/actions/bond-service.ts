@@ -45,7 +45,7 @@ export const fetchBonds = async (
 			input === "all" ? await fetchAllBonds(options.detailLevel!) : await fetchPortfolioBonds(input, options);
 
 		return { data };
-	} catch (error) {
+	} catch (error: any) {
 		console.error("[Bond Service] Error in fetchBonds:", error);
 		return {
 			error: error instanceof Error ? error.message : "Произошла неизвестная ошибка.",
@@ -64,7 +64,7 @@ const fetchAllBonds = async (detailLevel: "basic" | "full"): Promise<MOEXBondDat
 	);
 
 	if (!response.ok) {
-		throw new Error(`Failed to fetch bonds: ${response.status}`);
+		throw new Error(`[MOEX ERROR] Failed to fetch bonds: ${response.status}`);
 	}
 
 	const data = await response.json();
@@ -100,7 +100,7 @@ const fetchMarketData = async (secids: string[]): Promise<MOEXBondData[]> => {
 		)}`,
 		{ next: { revalidate: 3600 } }
 	);
-	if (!response.ok) throw new Error(`Failed to fetch data for bonds: ${secids.join(",")}`);
+	if (!response.ok) throw new Error(`[MOEX ERROR] Failed to fetch data for bonds: ${secids.join(",")}`);
 	return createBondsWithData(await response.json());
 };
 
@@ -109,6 +109,6 @@ const fetchCouponData = async (secid: string): Promise<MOEXBondCoupons & { SECID
 		`https://iss.moex.com/iss/securities/${secid}/bondization.json?iss.json=extended&iss.meta=off`,
 		{ next: { revalidate: 3600 } }
 	);
-	if (!response.ok) throw new Error(`Failed to fetch coupons for ${secid}`);
+	if (!response.ok) throw new Error(`[MOEX ERROR] Failed to fetch coupons for ${secid}`);
 	return createBondObjectWithCoupons(await response.json());
 };

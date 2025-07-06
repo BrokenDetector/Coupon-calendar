@@ -8,15 +8,12 @@ export default async function Home() {
 		fetchCurrencyRates(),
 	]);
 
-	if (currencyRatesResponse.error) {
-		console.error(currencyRatesResponse.error);
-	}
-
 	return (
 		<main>
 			<LocalPortfolioManager
 				allBonds={bondsList.data || []}
 				currencyRates={currencyRatesResponse.data || {}}
+				error={bondsList.error || currencyRatesResponse.error}
 			/>
 		</main>
 	);

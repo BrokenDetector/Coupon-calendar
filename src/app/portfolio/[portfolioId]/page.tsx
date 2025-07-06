@@ -40,25 +40,14 @@ const page: FC<pageProps> = async ({ params }) => {
 		fetchCurrencyRates(),
 	]);
 
-	if (portfolioBonds.error) {
-		console.error(`❗Error fetching bonds: ${portfolioBonds.error}`);
-	}
-
-	if (allBonds.error) {
-		console.error(`❗Error fetching all bonds: ${allBonds.error}`);
-	}
-
-	if (currencyRates.error) {
-		console.error(`❗Error fetching currency rates: ${currencyRates.error}`);
-	}
-
 	return (
 		<main>
 			<ServerPortfolioManager
 				portfolioId={portfolioId}
 				allBonds={allBonds.data || []}
 				currencyRates={currencyRates.data || {}}
-				initialBonds={(portfolioBonds.data as Bond[]) || []}
+				initialBonds={portfolioBonds.data as Bond[]}
+				error={portfolioBonds.error || allBonds.error || currencyRates.error}
 			/>
 		</main>
 	);

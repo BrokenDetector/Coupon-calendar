@@ -1,5 +1,6 @@
 import { fetchBonds } from "@/actions/bond-service";
 import AllBondsCard from "@/components/AllBondsCard";
+import { getErrorMessage } from "@/helpers/getErrorMessage";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -9,14 +10,18 @@ export const metadata: Metadata = {
 
 const page = async () => {
 	const allBonds = await fetchBonds("all", { checkAuth: false });
-	if (!allBonds.data) {
-		console.error("❗ERROR: ", allBonds.error);
-		return <div>Произошла ошибка при загрузке данных облигаций.</div>;
+	if (allBonds.error) {
+		return (
+			<div className="flex flex-col items-center justify-center min-h-[300px] text-red-600">
+				<p className="mb-2 text-lg font-semibold">Ошибка загрузки облигаций</p>
+				<p className="mb-4 max-w-lg text-center">{getErrorMessage(allBonds.error)}</p>
+			</div>
+		);
 	}
 
 	return (
 		<main className="flex flex-col items-center px-4 w-full">
-			<AllBondsCard allBonds={allBonds.data} />
+			<AllBondsCard allBonds={allBonds.data!} />
 		</main>
 	);
 };

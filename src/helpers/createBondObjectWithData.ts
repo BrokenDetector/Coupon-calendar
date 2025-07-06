@@ -39,6 +39,10 @@ const mapColumns = (columns: string[]): Record<string, number> => {
 };
 
 export const createBondsWithData = (data: any): MOEXBondData[] => {
+	if (!data.securities.data || data.securities.data.length === 0 || typeof data.securities.data[0][0] !== "string") {
+		throw new Error("[MOEX ERROR] No securities data found for the given SECID(s).");
+	}
+
 	const securitiesColumns = mapColumns(data.securities.columns);
 	const marketDataColumns = mapColumns(data.marketdata.columns);
 	const yieldDataColumns = mapColumns(data.marketdata_yields.columns);
