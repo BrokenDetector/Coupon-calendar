@@ -1,4 +1,4 @@
-import { fetchAllBondsFullData } from "@/actions/fetch-all-bonds-full-data";
+import { fetchBonds } from "@/actions/bond-service";
 import AllBondsCard from "@/components/AllBondsCard";
 import { Metadata } from "next";
 
@@ -8,14 +8,14 @@ export const metadata: Metadata = {
 };
 
 const page = async () => {
-	const allBonds = await fetchAllBondsFullData();
+	const allBonds = await fetchBonds("all", { checkAuth: false });
 	if (!allBonds.data) {
 		console.error("❗ERROR: ", allBonds.error);
 		return <div>Произошла ошибка при загрузке данных облигаций.</div>;
 	}
 
 	return (
-		<main className="w-full flex flex-col items-center px-4">
+		<main className="flex flex-col items-center px-4 w-full">
 			<AllBondsCard allBonds={allBonds.data} />
 		</main>
 	);

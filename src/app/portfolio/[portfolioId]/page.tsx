@@ -1,5 +1,4 @@
-import { fetchAllBonds } from "@/actions/fetch-all-bonds-sec-only";
-import { fetchBonds } from "@/actions/fetch-bonds";
+import { fetchBonds } from "@/actions/bond-service";
 import { fetchCurrencyRates } from "@/actions/fetch-currency-rates";
 import ServerPortfolioManager from "@/components/ServerPortfolioManager";
 import { authOptions } from "@/lib/auth";
@@ -36,13 +35,13 @@ const page: FC<pageProps> = async ({ params }) => {
 	}
 
 	const [portfolioBonds, allBonds, currencyRates] = await Promise.all([
-		fetchBonds(portfolio.bonds, true),
-		fetchAllBonds(),
+		fetchBonds(portfolio.bonds, { includeCoupons: true }),
+		fetchBonds("all", { detailLevel: "basic" }),
 		fetchCurrencyRates(),
 	]);
 
-	if (portfolioBonds instanceof Error) {
-		console.error(`❗Error fetching bonds: ${portfolioBonds.message}`);
+	if (portfolioBonds.error) {
+		console.error(`❗Error fetching bonds: ${portfolioBonds.error}`);
 	}
 
 	if (allBonds.error) {
@@ -59,7 +58,7 @@ const page: FC<pageProps> = async ({ params }) => {
 				portfolioId={portfolioId}
 				allBonds={allBonds.data || []}
 				currencyRates={currencyRates.data || {}}
-				initialBonds={portfolioBonds}
+				initialBonds={(portfolioBonds.data as Bond[]) || []}
 			/>
 		</main>
 	);

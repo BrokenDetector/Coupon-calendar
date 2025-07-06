@@ -104,8 +104,4 @@ interface VerificationToken {
 	expires: Date;
 }
 
-// API Response Types
 type APIResponse<T> = { data: T; error?: never } | { data?: never; error: string };
-
-type BondAPIResponse = APIResponse<Bond[]>;
-type PortfolioAPIResponse = APIResponse<DBPortfolio>;

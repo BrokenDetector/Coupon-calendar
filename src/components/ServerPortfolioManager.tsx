@@ -111,8 +111,8 @@ const ServerPortfolioManager: FC<ServerPortfolioManagerProps> = ({
 	);
 
 	return (
-		<div className="flex flex-col space-y-4 mx-10">
-			<div className="grid grid-cols-1 xl:grid-cols-4 gap-3">
+		<div className="flex flex-col mx-10 space-y-4">
+			<div className="grid grid-cols-1 gap-3 xl:grid-cols-4">
 				<SummaryCard portfolioSummary={portfolioSummary} />
 				<MyBondsCard
 					bonds={bonds}

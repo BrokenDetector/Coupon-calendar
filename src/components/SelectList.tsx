@@ -1,6 +1,6 @@
 "use client";
 
-import { fetchBonds } from "@/actions/fetch-bonds";
+import { fetchBonds } from "@/actions/bond-service";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { Search } from "lucide-react";
 import { FC, memo, useEffect, useMemo, useRef, useState } from "react";
@@ -39,10 +39,13 @@ const SelectList: FC<SelectListProps> = memo(({ options, onBondUpdate, bonds }) 
 	});
 
 	const handleSelect = async (bond: MOEXBondData) => {
-		const selectedBond = await fetchBonds([{ SECID: bond.SECID, quantity: 1, purchasePrice: null }], true);
+		const selectedBond = await fetchBonds([{ SECID: bond.SECID, quantity: 1, purchasePrice: null }], {
+			includeCoupons: true,
+			checkAuth: false,
+		});
 		const bondExist = bonds.find((b) => b.SECID === bond.SECID);
 		const quantity = bondExist ? bondExist.quantity! + 1 : 1;
-		const bondWithQuantity = { ...selectedBond[0], quantity };
+		const bondWithQuantity = { ...selectedBond.data![0], quantity };
 
 		setIsListVisible(false);
 		onBondUpdate(bondWithQuantity);

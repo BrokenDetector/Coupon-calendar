@@ -1,9 +1,12 @@
-import { fetchAllBonds } from "@/actions/fetch-all-bonds-sec-only";
+import { fetchBonds } from "@/actions/bond-service";
 import { fetchCurrencyRates } from "@/actions/fetch-currency-rates";
 import LocalPortfolioManager from "@/components/LocalPortfolioManager";
 
 export default async function Home() {
-	const [bondsList, currencyRatesResponse] = await Promise.all([fetchAllBonds(), fetchCurrencyRates()]);
+	const [bondsList, currencyRatesResponse] = await Promise.all([
+		fetchBonds("all", { detailLevel: "basic", checkAuth: false }),
+		fetchCurrencyRates(),
+	]);
 
 	if (currencyRatesResponse.error) {
 		console.error(currencyRatesResponse.error);

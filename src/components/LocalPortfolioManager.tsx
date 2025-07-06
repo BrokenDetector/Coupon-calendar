@@ -1,6 +1,6 @@
 "use client";
 
-import { fetchBonds } from "@/actions/fetch-bonds";
+import { fetchBonds } from "@/actions/bond-service";
 import { calculatePortfolioSummary } from "@/helpers/calculatePortfolioSummary";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { AlertCircle } from "lucide-react";
@@ -42,13 +42,16 @@ const LocalPortfolioManager: FC<LocalPortfolioManagerProps> = ({ allBonds, curre
 			const storedBonds = getLocalData();
 			if (storedBonds.length > 0) {
 				try {
-					const response = await customToast.promise(fetchBonds(storedBonds.slice(0, 10), true), {
-						loading: "Загрузка облигаций...",
-						success: "Облигации загружены",
-						error: "Не удалось загрузить облигации",
-					});
-					if (!(response instanceof Error)) {
-						setBonds(response);
+					const response = await customToast.promise(
+						fetchBonds(storedBonds.slice(0, 10), { includeCoupons: true }),
+						{
+							loading: "Загрузка облигаций...",
+							success: "Облигации загружены",
+							error: "Не удалось загрузить облигации",
+						}
+					);
+					if (response.data) {
+						setBonds(response.data as Bond[]);
 						checkAndRemoveMaturedBonds();
 					}
 				} catch (error) {
@@ -101,21 +104,21 @@ const LocalPortfolioManager: FC<LocalPortfolioManagerProps> = ({ allBonds, curre
 						<p>
 							<Link
 								href="/auth?view=register"
-								className="underline font-bold"
+								className="font-bold underline"
 							>
 								Зарегистрируйтесь
 							</Link>{" "}
 							или{" "}
 							<Link
 								href="/auth?view=login"
-								className="underline font-bold"
+								className="font-bold underline"
 							>
 								войдите в аккаунт
 							</Link>{" "}
 							для увеличения лимита.
 						</p>
 					),
-					icon: <AlertCircle className="size-5 text-yellow-500 dark:text-yellow-400" />,
+					icon: <AlertCircle className="text-yellow-500 size-5 dark:text-yellow-400" />,
 					className: "border-yellow-500 dark:border-yellow-400",
 					duration: 10000,
 				});
@@ -150,8 +153,8 @@ const LocalPortfolioManager: FC<LocalPortfolioManagerProps> = ({ allBonds, curre
 	);
 
 	return (
-		<div className="flex flex-col space-y-4 mx-10">
-			<div className="grid grid-cols-1 xl:grid-cols-4 gap-3">
+		<div className="flex flex-col mx-10 space-y-4">
+			<div className="grid grid-cols-1 gap-3 xl:grid-cols-4">
 				<SummaryCard portfolioSummary={portfolioSummary} />
 				<MyBondsCard
 					bonds={bonds}
