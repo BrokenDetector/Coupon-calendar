@@ -58,7 +58,7 @@ export const fetchBonds = async (
  */
 const fetchAllBonds = async (detailLevel: "basic" | "full"): Promise<MOEXBondData[]> => {
 	const response = await fetch(
-		`${BASE_MOEX_URL}/securities.json?iss.meta=off${
+		`${BASE_MOEX_URL}/securities.json?marketprice_board=1&iss.meta=off${
 			detailLevel === "basic" ? "&securities.columns=SECID,SHORTNAME,ISIN,FACEUNIT" : ""
 		}`
 	);
@@ -95,7 +95,7 @@ const fetchPortfolioBonds = async (bonds: BondRequestInput[], options: FetchBond
 
 const fetchMarketData = async (secids: string[]): Promise<MOEXBondData[]> => {
 	const response = await fetch(
-		`${BASE_MOEX_URL}/securities.json?iss.meta=off&iss.only=securities,marketdata,marketdata_yields&securities=${secids.join(
+		`${BASE_MOEX_URL}/securities.json?marketprice_board=1&iss.meta=off&iss.only=securities,marketdata,marketdata_yields&securities=${secids.join(
 			","
 		)}`,
 		{ next: { revalidate: 3600 } }
