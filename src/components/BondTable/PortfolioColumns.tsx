@@ -27,8 +27,6 @@ const calculateYearsToMaturity = (maturityDate: string): number => {
 	return diffTime / (1000 * 60 * 60 * 24 * 365.25);
 };
 
-
-
 export const columns: ColumnDef<ExtendedBond>[] = [
 	{
 		accessorKey: "SHORTNAME",
@@ -37,8 +35,8 @@ export const columns: ColumnDef<ExtendedBond>[] = [
 		cell: ({ row }) => {
 			const bond = row.original;
 			return (
-				<div className="flex flex-col text-left items-start justify-start px-9 w-full">
-					<span className="font-bold text-sm">{bond.SHORTNAME}</span>
+				<div className="flex flex-col justify-start items-start px-9 w-full text-left">
+					<span className="text-sm font-bold">{bond.SHORTNAME}</span>
 					<span className="text-xs text-muted-foreground">{bond.ISIN}</span>
 				</div>
 			);
@@ -113,7 +111,7 @@ export const columns: ColumnDef<ExtendedBond>[] = [
 							bond.handlePriceChange(bond.SECID, value.replace(",", "."));
 						}
 					}}
-					className="w-16"
+					className="w-28"
 					onKeyDown={(e) => {
 						if (e.key === "Enter") {
 							(e.target as HTMLElement).blur();
@@ -219,7 +217,7 @@ export const columns: ColumnDef<ExtendedBond>[] = [
 			const periodB = rowB.original.COUPONFREQUENCY || 0;
 			return periodA - periodB;
 		},
-		filterFn:(row, columnId, filterValue) => {
+		filterFn: (row, columnId, filterValue) => {
 			if (!filterValue?.length) return true;
 			return filterValue.some((freq: string) => {
 				const frequencyRange = COUPON_FREQUENCIES.find((f) => f.value === parseInt(freq))?.range;
@@ -414,7 +412,7 @@ export const columns: ColumnDef<ExtendedBond>[] = [
 							(e.target as HTMLElement).blur();
 						}
 					}}
-					className="w-12"
+					className="w-20"
 					aria-label={`Количество ${bond.SHORTNAME}`}
 				/>
 			);
@@ -435,7 +433,7 @@ export const columns: ColumnDef<ExtendedBond>[] = [
 				<Button
 					onClick={() => bond.handleBondRemove(bond.SECID)}
 					variant={"ghost"}
-					className="text-destructive hover:text-destructive/90 rounded-lg h-fit"
+					className="rounded-lg text-destructive hover:text-destructive/90 h-fit"
 					aria-label={`Удалить ${bond.SHORTNAME} из портфеля`}
 				>
 					<Trash className="size-4" />

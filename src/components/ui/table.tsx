@@ -7,10 +7,10 @@ interface ExtendedTableProps extends React.HTMLAttributes<HTMLTableElement> {
 }
 
 const Table = React.forwardRef<HTMLTableElement, ExtendedTableProps>(({ className, divClassname, ...props }, ref) => (
-	<div className={cn("relative w-full overflow-auto", divClassname)}>
+	<div className={cn("overflow-auto relative w-full", divClassname)}>
 		<table
 			ref={ref}
-			className={cn("w-full caption-bottom text-sm", className)}
+			className={cn("w-full text-sm caption-bottom", className)}
 			{...props}
 		/>
 	</div>
