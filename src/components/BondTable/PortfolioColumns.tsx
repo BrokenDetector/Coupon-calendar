@@ -111,7 +111,7 @@ export const columns: ColumnDef<ExtendedBond>[] = [
 							bond.handlePriceChange(bond.SECID, value.replace(",", "."));
 						}
 					}}
-					className="w-28"
+					className="w-18"
 					onKeyDown={(e) => {
 						if (e.key === "Enter") {
 							(e.target as HTMLElement).blur();
@@ -412,7 +412,7 @@ export const columns: ColumnDef<ExtendedBond>[] = [
 							(e.target as HTMLElement).blur();
 						}
 					}}
-					className="w-20"
+					className="w-14"
 					aria-label={`Количество ${bond.SHORTNAME}`}
 				/>
 			);
