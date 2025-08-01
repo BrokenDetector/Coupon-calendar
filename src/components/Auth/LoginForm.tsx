@@ -74,6 +74,7 @@ const LoginForm: FC = () => {
 										placeholder="Ваш адрес электронной почты"
 										type="email"
 										disabled={isPending}
+										className="bg-muted"
 									/>
 								</FormControl>
 								<FormMessage />
@@ -93,6 +94,7 @@ const LoginForm: FC = () => {
 										placeholder="Введите пароль"
 										type="password"
 										disabled={isPending}
+										className="bg-muted"
 									/>
 								</FormControl>
 								<FormMessage />
@@ -107,7 +109,7 @@ const LoginForm: FC = () => {
 				>
 					{isPending ? (
 						<>
-							<Loader className="mr-2 h-4 w-4 animate-spin" />
+							<Loader className="mr-2 w-4 h-4 animate-spin" />
 							Вход...
 						</>
 					) : (
