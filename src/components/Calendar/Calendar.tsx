@@ -8,7 +8,7 @@ import { addMonths, getYear, isSameDay, parseISO, startOfYear } from "date-fns";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { FC, useCallback, useMemo, useState } from "react";
+import { FC, useCallback, useDeferredValue, useMemo, useState } from "react";
 import MonthCalendar from "./MonthCalendar";
 
 interface CouponCalendarProps {
@@ -22,14 +22,15 @@ const CouponCalendar: FC<CouponCalendarProps> = ({ bonds }) => {
 	const [bondsForSelectedDate, setBondsForSelectedDate] = useState<Bond[]>([]);
 	const [totalCouponsByCurrency, setTotalCouponsByCurrency] = useState<Record<string, number>>({});
 	const session = useSession();
+	const deferredBonds = useDeferredValue(bonds);
 
 	const bondsSignature = useMemo(() => {
-		return bonds.map((bond) => `${bond.SECID}:${bond.quantity}`).join("|");
-	}, [bonds]);
+		return deferredBonds.map((bond) => `${bond.SECID}:${bond.quantity}`).join("|");
+	}, [deferredBonds]);
 
 	const highlightedDates = useMemo(() => {
-		if (bonds.length > 0) {
-			return bonds.reduce((dates: string[], bond) => {
+		if (deferredBonds.length > 0) {
+			return deferredBonds.reduce((dates: string[], bond) => {
 				bond.COUPONDATES?.forEach((date) => dates.push(date));
 				bond.AMORTIZATIONDATES?.forEach((date) => dates.push(date));
 				return dates;
