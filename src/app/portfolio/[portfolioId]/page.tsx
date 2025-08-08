@@ -21,8 +21,6 @@ const page: FC<pageProps> = async ({ params }) => {
 
 	const user = session!.user;
 
-	// `params` should be awaited before using its properties.
-	// https://nextjs.org/docs/messages/sync-dynamic-apis
 	const { portfolioId } = await params;
 	const portfolio = (await getPortfolio(portfolioId)) as DBPortfolio;
 
@@ -36,7 +34,7 @@ const page: FC<pageProps> = async ({ params }) => {
 
 	const [portfolioBonds, allBonds, currencyRates] = await Promise.all([
 		fetchBonds(portfolio.bonds, { includeCoupons: true }),
-		fetchBonds("all", { detailLevel: "basic" }),
+		fetchBonds("all", { detailLevel: "basic", checkAuth: false }),
 		fetchCurrencyRates(),
 	]);
 
