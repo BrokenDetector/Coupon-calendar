@@ -1,6 +1,7 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 import { format, isSameDay } from "date-fns";
 import { ru } from "date-fns/locale";
 import { FC, memo } from "react";
@@ -36,39 +37,38 @@ const MonthCalendar: FC<MonthCalendarProps> = memo(({ date, highlightedDates, on
 	return (
 		<Card className="w-full">
 			<CardHeader className="p-2">
-				<CardTitle className="text-center text-sm font-semibold">
+				<CardTitle className="text-sm font-semibold text-center">
 					{capitalizeFirstLetter(format(date, "LLLL yyyy", { locale: ru }))}
 				</CardTitle>
 			</CardHeader>
 			<CardContent className="p-2">
 				<div className="grid grid-cols-7 gap-1 text-center">
-					{daysOfWeek.map((day) => (
-						<div
+					{daysOfWeek.map((day, index) => (
+						<span
 							key={day}
-							className={`font-medium ${
-								day === "Sat" || day === "Sun" ? "text-destructive" : "text-muted-foreground"
-							}`}
+							className={cn("font-medium", index >= 5 ? "text-destructive" : "text-muted-foreground")}
 						>
 							{day}
-						</div>
+						</span>
 					))}
 					{calendarDays.map((day, index) => {
 						const isWeekend = day.getDay() === 0 || day.getDay() === 6;
 						const isHighlighted = highlightedDates.some((d) => isSameDay(d, day));
+
 						return (
-							<div
+							<button
 								key={index}
-								className={`p-1 cursor-pointer ${
+								className={`p-1 rounded cursor-pointer text-center ${
 									day.getMonth() !== date.getMonth()
 										? "text-muted-foreground"
 										: isWeekend
 										? "text-destructive"
 										: ""
-								} ${isHighlighted ? "bg-primary/70 hover:bg-primary/60" : ""}`}
+								} ${isHighlighted ? "bg-primary/80 hover:bg-primary/70" : ""}`}
 								onClick={() => onDayClick(day)}
 							>
-								<div>{format(day, "d")}</div>
-							</div>
+								{format(day, "d")}
+							</button>
 						);
 					})}
 				</div>
