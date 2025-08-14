@@ -106,7 +106,7 @@ const fetchMarketData = async (secids: string[]): Promise<MOEXBondData[]> => {
 
 const fetchCouponData = async (secid: string): Promise<MOEXBondCoupons & { SECID: string }> => {
 	const response = await fetch(
-		`https://iss.moex.com/iss/securities/${secid}/bondization.json?iss.json=extended&iss.meta=off`,
+		`https://iss.moex.com/iss/securities/${secid}/bondization.json?iss.json=extended&iss.meta=off&limit=off`,
 		{ next: { revalidate: 3600 } }
 	);
 	if (!response.ok) throw new Error(`[MOEX ERROR] Failed to fetch coupons for ${secid}`);

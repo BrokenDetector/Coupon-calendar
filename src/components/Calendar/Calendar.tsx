@@ -3,16 +3,20 @@
 import CouponModal from "@/components/Calendar/CouponModal";
 import { Button } from "@/components/ui/button";
 import { getCurrencySymbol } from "@/helpers/getCurrencySymbol";
-import { sumCouponsByCurrency } from "@/helpers/sumCouponsByCurrency";
-import { addMonths, getYear, isSameDay, parseISO, startOfYear } from "date-fns";
+import { addMonths, format, getYear, parseISO, startOfYear } from "date-fns";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { FC, useCallback, useDeferredValue, useMemo, useState } from "react";
+import { FC, useCallback, useDeferredValue, useEffect, useMemo, useState } from "react";
 import MonthCalendar from "./MonthCalendar";
 
 interface CouponCalendarProps {
 	bonds: Bond[];
+}
+interface Holiday {
+	date: string;
+	localName: string;
+	name: string;
 }
 
 const CouponCalendar: FC<CouponCalendarProps> = ({ bonds }) => {
@@ -21,26 +25,127 @@ const CouponCalendar: FC<CouponCalendarProps> = ({ bonds }) => {
 	const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 	const [bondsForSelectedDate, setBondsForSelectedDate] = useState<Bond[]>([]);
 	const [totalCouponsByCurrency, setTotalCouponsByCurrency] = useState<Record<string, number>>({});
+	const [holidays, setHolidays] = useState<Record<number, Holiday[]>>({});
 	const session = useSession();
 	const deferredBonds = useDeferredValue(bonds);
+
+	const fetchHolidays = async (year: number): Promise<Holiday[]> => {
+		try {
+			const response = await fetch(`https://date.nager.at/api/v3/PublicHolidays/${year}/RU`);
+			if (!response.ok) throw new Error(`Failed to fetch holidays for ${year}`);
+			return await response.json();
+		} catch (error) {
+			console.error("Error fetching holidays:", error);
+			return [];
+		}
+	};
+
+	useEffect(() => {
+		const loadHolidays = async () => {
+			const missingYears: number[] = [];
+			if (!holidays[currentYear]) missingYears.push(currentYear);
+			if (!holidays[currentYear + 1]) missingYears.push(currentYear + 1);
+
+			if (missingYears.length > 0) {
+				const results = await Promise.all(missingYears.map((y) => fetchHolidays(y)));
+				setHolidays((prev) => {
+					const next = { ...prev };
+					missingYears.forEach((y, i) => {
+						next[y] = results[i];
+					});
+					return next;
+				});
+			}
+		};
+
+		loadHolidays();
+	}, [currentYear, holidays]);
+
+	const adjustPaymentDate = (dateStr: string): Date => {
+		const date = parseISO(dateStr);
+
+		const isHoliday = (d: Date) => {
+			const y = d.getFullYear();
+			const yearHolidays = holidays[y] || [];
+			const localDate = format(d, "yyyy-MM-dd");
+			return yearHolidays.some((h) => h.date === localDate);
+		};
+
+		const isWeekend = (d: Date) => {
+			const day = d.getDay();
+			return day === 0 || day === 6;
+		};
+
+		let adjustedDate = new Date(date);
+		while (isHoliday(adjustedDate) || isWeekend(adjustedDate)) {
+			adjustedDate.setDate(adjustedDate.getDate() + 1);
+		}
+
+		return adjustedDate;
+	};
 
 	const bondsSignature = useMemo(() => {
 		return deferredBonds.map((bond) => `${bond.SECID}:${bond.quantity}`).join("|");
 	}, [deferredBonds]);
 
-	const highlightedDates = useMemo(() => {
-		if (deferredBonds.length > 0) {
-			return deferredBonds.reduce((dates: string[], bond) => {
-				bond.COUPONDATES?.forEach((date) => dates.push(date));
-				bond.AMORTIZATIONDATES?.forEach((date) => dates.push(date));
-				return dates;
-			}, []);
+	const { highlightedDates, dayIndex, dayCurrencyTotals, monthCurrencyTotals } = useMemo(() => {
+		const dayIndex: Record<string, Bond[]> = {};
+		const dayCurrencyTotals: Record<string, Record<string, number>> = {};
+		const monthCurrencyTotals: Record<string, Record<string, number>> = {};
+		const dateSeen = new Set<string>();
+
+		const addTotal = (
+			bucket: Record<string, Record<string, number>>,
+			key: string,
+			currency: string,
+			value: number
+		) => {
+			if (!bucket[key]) bucket[key] = {};
+			if (!bucket[key][currency]) bucket[key][currency] = 0;
+			bucket[key][currency] += value;
+		};
+
+		for (const bond of deferredBonds) {
+			// Coupons
+			bond.COUPONDATES?.forEach((dateStr, idx) => {
+				const adjusted = adjustPaymentDate(dateStr);
+				const dateKey = format(adjusted, "yyyy-MM-dd");
+				const monthKey = format(adjusted, "yyyy-MM");
+
+				if (!dayIndex[dateKey]) dayIndex[dateKey] = [];
+				if (!dayIndex[dateKey].some((b) => b.SECID)) {
+					dayIndex[dateKey].push(bond);
+				}
+
+				const currency = bond.FACEUNIT;
+				const value = (bond.COUPONVALUES?.[idx] || 0) * (bond.quantity || 1);
+				addTotal(dayCurrencyTotals, dateKey, currency, value);
+				addTotal(monthCurrencyTotals, monthKey, currency, value);
+				dateSeen.add(dateKey);
+			});
+			// Amortizations
+			bond.AMORTIZATIONDATES?.forEach((dateStr, idx) => {
+				const adjusted = adjustPaymentDate(dateStr);
+				const dateKey = format(adjusted, "yyyy-MM-dd");
+				const monthKey = format(adjusted, "yyyy-MM");
+
+				if (!dayIndex[dateKey]) dayIndex[dateKey] = [];
+				if (!dayIndex[dateKey].some((b) => b.SECID)) {
+					dayIndex[dateKey].push(bond);
+				}
+
+				const currency = bond.FACEUNIT;
+				const value = (bond.AMORTIZATIONVALUES?.[idx]?.value || 0) * (bond.quantity || 1);
+				addTotal(dayCurrencyTotals, dateKey, currency, value);
+				addTotal(monthCurrencyTotals, monthKey, currency, value);
+				dateSeen.add(dateKey);
+			});
 		}
-		return [];
+
+		const highlightedDates = Array.from(dateSeen).map((k) => parseISO(k));
+		return { highlightedDates, dayIndex, dayCurrencyTotals, monthCurrencyTotals };
 		// eslint-disable-next-line
 	}, [bondsSignature]);
-
-	const parsedHighlightedDates = useMemo(() => highlightedDates.map((date) => parseISO(date)), [highlightedDates]);
 
 	const months = useMemo(
 		() => Array.from({ length: 12 }, (_, i) => addMonths(startOfYear(new Date(currentYear, 0)), i)),
@@ -49,23 +154,16 @@ const CouponCalendar: FC<CouponCalendarProps> = ({ bonds }) => {
 
 	const handleDayClick = useCallback(
 		(date: Date) => {
-			const bondsWithCoupons = bonds.filter(
-				(bond) =>
-					bond.COUPONDATES?.some((couponDate) => isSameDay(parseISO(couponDate), date)) ||
-					bond.AMORTIZATIONDATES?.some((amortizationDate) => isSameDay(parseISO(amortizationDate), date))
-			);
-
-			const totalsByCurrency = sumCouponsByCurrency(bondsWithCoupons, (couponDate) =>
-				isSameDay(couponDate, date)
-			);
+			const dateKey = format(date, "yyyy-MM-dd");
+			const bondsWithPayments = dayIndex[dateKey] || [];
+			const totalsByCurrency = dayCurrencyTotals[dateKey] || {};
 
 			setSelectedDate(date);
-			setBondsForSelectedDate(bondsWithCoupons);
+			setBondsForSelectedDate(bondsWithPayments);
 			setTotalCouponsByCurrency(totalsByCurrency);
 			setIsModalOpen(true);
 		},
-		// eslint-disable-next-line
-		[bondsSignature]
+		[dayIndex, dayCurrencyTotals]
 	);
 
 	const changeYear = useCallback((increment: number) => {
@@ -74,12 +172,10 @@ const CouponCalendar: FC<CouponCalendarProps> = ({ bonds }) => {
 
 	const calculateMonthlyTotal = useCallback(
 		(month: Date) => {
-			return sumCouponsByCurrency(
-				bonds,
-				(date) => date.getFullYear() === month.getFullYear() && date.getMonth() === month.getMonth()
-			);
+			const monthKey = format(month, "yyyy-MM");
+			return monthCurrencyTotals[monthKey] || {};
 		},
-		[bonds]
+		[monthCurrencyTotals]
 	);
 
 	return (
@@ -104,7 +200,7 @@ const CouponCalendar: FC<CouponCalendarProps> = ({ bonds }) => {
 						>
 							<MonthCalendar
 								date={month}
-								highlightedDates={parsedHighlightedDates}
+								highlightedDates={highlightedDates}
 								onDayClick={handleDayClick}
 							/>
 							<h5 className="px-4 pb-4 text-sm font-bold text-balance">
@@ -150,6 +246,7 @@ const CouponCalendar: FC<CouponCalendarProps> = ({ bonds }) => {
 				bondsForSelectedDate={bondsForSelectedDate}
 				totalCouponsByCurrency={totalCouponsByCurrency}
 				onClose={() => setIsModalOpen(false)}
+				adjustPaymentDate={adjustPaymentDate}
 			/>
 		</div>
 	);

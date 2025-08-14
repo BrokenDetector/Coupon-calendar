@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { getCurrencySymbol } from "@/helpers/getCurrencySymbol";
-import { format, isSameDay, parseISO } from "date-fns";
+import { format, isSameDay } from "date-fns";
 import { ru } from "date-fns/locale";
 import { FC } from "react";
 
@@ -11,6 +11,7 @@ interface CouponModalProps {
 	bondsForSelectedDate: Bond[];
 	totalCouponsByCurrency: Record<string, number>;
 	onClose: () => void;
+	adjustPaymentDate: (dateStr: string) => Date;
 }
 
 const CouponModal: FC<CouponModalProps> = ({
@@ -19,6 +20,7 @@ const CouponModal: FC<CouponModalProps> = ({
 	bondsForSelectedDate,
 	totalCouponsByCurrency,
 	onClose,
+	adjustPaymentDate,
 }) => {
 	return (
 		<Dialog
@@ -36,12 +38,13 @@ const CouponModal: FC<CouponModalProps> = ({
 						<>
 							{bondsForSelectedDate.map((bond) => {
 								const couponIndex =
-									bond.COUPONDATES?.findIndex((date) => isSameDay(parseISO(date), selectedDate!)) ??
-									-1;
+									bond.COUPONDATES?.findIndex((date) =>
+										isSameDay(adjustPaymentDate(date), selectedDate!)
+									) ?? -1;
 
 								const amortizationIndex =
 									bond.AMORTIZATIONDATES?.findIndex((date) =>
-										isSameDay(parseISO(date), selectedDate!)
+										isSameDay(adjustPaymentDate(date), selectedDate!)
 									) ?? -1;
 
 								const hasCoupon = couponIndex !== -1;
