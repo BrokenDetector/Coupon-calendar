@@ -113,7 +113,7 @@ const CouponCalendar: FC<CouponCalendarProps> = ({ bonds }) => {
 				const monthKey = format(adjusted, "yyyy-MM");
 
 				if (!dayIndex[dateKey]) dayIndex[dateKey] = [];
-				if (!dayIndex[dateKey].some((b) => b.SECID)) {
+				if (!dayIndex[dateKey].some((b) => b.SECID === bond.SECID)) {
 					dayIndex[dateKey].push(bond);
 				}
 
@@ -130,7 +130,7 @@ const CouponCalendar: FC<CouponCalendarProps> = ({ bonds }) => {
 				const monthKey = format(adjusted, "yyyy-MM");
 
 				if (!dayIndex[dateKey]) dayIndex[dateKey] = [];
-				if (!dayIndex[dateKey].some((b) => b.SECID)) {
+				if (!dayIndex[dateKey].some((b) => b.SECID === bond.SECID)) {
 					dayIndex[dateKey].push(bond);
 				}
 
