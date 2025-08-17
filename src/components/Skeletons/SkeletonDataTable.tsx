@@ -3,8 +3,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 const SkeletonDataTable = () => {
 	return (
-		<Card className="col-span-4 xl:col-span-3 rounded-lg">
-			<CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+		<Card className="col-span-5 rounded-lg xl:col-span-4">
+			<CardHeader className="flex flex-col justify-between sm:flex-row sm:items-center">
 				<CardTitle className="text-2xl font-bold">Мои облигации</CardTitle>
 				<div className="flex flex-col gap-4">
 					<Skeleton className="h-8 w-full sm:w-[200px]" />
@@ -13,8 +13,8 @@ const SkeletonDataTable = () => {
 			</CardHeader>
 
 			<CardContent>
-				<div className="flex flex-row gap-2 sm:items-center sm:justify-between w-full mb-4">
-					<div className="flex flex-1 items-center gap-2 flex-wrap">
+				<div className="flex flex-row gap-2 mb-4 w-full sm:items-center sm:justify-between">
+					<div className="flex flex-wrap flex-1 gap-2 items-center">
 						<Skeleton className="h-8 max-w-full sm:max-w-sm min-w-[150px] flex-1" />
 						<Skeleton className="size-8" />
 					</div>
@@ -26,13 +26,13 @@ const SkeletonDataTable = () => {
 				<div className="rounded-md border">
 					<div className="relative">
 						{/* Header row */}
-						<div className="flex w-full p-4 gap-4">
+						<div className="flex gap-4 p-4 w-full">
 							{Array(6)
 								.fill(null)
 								.map((_, i) => (
 									<Skeleton
 										key={i}
-										className="h-4 flex-1"
+										className="flex-1 h-4"
 									/>
 								))}
 						</div>
@@ -43,14 +43,14 @@ const SkeletonDataTable = () => {
 							.map((_, i) => (
 								<div
 									key={i}
-									className="flex w-full p-4 gap-4"
+									className="flex gap-4 p-4 w-full"
 								>
 									{Array(6)
 										.fill(null)
 										.map((_, j) => (
 											<Skeleton
 												key={j}
-												className="h-10 flex-1"
+												className="flex-1 h-10"
 											/>
 										))}
 								</div>

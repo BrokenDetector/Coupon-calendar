@@ -3,31 +3,31 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 const SkeletonSummaryCard = () => {
 	return (
-		<Card className="col-span-4 xl:col-span-1 rounded-lg">
+		<Card className="col-span-4 rounded-lg xl:col-span-1">
 			<CardHeader>
-				<CardTitle className="text-xl sm:text-2xl font-bold">Общая информация по портфелю</CardTitle>
+				<CardTitle className="font-bold sm:text-xl">Общая информация по портфелю</CardTitle>
 			</CardHeader>
 			<CardContent>
-				<div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-1 gap-6">
+				<div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-1">
 					<div>
-						<p className="text-sm sm:text-md font-semibold text-muted-foreground">Сумма инвестиций</p>
-						<Skeleton className="h-7 sm:h-8 mt-1 w-full" />
+						<p className="text-sm font-semibold sm:text-md text-muted-foreground">Сумма инвестиций</p>
+						<Skeleton className="mt-1 w-full h-7" />
 					</div>
 
 					<div>
-						<p className="text-sm sm:text-md font-semibold text-muted-foreground">Текущая стоимость</p>
-						<div className="space-y-1 mt-1">
-							<Skeleton className="h-7 sm:h-8 w-full" />
+						<p className="text-sm font-semibold sm:text-md text-muted-foreground">Текущая стоимость</p>
+						<div className="mt-1 space-y-1">
+							<Skeleton className="w-full h-7" />
 						</div>
 					</div>
 
 					<div className="flex flex-col">
-						<div className="flex items-center gap-1">
-							<p className="text-sm sm:text-md font-semibold text-muted-foreground">
+						<div className="flex gap-1 items-center">
+							<p className="text-sm font-semibold sm:text-md text-muted-foreground">
 								Средняя текущая доходность
 							</p>
 						</div>
-						<Skeleton className="h-7 sm:h-8 mt-1 w-full" />
+						<Skeleton className="mt-1 w-full h-7" />
 					</div>
 				</div>
 			</CardContent>

@@ -34,9 +34,9 @@ const MyBondsCard = ({
 	}));
 
 	return (
-		<Card className="rounded-lg col-span-4 xl:col-span-3">
-			<CardHeader className="flex flex-col sm:flex-row sm:items-center justify-between">
-				<CardTitle className="text-2xl font-bold">Мои облигации</CardTitle>
+		<Card className="col-span-5 rounded-lg xl:col-span-4">
+			<CardHeader className="flex flex-col justify-between sm:flex-row sm:items-center">
+				<CardTitle className="text-xl font-bold">Мои облигации</CardTitle>
 				<div>
 					<SelectList
 						options={allBonds}
@@ -46,7 +46,7 @@ const MyBondsCard = ({
 					<Button
 						variant="link"
 						asChild
-						className="ml-4 text-foreground text-sm p-0"
+						className="p-0 ml-4 text-xs text-foreground"
 					>
 						<Link href="/bonds">Список всех облигаций</Link>
 					</Button>

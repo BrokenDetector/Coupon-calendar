@@ -184,7 +184,7 @@ const CouponCalendar: FC<CouponCalendarProps> = ({ bonds }) => {
 				<Button onClick={() => changeYear(-1)}>
 					<ChevronLeft className="w-4 h-4" />
 				</Button>
-				<h1 className="text-2xl font-bold text-center">Календарь на {currentYear}</h1>
+				<h1 className="text-xl font-bold text-center">Календарь на {currentYear}</h1>
 				<Button onClick={() => changeYear(1)}>
 					<ChevronRight className="w-4 h-4" />
 				</Button>

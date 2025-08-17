@@ -19,29 +19,31 @@ const SummaryCard: FC<SummaryCardProps> = ({ portfolioSummary }) => {
 	const returnSymbol = isProfit ? "▲" : "▼";
 
 	return (
-		<Card className="col-span-4 xl:col-span-1 rounded-lg">
+		<Card className="col-span-4 rounded-lg xl:col-span-1">
 			<CardHeader>
-				<CardTitle className="text-xl sm:text-2xl font-bold">Общая информация по портфелю</CardTitle>
+				<CardTitle className="font-bold sm:text-xl">Общая информация по портфелю</CardTitle>
 			</CardHeader>
 			<CardContent>
-				<div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-1 gap-6">
+				<div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-1">
 					<div>
-						<p className="text-sm sm:text-md font-semibold text-muted-foreground">Сумма инвестиций</p>
-						<p className="text-lg sm:text-xl font-bold mt-1">
+						<p className="text-sm font-semibold sm:text-md text-muted-foreground">Сумма инвестиций</p>
+						<p className="mt-1 text-lg font-bold">
 							{Number(portfolioSummary.totalPurchasePrice).toLocaleString("ru-RU")} ₽
 						</p>
 					</div>
 
 					<div>
-						<p className="text-sm sm:text-md font-semibold text-muted-foreground">Текущая стоимость</p>
-						<p
-							className={`text-lg sm:text-xl font-bold mt-1 ${
-								isProfit ? "text-green-600" : "text-red-600"
-							}`}
-						>
+						<p className="text-sm font-semibold sm:text-md text-muted-foreground">Текущая стоимость</p>
+						<p className={`text-lg font-bold mt-1 ${isProfit ? "text-green-600" : "text-red-600"}`}>
 							{Number(portfolioSummary.totalCurrentPrice).toLocaleString("ru-RU")} ₽{" "}
 							<span className="text-sm">
-								({returnSymbol} {priceDifference.toLocaleString("ru-RU")}, {returnPercentage.toFixed(2)}
+								({returnSymbol} {priceDifference.toLocaleString("ru-RU")}{" "}
+								<span
+									className={`size-1 rounded-2xl inline-block align-middle ${
+										isProfit ? "bg-green-600" : "bg-red-600"
+									}`}
+								/>{" "}
+								{returnPercentage.toFixed(2)}
 								%)
 							</span>
 						</p>
@@ -49,15 +51,15 @@ const SummaryCard: FC<SummaryCardProps> = ({ portfolioSummary }) => {
 
 					<div>
 						<TooltipProvider>
-							<p className="text-sm sm:text-md font-semibold text-muted-foreground flex items-center gap-1">
+							<p className="flex gap-1 items-center text-sm font-semibold sm:text-md text-muted-foreground">
 								Средняя текущая доходность
 								<Tooltip>
 									<TooltipTrigger>
-										<InfoIcon className="size-4 mt-1 text-muted-foreground" />
+										<InfoIcon className="mt-1 size-4 text-muted-foreground" />
 									</TooltipTrigger>
 									<TooltipContent className="max-w-[300px] bg-muted text-foreground font-semibold">
 										<p>Как рассчитывается:</p>
-										<ul className="list-disc pl-4 space-y-1 mt-1">
+										<ul className="pl-4 mt-1 space-y-1 list-disc">
 											<li>Доходность каждой облигации: (Годовой купон / Текущая цена) × 100%</li>
 											<li>Учитываются только облигации с известной текущей ценой</li>
 											<li>
@@ -71,7 +73,7 @@ const SummaryCard: FC<SummaryCardProps> = ({ portfolioSummary }) => {
 									</TooltipContent>
 								</Tooltip>
 							</p>
-							<p className="text-lg sm:text-xl font-bold mt-1">{portfolioSummary.averageCurrentYield}%</p>
+							<p className="mt-1 text-lg font-bold">{portfolioSummary.averageCurrentYield}%</p>
 						</TooltipProvider>
 					</div>
 				</div>
