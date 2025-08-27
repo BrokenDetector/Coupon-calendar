@@ -2,12 +2,13 @@
 
 import CouponModal from "@/components/Calendar/CouponModal";
 import { Button } from "@/components/ui/button";
-import { getCurrencySymbol } from "@/helpers/getCurrencySymbol";
+import { useGSAP } from "@gsap/react";
 import { addMonths, format, getYear, parseISO, startOfYear } from "date-fns";
+import gsap from "gsap";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { FC, useCallback, useDeferredValue, useEffect, useMemo, useState } from "react";
+import { FC, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import MonthCalendar from "./MonthCalendar";
 
 interface CouponCalendarProps {
@@ -28,6 +29,10 @@ const CouponCalendar: FC<CouponCalendarProps> = ({ bonds }) => {
 	const [holidays, setHolidays] = useState<Record<number, Holiday[]>>({});
 	const session = useSession();
 	const deferredBonds = useDeferredValue(bonds);
+
+	const calendarRef = useRef<HTMLDivElement>(null);
+	const yearTitleRef = useRef<HTMLHeadingElement>(null);
+	const monthGridRef = useRef<HTMLDivElement>(null);
 
 	const fetchHolidays = async (year: number): Promise<Holiday[]> => {
 		try {
@@ -106,7 +111,6 @@ const CouponCalendar: FC<CouponCalendarProps> = ({ bonds }) => {
 		};
 
 		for (const bond of deferredBonds) {
-			// Coupons
 			bond.COUPONDATES?.forEach((dateStr, idx) => {
 				const adjusted = adjustPaymentDate(dateStr);
 				const dateKey = format(adjusted, "yyyy-MM-dd");
@@ -123,7 +127,7 @@ const CouponCalendar: FC<CouponCalendarProps> = ({ bonds }) => {
 				addTotal(monthCurrencyTotals, monthKey, currency, value);
 				dateSeen.add(dateKey);
 			});
-			// Amortizations
+
 			bond.AMORTIZATIONDATES?.forEach((dateStr, idx) => {
 				const adjusted = adjustPaymentDate(dateStr);
 				const dateKey = format(adjusted, "yyyy-MM-dd");
@@ -178,43 +182,73 @@ const CouponCalendar: FC<CouponCalendarProps> = ({ bonds }) => {
 		[monthCurrencyTotals]
 	);
 
+	useGSAP(() => {
+		if (yearTitleRef.current) {
+			gsap.fromTo(
+				yearTitleRef.current,
+				{ opacity: 0, y: -10 },
+				{ opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }
+			);
+		}
+	}, [currentYear]);
+
+	useGSAP(() => {
+		if (monthGridRef.current) {
+			const monthElements = monthGridRef.current.children;
+			gsap.fromTo(
+				monthElements,
+				{ opacity: 0, y: 20 },
+				{
+					opacity: 1,
+					y: 0,
+					duration: 0.6,
+					stagger: 0.05,
+					ease: "back.out(1.7)",
+					delay: 0.2,
+				}
+			);
+		}
+	}, [currentYear]);
+
 	return (
-		<div className="col-span-3 p-4 rounded-lg border bg-card/30">
+		<div
+			className="col-span-3 p-4 rounded-lg border bg-card/30"
+			ref={calendarRef}
+		>
 			<div className="flex justify-between items-center mb-6">
 				<Button onClick={() => changeYear(-1)}>
-					<ChevronLeft className="w-4 h-4" />
+					<ChevronLeft className="size-4" />
 				</Button>
-				<h1 className="text-xl font-bold text-center">Календарь на {currentYear}</h1>
+				<h1
+					ref={yearTitleRef}
+					className="text-xl font-bold text-center"
+				>
+					Календарь на {currentYear}
+				</h1>
 				<Button onClick={() => changeYear(1)}>
-					<ChevronRight className="w-4 h-4" />
+					<ChevronRight className="size-4" />
 				</Button>
 			</div>
-			<div className="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-2 mb-6">
+
+			<div
+				ref={monthGridRef}
+				className="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-2 mb-6"
+			>
 				{months.map((month, index) => {
 					const monthlyTotals = calculateMonthlyTotal(month);
 
 					return (
-						<div
+						<MonthCalendar
 							key={index}
-							className="flex flex-col gap-4 justify-between items-center rounded-lg border"
-						>
-							<MonthCalendar
-								date={month}
-								highlightedDates={highlightedDates}
-								onDayClick={handleDayClick}
-							/>
-							<h5 className="px-4 pb-4 text-sm font-bold text-balance">
-								Сумма выплат за месяц:
-								{Object.entries(monthlyTotals).map(([currency, total]) => (
-									<div key={currency}>
-										{total.toFixed(2)} {getCurrencySymbol(currency)}
-									</div>
-								))}
-							</h5>
-						</div>
+							date={month}
+							highlightedDates={highlightedDates}
+							monthlyTotals={monthlyTotals}
+							onDayClick={handleDayClick}
+						/>
 					);
 				})}
 			</div>
+
 			<div className="flex flex-col p-4 text-xs italic text-muted-foreground">
 				<span>*Все платежи указаны без вычета налогов и комиссий.</span>
 				{!session?.data?.user && (

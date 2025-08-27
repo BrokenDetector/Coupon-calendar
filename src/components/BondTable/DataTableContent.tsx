@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
 import { flexRender, Table as ReactTable } from "@tanstack/react-table";
 import { Virtualizer } from "@tanstack/react-virtual";
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
@@ -21,6 +22,7 @@ export function DataTableContent<TData extends { SECID: string }, TValue>({
 	tableContainerRef,
 }: DataTableContentProps<TData, TValue>) {
 	const { sorting, columnFilters, columnVisibility } = table.getState();
+	const [parent] = useAutoAnimate();
 
 	return (
 		<div className="rounded-md border bg-background/20">
@@ -81,6 +83,7 @@ export function DataTableContent<TData extends { SECID: string }, TValue>({
 					))}
 				</TableHeader>
 				<TableBody
+					ref={parent}
 					className="relative z-1"
 					style={{
 						height: `${virtualizer.getTotalSize()}px`,
