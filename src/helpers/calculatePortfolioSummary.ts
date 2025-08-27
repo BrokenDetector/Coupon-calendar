@@ -40,7 +40,7 @@ export const calculatePortfolioSummary = (
 		}
 
 		// Add accrued coupon income to totalCurrentPrice
-		totalCurrentPrice += (bond.ACCRUEDINT || 0) * conversionRate * quantity;
+		totalCurrentPrice += (bond.ACCRUEDINT || 0) * quantity;
 	});
 
 	const averageCurrentYield = bondCountWithYield > 0 ? (totalCurrentYield / bondCountWithYield).toFixed(2) : "0";
