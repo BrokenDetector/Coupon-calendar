@@ -107,8 +107,7 @@ export const columns: ColumnDef<ExtendedBond>[] = [
 						const value = e.target.value;
 						// Allow numbers and single dot or comma
 						if (/^$|^\d*[.,]?\d*$/.test(value)) {
-							// @ts-ignore
-							bond.handlePriceChange(bond.SECID, value.replace(",", "."));
+							bond.handlePriceChange(bond.SECID, parseFloat(value.replace(",", ".")));
 						}
 					}}
 					className="w-18"

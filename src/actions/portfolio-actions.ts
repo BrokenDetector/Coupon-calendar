@@ -29,9 +29,6 @@ export async function addOrUpdatePortfolio({
 			return { error: "Максимум 5 портфелей." };
 		}
 
-		const portfolioName = name || `Портфель ${portfolioCount > 0 ? portfolioCount + 1 : 1}`;
-		const portfolioColor = color || "#94A3B8";
-
 		// If updating, check if portfolio exists and belongs to user
 		if (id) {
 			const existingPortfolio = await db.portfolio.findFirst({
@@ -80,7 +77,7 @@ export async function deletePortfolio(id: string): Promise<APIResponse<{ success
 			return { error: protection.error };
 		}
 
-		const userId = protection.session?.user.id!;
+		const userId = protection.session?.user.id;
 
 		const portfolio = await db.portfolio.findFirst({
 			where: { id, userId },

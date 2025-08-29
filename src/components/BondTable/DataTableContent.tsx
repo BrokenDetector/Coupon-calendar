@@ -8,10 +8,10 @@ import { buttonVariants } from "../ui/button";
 import { Table, TableBody, TableHead, TableHeader, TableRow } from "../ui/table";
 import { MemoizedRow } from "./MemoizedRow";
 
-interface DataTableContentProps<TData extends { SECID: string }, TValue> {
+interface DataTableContentProps<TData extends { SECID: string }, _TValue> {
 	table: ReactTable<TData>;
-	virtualizer: Virtualizer<any, any>;
-	tableContainerRef: RefObject<HTMLTableElement>;
+	virtualizer: Virtualizer<HTMLDivElement, Element>;
+	tableContainerRef: RefObject<HTMLDivElement>;
 	className?: string;
 }
 
@@ -25,11 +25,11 @@ export function DataTableContent<TData extends { SECID: string }, TValue>({
 	const [parent] = useAutoAnimate();
 
 	return (
-		<div className="rounded-md border bg-background/20">
-			<Table
-				divClassname={cn("overflow-auto", className)}
-				ref={tableContainerRef}
-			>
+		<div
+			className="rounded-md border bg-background/20"
+			ref={tableContainerRef}
+		>
+			<Table divClassname={cn("overflow-auto", className)}>
 				<TableHeader className="sticky top-0 z-10 text-xs shadow-lg bg-card">
 					{table.getHeaderGroups().map((headerGroup) => (
 						<TableRow

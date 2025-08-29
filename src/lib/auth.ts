@@ -1,7 +1,7 @@
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { compare } from "bcryptjs";
 import { NextAuthOptions } from "next-auth";
-import { Adapter } from "next-auth/adapters";
+import { Adapter, AdapterUser } from "next-auth/adapters";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import YandexProvider from "next-auth/providers/yandex";
@@ -41,16 +41,15 @@ function getYandexCredentials() {
 
 const prismaAdapter = PrismaAdapter(db) as Adapter;
 
-//@ts-ignore
-prismaAdapter.createUser = async (data) => {
+prismaAdapter.createUser = async (data: AdapterUser): Promise<AdapterUser> => {
 	const isOAuthUser = !!data.emailVerified;
 
 	const user = await db.user.create({
 		data: {
-			name: data.name,
+			name: data.name!,
 			email: data.email,
 			image: data.image,
-			emailVerified: isOAuthUser ? true : false,
+			emailVerified: isOAuthUser,
 			portfolios: {
 				create: {
 					name: "Портфель 1",
@@ -60,7 +59,13 @@ prismaAdapter.createUser = async (data) => {
 		},
 	});
 
-	return user;
+	return {
+		id: user.id,
+		name: user.name,
+		email: user.email,
+		emailVerified: user.emailVerified,
+		image: user.image,
+	} as AdapterUser;
 };
 
 export const authOptions: NextAuthOptions = {

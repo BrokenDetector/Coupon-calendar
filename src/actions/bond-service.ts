@@ -45,7 +45,7 @@ export const fetchBonds = async (
 			input === "all" ? await fetchAllBonds(options.detailLevel!) : await fetchPortfolioBonds(input, options);
 
 		return { data };
-	} catch (error: any) {
+	} catch (error: unknown) {
 		console.error("[Bond Service] Error in fetchBonds:", error);
 		return {
 			error: error instanceof Error ? error.message : "Произошла неизвестная ошибка.",

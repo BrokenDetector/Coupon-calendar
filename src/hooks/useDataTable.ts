@@ -12,8 +12,12 @@ import { useSearchParams } from "next/navigation";
 import { useRef, useState } from "react";
 import type { DataTableOptions } from "../types/table";
 
+type SortParam = Array<{ id: string; desc: boolean }>;
+type HiddenColumnsParam = Record<string, boolean>;
+type UpdateKey = "search" | "sorting" | "hidden_columns";
+
 export const useDataTable = <TData extends object, TValue>({ data, columns }: DataTableOptions<TData, TValue>) => {
-	const tableContainerRef = useRef<HTMLTableElement>(null);
+	const tableContainerRef = useRef<HTMLDivElement>(null);
 	const searchParams = useSearchParams();
 
 	const deserializeSortingState = (): SortingState => {
@@ -53,16 +57,16 @@ export const useDataTable = <TData extends object, TValue>({ data, columns }: Da
 	]);
 	const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(deserializeColumnVisibility());
 
-	const updateParams = (key: string, value: any) => {
+	const updateParams = (key: UpdateKey, value: string | SortParam | HiddenColumnsParam) => {
 		const params = new URLSearchParams(searchParams?.toString() || "");
 
 		if (key === "search") {
-			params.set(key, value);
+			params.set(key, value as string);
 		} else if (key === "sorting") {
 			Array.from(params.keys()).forEach((k) => {
 				if (k.startsWith("order_by_")) params.delete(k);
 			});
-			value.forEach(({ id, desc }: { id: string; desc: boolean }) => {
+			(value as SortParam).forEach(({ id, desc }: { id: string; desc: boolean }) => {
 				params.set(`order_by_${id}`, desc ? "desc" : "asc");
 			});
 		} else if (key === "hidden_columns") {
@@ -76,8 +80,6 @@ export const useDataTable = <TData extends object, TValue>({ data, columns }: Da
 			} else {
 				params.delete("hidden_columns");
 			}
-		} else {
-			params.set(key, value);
 		}
 
 		window.history.replaceState(null, "", `?${params.toString()}`);
@@ -97,7 +99,7 @@ export const useDataTable = <TData extends object, TValue>({ data, columns }: Da
 			const newFilters = typeof updater === "function" ? updater(columnFilters) : updater;
 			setColumnFilters(newFilters);
 			// update only search param
-			updateParams("search", newFilters.find((f) => f.id === "SHORTNAME")?.value || "");
+			updateParams("search", (newFilters.find((f) => f.id === "SHORTNAME")?.value as string) || "");
 		},
 		getFilteredRowModel: getFilteredRowModel(),
 		onColumnVisibilityChange: (updater) => {
@@ -115,7 +117,7 @@ export const useDataTable = <TData extends object, TValue>({ data, columns }: Da
 
 	const virtualizer = useVirtualizer({
 		count: table.getRowModel().rows.length,
-		getScrollElement: () => tableContainerRef.current?.parentElement!,
+		getScrollElement: () => tableContainerRef.current,
 		estimateSize: () => 45,
 		overscan: 7,
 	});

@@ -15,7 +15,7 @@ export const useLocalStorage = (key: string) => {
 	}, [key]);
 
 	const setLocalData = useCallback(
-		(data: any) => {
+		<T>(data: T) => {
 			try {
 				if (typeof window !== "undefined") {
 					localStorage.setItem(key, JSON.stringify(data));

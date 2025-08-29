@@ -60,8 +60,8 @@ export function DataTableToolbar<TData>({ table, placeholder = "Поиск" }: D
 	];
 
 	return (
-		<div className="flex gap-2 flex-row sm:items-center sm:justify-between w-full">
-			<div className="flex flex-1 items-center gap-2 flex-wrap">
+		<div className="flex flex-row gap-2 w-full sm:items-center sm:justify-between">
+			<div className="flex flex-wrap flex-1 gap-2 items-center">
 				<Input
 					placeholder={placeholder}
 					value={(table.getColumn("SHORTNAME")?.getFilterValue() as string) ?? ""}
@@ -159,7 +159,7 @@ export function DataTableToolbar<TData>({ table, placeholder = "Поиск" }: D
 									onCheckedChange={(value) => column.toggleVisibility(!!value)}
 								>
 									{typeof column.columnDef.header === "function"
-										? //@ts-ignore
+										? //@ts-expect-error: passing minimal props that work runtime
 										  column.columnDef.header({ column })
 										: column.columnDef.header || column.id}
 								</DropdownMenuCheckboxItem>

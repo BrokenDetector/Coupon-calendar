@@ -11,12 +11,16 @@ interface MemoizedRowProps<T> {
 	sorting: SortingState;
 }
 
+const hasPortfolioFields = (value: unknown): value is { quantity: number; purchasePrice: number } => {
+	return typeof value === "object" && value !== null && "quantity" in value && "purchasePrice" in value;
+};
+
 export const MemoizedRow = memo(
 	function RowComponent<TData>({ row, virtualRow }: MemoizedRowProps<TData>) {
 		return (
 			<TableRow
 				data-state={row.getIsSelected() && "selected"}
-				className="absolute flex w-full border-b"
+				className="flex absolute w-full border-b"
 				style={{
 					height: `${virtualRow.size}px`,
 					top: `${virtualRow.start}px`,
@@ -28,7 +32,7 @@ export const MemoizedRow = memo(
 						style={{
 							width: cell.column.getSize(),
 						}}
-						className="flex items-center justify-center text-sm border-r last:border-r-0 overflow-y-hidden overflow-x-auto whitespace-nowrap"
+						className="flex overflow-x-auto overflow-y-hidden justify-center items-center text-sm whitespace-nowrap border-r last:border-r-0"
 					>
 						{flexRender(cell.column.columnDef.cell, cell.getContext())}
 					</TableCell>
@@ -37,8 +41,8 @@ export const MemoizedRow = memo(
 		);
 	},
 	<T,>(prevProps: MemoizedRowProps<T>, nextProps: MemoizedRowProps<T>) => {
-		const prevValues = prevProps.row.original as any;
-		const nextValues = nextProps.row.original as any;
+		const prevValues = prevProps.row.original;
+		const nextValues = nextProps.row.original;
 
 		const filtersEqual = JSON.stringify(prevProps.columnFilters) === JSON.stringify(nextProps.columnFilters);
 		const visibilityEqual =
@@ -49,7 +53,7 @@ export const MemoizedRow = memo(
 			prevProps.virtualRow.size === nextProps.virtualRow.size;
 
 		// For MyBondsCard - check quantity, price, and virtual position
-		if ("quantity" in prevValues && "purchasePrice" in prevValues) {
+		if (hasPortfolioFields(prevValues) && hasPortfolioFields(nextValues)) {
 			return (
 				prevValues.quantity === nextValues.quantity &&
 				prevValues.purchasePrice === nextValues.purchasePrice &&
@@ -63,7 +67,7 @@ export const MemoizedRow = memo(
 		return virtualPositionEqual && filtersEqual && visibilityEqual && sortingEqual;
 	}
 ) as unknown as {
-	(props: MemoizedRowProps<any>): JSX.Element;
+	<T>(props: MemoizedRowProps<T>): JSX.Element;
 	displayName?: string;
 };
 

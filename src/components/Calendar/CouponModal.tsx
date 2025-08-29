@@ -76,9 +76,7 @@ const CouponModal: FC<CouponModalProps> = ({
 													{bond.AMORTIZATIONVALUES?.[amortizationIndex].value.toFixed(2)}
 													{getCurrencySymbol(bond.FACEUNIT)}{" "}
 													<span className="text-muted-foreground">
-														{`(${bond.AMORTIZATIONVALUES?.[
-															amortizationIndex
-														].percent.toFixed(2)}%)`}
+														{`(${bond.AMORTIZATIONVALUES?.[amortizationIndex].percent}%)`}
 													</span>
 												</div>
 											)}

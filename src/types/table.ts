@@ -2,7 +2,7 @@ import { ColumnDef, SortingState, VisibilityState } from "@tanstack/react-table"
 
 export type FilterType = "text" | "select" | "number" | "date" | "boolean";
 
-export interface FilterField<TData> {
+export interface FilterField<_TData> {
 	id: string;
 	type: FilterType;
 	label: string;
@@ -14,7 +14,7 @@ export interface DataTableState {
 	columnVisibility: VisibilityState;
 	columnFilters: {
 		id: string;
-		value: any;
+		value: string;
 	}[];
 	globalFilter: string;
 }

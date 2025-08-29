@@ -81,7 +81,7 @@ const CouponCalendar: FC<CouponCalendarProps> = ({ bonds }) => {
 			return day === 0 || day === 6;
 		};
 
-		let adjustedDate = new Date(date);
+		const adjustedDate = new Date(date);
 		while (isHoliday(adjustedDate) || isWeekend(adjustedDate)) {
 			adjustedDate.setDate(adjustedDate.getDate() + 1);
 		}

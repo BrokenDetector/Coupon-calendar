@@ -31,7 +31,7 @@ const MonthCalendar: FC<MonthCalendarProps> = memo(({ date, highlightedDates, mo
 	endDate.setDate(endDate.getDate() + (endDate.getDay() === 0 ? 0 : 7 - endDate.getDay()));
 
 	const calendarDays = [];
-	let currentDate = startDate;
+	const currentDate = startDate;
 
 	while (currentDate <= endDate) {
 		calendarDays.push(new Date(currentDate));
@@ -58,9 +58,10 @@ const MonthCalendar: FC<MonthCalendarProps> = memo(({ date, highlightedDates, mo
 					snap: { value: 1 },
 					ease: "power1.out",
 					onUpdate: () => {
-						if (element) {
-							element.textContent = obj.value.toFixed(2);
-						}
+						element.textContent = obj.value.toFixed(2);
+					},
+					onComplete: () => {
+						element.textContent = total.toFixed(2);
 					},
 				});
 			}

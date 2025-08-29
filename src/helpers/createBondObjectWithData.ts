@@ -38,7 +38,26 @@ const mapColumns = (columns: string[]): Record<string, number> => {
 	}, {} as Record<string, number>);
 };
 
-export const createBondsWithData = (data: any): MOEXBondData[] => {
+type RawRow = Array<string | number>;
+
+const getStringAt = (row: RawRow, index: number) => {
+	const value = row?.[index];
+	if (value === undefined || value === null) return "";
+	return String(value);
+};
+
+const getNumberAt = (row: RawRow | undefined, index: number) => {
+	if (!row) return 0;
+	const value = row[index];
+	if (value === undefined || value === null || value === "") return 0;
+	return Number(value);
+};
+
+export const createBondsWithData = (data: {
+	securities: { columns: string[]; data: RawRow[] };
+	marketdata: { columns: string[]; data: RawRow[] };
+	marketdata_yields: { columns: string[]; data: RawRow[] };
+}): MOEXBondData[] => {
 	if (!data.securities.data || data.securities.data.length === 0 || typeof data.securities.data[0][0] !== "string") {
 		throw new Error("[MOEX ERROR] No securities data found for the given SECID(s).");
 	}
@@ -47,38 +66,38 @@ export const createBondsWithData = (data: any): MOEXBondData[] => {
 	const marketDataColumns = mapColumns(data.marketdata.columns);
 	const yieldDataColumns = mapColumns(data.marketdata_yields.columns);
 
-	const yieldDataMap = new Map<string, any>();
-	data.marketdata_yields.data.forEach((yieldData: any) => {
-		const secid = yieldData[yieldDataColumns["SECID"]];
+	const yieldDataMap = new Map<string, RawRow>();
+	data.marketdata_yields.data.forEach((yieldData) => {
+		const secid = getStringAt(yieldData, yieldDataColumns["SECID"]);
 		if (secid) {
 			yieldDataMap.set(secid, yieldData);
 		}
 	});
 
-	return data.securities.data.map((bondData: any) => {
-		const secid = bondData[securitiesColumns["SECID"]];
-		const marketData = data.marketdata.data.find((md: any) => md[marketDataColumns["SECID"]] === secid) || {};
-		const yieldData = yieldDataMap.get(secid) || {};
+	return data.securities.data.map((bondData) => {
+		const secid = getStringAt(bondData, securitiesColumns["SECID"]);
+		const marketData = data.marketdata.data.find((md) => getStringAt(md, marketDataColumns["SECID"]) === secid);
+		const yieldData = yieldDataMap.get(secid);
 
 		const bond = {
 			SECID: secid,
-			NAME: bondData[securitiesColumns["SECNAME"]],
-			SHORTNAME: bondData[securitiesColumns["SHORTNAME"]],
-			ISIN: bondData[securitiesColumns["ISIN"]],
-			FACEVALUE: bondData[securitiesColumns["FACEVALUE"]],
-			NEXTCOUPON: bondData[securitiesColumns["NEXTCOUPON"]],
-			COUPONVALUE: bondData[securitiesColumns["COUPONVALUE"]],
-			COUPONFREQUENCY: bondData[securitiesColumns["COUPONPERIOD"]],
-			MATDATE: bondData[securitiesColumns["MATDATE"]],
-			ACCRUEDINT: bondData[securitiesColumns["ACCRUEDINT"]],
-			FACEUNIT: bondData[securitiesColumns["FACEUNIT"]],
-			COUPONPERCENT: bondData[securitiesColumns["COUPONPERCENT"]],
-			PREVPRICE: bondData[securitiesColumns["PREVPRICE"]] || undefined,
-			LAST: marketData[marketDataColumns["LAST"]] || undefined,
-			DURATION: marketData[marketDataColumns["DURATION"]],
-			EFFECTIVEYIELD: yieldData[yieldDataColumns["EFFECTIVEYIELD"]],
-			DURATIONWAPRICE: yieldData[yieldDataColumns["DURATIONWAPRICE"]] || undefined,
-			TYPE: getTypeName(bondData[securitiesColumns["SECTYPE"]]),
+			NAME: getStringAt(bondData, securitiesColumns["SECNAME"]),
+			SHORTNAME: getStringAt(bondData, securitiesColumns["SHORTNAME"]),
+			ISIN: getStringAt(bondData, securitiesColumns["ISIN"]),
+			FACEVALUE: getNumberAt(bondData, securitiesColumns["FACEVALUE"]),
+			NEXTCOUPON: getStringAt(bondData, securitiesColumns["NEXTCOUPON"]),
+			COUPONVALUE: getNumberAt(bondData, securitiesColumns["COUPONVALUE"]),
+			COUPONFREQUENCY: getNumberAt(bondData, securitiesColumns["COUPONPERIOD"]),
+			MATDATE: getStringAt(bondData, securitiesColumns["MATDATE"]),
+			ACCRUEDINT: getNumberAt(bondData, securitiesColumns["ACCRUEDINT"]),
+			FACEUNIT: getStringAt(bondData, securitiesColumns["FACEUNIT"]),
+			COUPONPERCENT: getNumberAt(bondData, securitiesColumns["COUPONPERCENT"]),
+			PREVPRICE: getNumberAt(bondData, securitiesColumns["PREVPRICE"]),
+			LAST: getNumberAt(marketData, marketDataColumns["LAST"]),
+			DURATION: getNumberAt(marketData, marketDataColumns["DURATION"]),
+			EFFECTIVEYIELD: getNumberAt(yieldData, yieldDataColumns["EFFECTIVEYIELD"]),
+			DURATIONWAPRICE: getNumberAt(yieldData, yieldDataColumns["DURATIONWAPRICE"]),
+			TYPE: getTypeName(getStringAt(bondData, securitiesColumns["SECTYPE"])),
 		};
 
 		return {
@@ -89,7 +108,15 @@ export const createBondsWithData = (data: any): MOEXBondData[] => {
 	});
 };
 
-export const createBondObjectWithCoupons = (data: any): MOEXBondCoupons & { SECID: string } => {
+export const createBondObjectWithCoupons = (
+	data: [
+		charsetinfo: { name: string },
+		{
+			coupons: { secid: string; value: number; coupondate: string }[];
+			amortizations: { secid: string; value: number; valueprc: string; amortdate: string }[];
+		}
+	]
+): MOEXBondCoupons & { SECID: string } => {
 	const coupons = data[1]?.coupons;
 	const amortizations = data[1]?.amortizations || [];
 
@@ -99,14 +126,14 @@ export const createBondObjectWithCoupons = (data: any): MOEXBondCoupons & { SECI
 
 	const { secid: SECID } = coupons[0];
 
-	const COUPONVALUES: number[] = coupons.map((coupon: any) => coupon.value);
-	const COUPONDATES: string[] = coupons.map((coupon: any) => coupon.coupondate);
+	const COUPONVALUES = coupons.map((coupon) => coupon.value);
+	const COUPONDATES = coupons.map((coupon) => coupon.coupondate);
 
-	const AMORTIZATIONVALUES: { value: number; percent: number }[] = amortizations.map((amortization: any) => ({
+	const AMORTIZATIONVALUES = amortizations.map((amortization) => ({
 		value: amortization.value,
 		percent: amortization.valueprc,
 	}));
-	const AMORTIZATIONDATES: string[] = amortizations.map((amortization: any) => amortization.amortdate);
+	const AMORTIZATIONDATES = amortizations.map((amortization) => amortization.amortdate);
 
 	return {
 		COUPONVALUES,
