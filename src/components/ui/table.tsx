@@ -4,17 +4,23 @@ import { cn } from "@/lib/utils";
 
 interface ExtendedTableProps extends React.HTMLAttributes<HTMLTableElement> {
 	divClassname?: string;
+	parentRef?: React.RefObject<HTMLDivElement>;
 }
 
-const Table = React.forwardRef<HTMLTableElement, ExtendedTableProps>(({ className, divClassname, ...props }, ref) => (
-	<div className={cn("overflow-auto relative w-full", divClassname)}>
-		<table
-			ref={ref}
-			className={cn("w-full text-sm caption-bottom", className)}
-			{...props}
-		/>
-	</div>
-));
+const Table = React.forwardRef<HTMLTableElement, ExtendedTableProps>(
+	({ className, divClassname, parentRef, ...props }, ref) => (
+		<div
+			className={cn("overflow-auto relative w-full", divClassname)}
+			ref={parentRef}
+		>
+			<table
+				ref={ref}
+				className={cn("w-full text-sm caption-bottom", className)}
+				{...props}
+			/>
+		</div>
+	)
+);
 Table.displayName = "Table";
 
 const TableHeader = React.forwardRef<HTMLTableSectionElement, React.HTMLAttributes<HTMLTableSectionElement>>(

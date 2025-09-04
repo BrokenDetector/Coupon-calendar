@@ -22,14 +22,16 @@ export function DataTableContent<TData extends { SECID: string }, TValue>({
 	tableContainerRef,
 }: DataTableContentProps<TData, TValue>) {
 	const { sorting, columnFilters, columnVisibility } = table.getState();
-	const [parent] = useAutoAnimate();
+	const [parent] = useAutoAnimate({
+		duration: 100,
+	});
 
 	return (
-		<div
-			className="rounded-md border bg-background/20"
-			ref={tableContainerRef}
-		>
-			<Table divClassname={cn("overflow-auto", className)}>
+		<div className="rounded-md border bg-background/20">
+			<Table
+				divClassname={cn("overflow-auto", className)}
+				parentRef={tableContainerRef}
+			>
 				<TableHeader className="sticky top-0 z-10 text-xs shadow-lg bg-card">
 					{table.getHeaderGroups().map((headerGroup) => (
 						<TableRow
