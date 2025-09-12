@@ -1,4 +1,5 @@
 import { createBondsWithData, getCurrentYield } from "@/helpers/createBondObjectWithData";
+import { mockBond } from "@/lib/utils";
 
 describe("Bond Data Helper Functions", () => {
 	describe("createBondsWithData", () => {
@@ -80,17 +81,10 @@ describe("Bond Data Helper Functions", () => {
 
 	describe("getCurrentYield", () => {
 		test("should calculate current yield correctly", () => {
-			const bond: Partial<MOEXBondData> = {
-				FACEVALUE: 1000,
-				LAST: 100,
+			const bond = mockBond({
 				COUPONVALUE: 50,
 				COUPONFREQUENCY: 40,
-				SECID: "BOND1",
-				NAME: "Bond1",
-				SHORTNAME: "Bond1",
-				ISIN: "RU1234567890",
-				FACEUNIT: "RUB",
-			};
+			});
 
 			const resultYield = getCurrentYield(bond);
 			// Annual coupon = 50 * (365/4) = 4562.5
@@ -100,52 +94,29 @@ describe("Bond Data Helper Functions", () => {
 		});
 
 		test("should handle zero current price", () => {
-			const bond: Partial<MOEXBondData> = {
-				FACEVALUE: 1000,
+			const bond = mockBond({
 				LAST: 0,
 				PREVPRICE: 0,
 				COUPONVALUE: 50,
 				COUPONFREQUENCY: 4,
-				SECID: "BOND1",
-				NAME: "Bond1",
-				SHORTNAME: "Bond1",
-				ISIN: "RU1234567890",
-				FACEUNIT: "RUB",
-			};
+			});
 
 			const resultYield = getCurrentYield(bond);
 			expect(resultYield).toBe(0);
 		});
 
 		test("should handle missing or zero COUPONVALUE", () => {
-			const bond: Partial<MOEXBondData> = {
-				FACEVALUE: 1000,
-				LAST: 100,
+			const bond = mockBond({
+				PREVPRICE: 0,
 				COUPONVALUE: 0,
 				COUPONFREQUENCY: 4,
-				SECID: "BOND1",
-				NAME: "Bond1",
-				SHORTNAME: "Bond1",
-				ISIN: "RU1234567890",
-				FACEUNIT: "RUB",
-			};
-
+			});
 			const resultYield = getCurrentYield(bond);
 			expect(resultYield).toBe(0);
 		});
 
 		test("should default to COUPONFREQUENCY of 365 if missing", () => {
-			const bond: Partial<MOEXBondData> = {
-				FACEVALUE: 1000,
-				LAST: 100,
-				COUPONVALUE: 50,
-				COUPONFREQUENCY: undefined,
-				SECID: "BOND1",
-				NAME: "Bond1",
-				SHORTNAME: "Bond1",
-				ISIN: "RU1234567890",
-				FACEUNIT: "RUB",
-			};
+			const bond = mockBond({ COUPONVALUE: 50, COUPONFREQUENCY: undefined });
 
 			const resultYield = getCurrentYield(bond);
 			// Annual coupon = 50 * (365/365) = 50

@@ -1,14 +1,9 @@
 import { calculatePortfolioSummary } from "@/helpers/calculatePortfolioSummary";
+import { mockBond } from "@/lib/utils";
 
 describe("calculatePortfolioSummary", () => {
 	const mockBonds: Bond[] = [
-		{
-			SECID: "BOND1",
-			NAME: "Test Bond 1",
-			ISIN: "RU000A0000",
-			SHORTNAME: "Test Bond 1",
-			FACEVALUE: 1000,
-			FACEUNIT: "RUB",
+		mockBond({
 			CURRENTPRICE: 110,
 			purchasePrice: 100,
 			LAST: 110,
@@ -18,14 +13,7 @@ describe("calculatePortfolioSummary", () => {
 			quantity: 10,
 			NEXTCOUPON: "2025-01-01",
 			MATDATE: "2025-01-01",
-			EFFECTIVEYIELD: 0,
-			ACCRUEDINT: 0,
-			DURATION: 0,
-			DURATIONWAPRICE: 0,
-			COUPONPERCENT: 0,
-			CURRENTYIELD: 0,
-			TYPE: "Bond",
-		},
+		}),
 	];
 
 	const mockCurrencyRates = {
