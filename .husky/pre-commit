@@ -1,3 +1,8 @@
+echo "🧪 Running tests..."
 npm test
 
+echo "🔍 Running TypeScript check..."
+npm run lint:ts
+
+echo "🎨 Formatting and linting staged files..."
 npx lint-staged
