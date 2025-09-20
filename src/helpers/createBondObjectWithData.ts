@@ -1,3 +1,19 @@
+export type BondsWithData = {
+	securities: { columns: string[]; data: RawRow[] };
+	marketdata: { columns: string[]; data: RawRow[] };
+	marketdata_yields: { columns: string[]; data: RawRow[] };
+};
+
+export type BondObjectWithCoupons = [
+	{ charsetinfo: { name: string } },
+	{
+		coupons: { secid: string; value: number; coupondate: string }[];
+		amortizations: { secid: string; value: number; valueprc: string; amortdate: string }[];
+	},
+];
+
+type RawRow = Array<string | number | null | undefined>;
+
 export const getCurrentYield = (bond: Partial<MOEXBondData>): number => {
 	const nominalValue = bond.FACEVALUE || 0;
 	const currentPrice = bond.LAST || bond.PREVPRICE || 0;
@@ -15,7 +31,7 @@ const getCurrentPrice = (bond: Partial<MOEXBondData>): number => {
 	return bond.LAST || bond.PREVPRICE || 0;
 };
 
-const getTypeName = (secType: string): string => {
+export const getTypeName = (secType: string): string => {
 	switch (secType) {
 		case "3":
 			return "ofz_bond";
@@ -32,32 +48,29 @@ const getTypeName = (secType: string): string => {
 };
 
 const mapColumns = (columns: string[]): Record<string, number> => {
-	return columns.reduce((acc, column, index) => {
-		acc[column] = index;
-		return acc;
-	}, {} as Record<string, number>);
+	return columns.reduce(
+		(acc, column, index) => {
+			acc[column] = index;
+			return acc;
+		},
+		{} as Record<string, number>,
+	);
 };
 
-type RawRow = Array<string | number>;
-
-const getStringAt = (row: RawRow, index: number) => {
+export const getStringAt = (row: RawRow, index: number) => {
 	const value = row?.[index];
 	if (value === undefined || value === null) return "";
 	return String(value);
 };
 
-const getNumberAt = (row: RawRow | undefined, index: number) => {
+export const getNumberAt = (row: RawRow | undefined, index: number) => {
 	if (!row) return 0;
 	const value = row[index];
 	if (value === undefined || value === null || value === "") return 0;
 	return Number(value);
 };
 
-export const createBondsWithData = (data: {
-	securities: { columns: string[]; data: RawRow[] };
-	marketdata: { columns: string[]; data: RawRow[] };
-	marketdata_yields: { columns: string[]; data: RawRow[] };
-}): MOEXBondData[] => {
+export const createBondsWithData = (data: BondsWithData): MOEXBondData[] => {
 	if (!data.securities.data || data.securities.data.length === 0 || typeof data.securities.data[0][0] !== "string") {
 		throw new Error("[MOEX ERROR] No securities data found for the given SECID(s).");
 	}
@@ -108,15 +121,7 @@ export const createBondsWithData = (data: {
 	});
 };
 
-export const createBondObjectWithCoupons = (
-	data: [
-		charsetinfo: { name: string },
-		{
-			coupons: { secid: string; value: number; coupondate: string }[];
-			amortizations: { secid: string; value: number; valueprc: string; amortdate: string }[];
-		}
-	]
-): MOEXBondCoupons & { SECID: string } => {
+export const createBondObjectWithCoupons = (data: BondObjectWithCoupons): MOEXBondCoupons & { SECID: string } => {
 	const coupons = data[1]?.coupons;
 	const amortizations = data[1]?.amortizations || [];
 

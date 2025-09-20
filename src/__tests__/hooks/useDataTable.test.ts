@@ -1,10 +1,15 @@
 import { useDataTable } from "@/hooks/useDataTable";
 import { act, renderHook } from "@testing-library/react";
+import { useSearchParams } from "next/navigation";
 
-// Mock the useSearchParams hook
 jest.mock("next/navigation", () => ({
-	useSearchParams: () => new URLSearchParams(""),
+	useSearchParams: jest.fn(),
 }));
+
+function mockUseSearchParams(paramsString: string) {
+	const searchParams = new URLSearchParams(paramsString);
+	(useSearchParams as jest.Mock).mockReturnValue(searchParams);
+}
 
 describe("useDataTable", () => {
 	const mockData = [
@@ -23,7 +28,7 @@ describe("useDataTable", () => {
 			useDataTable({
 				data: mockData,
 				columns: mockColumns,
-			})
+			}),
 		);
 
 		expect(result.current.state.sorting).toEqual([]);
@@ -39,7 +44,7 @@ describe("useDataTable", () => {
 			useDataTable({
 				data: mockData,
 				columns: mockColumns,
-			})
+			}),
 		);
 
 		act(() => {
@@ -60,7 +65,7 @@ describe("useDataTable", () => {
 			useDataTable({
 				data: mockData,
 				columns: mockColumns,
-			})
+			}),
 		);
 
 		act(() => {
@@ -75,7 +80,7 @@ describe("useDataTable", () => {
 			useDataTable({
 				data: mockData,
 				columns: mockColumns,
-			})
+			}),
 		);
 
 		act(() => {
@@ -92,10 +97,39 @@ describe("useDataTable", () => {
 			useDataTable({
 				data: mockData,
 				columns: mockColumns,
-			})
+			}),
 		);
 
 		expect(result.current.virtualizer).toBeDefined();
 		expect(result.current.virtualizer.getVirtualItems()).toBeDefined();
+	});
+
+	test("should initialize with URL search params", () => {
+		mockUseSearchParams("search=test&order_by_SHORTNAME=desc&hidden_columns=COUPONPERCENT-DURATION");
+
+		const { result } = renderHook(() =>
+			useDataTable({
+				data: mockData,
+				columns: mockColumns,
+			}),
+		);
+
+		expect(result.current.state.sorting).toEqual([{ id: "SHORTNAME", desc: true }]);
+		expect(result.current.state.columnFilters).toEqual([{ id: "SHORTNAME", value: "test" }]);
+		expect(result.current.state.columnVisibility).toEqual({ COUPONPERCENT: false, DURATION: false });
+	});
+
+	test("should handle empty hidden_columns param", () => {
+		mockUseSearchParams("hidden_columns=");
+
+		const { result } = renderHook(() => useDataTable({ data: mockData, columns: mockColumns }));
+		expect(result.current.state.columnVisibility).toEqual({});
+	});
+
+	test("should handle malformed sorting params", () => {
+		mockUseSearchParams("order_by_SHORTNAME=invalid");
+
+		const { result } = renderHook(() => useDataTable({ data: mockData, columns: mockColumns }));
+		expect(result.current.state.sorting).toEqual([]);
 	});
 });
