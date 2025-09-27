@@ -16,11 +16,7 @@ const AllBondsCard: FC<AllBondsCardProps> = ({ allBonds }) => {
 				<CardTitle className="text-2xl font-bold">Все облигации</CardTitle>
 			</CardHeader>
 			<CardContent>
-				<DataTable
-					data={allBonds}
-					columns={columns}
-					className="h-[650px]"
-				/>
+				<DataTable data={allBonds} columns={columns} className="h-[650px]" />
 			</CardContent>
 		</Card>
 	);

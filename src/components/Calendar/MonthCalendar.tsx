@@ -69,7 +69,7 @@ const MonthCalendar: FC<MonthCalendarProps> = memo(({ date, highlightedDates, mo
 	}, [monthlyTotals]);
 
 	return (
-		<div className="flex flex-col gap-4 justify-between items-center rounded-xl border">
+		<div className="flex flex-col gap-4 justify-between items-center rounded-xl border w-full max-w-[350px] justify-self-center">
 			<Card className="w-full">
 				<CardHeader className="p-2">
 					<CardTitle className="text-sm font-semibold text-center">
@@ -97,8 +97,8 @@ const MonthCalendar: FC<MonthCalendarProps> = memo(({ date, highlightedDates, mo
 										day.getMonth() !== date.getMonth()
 											? "text-muted-foreground"
 											: isWeekend
-											? "text-destructive"
-											: ""
+												? "text-destructive"
+												: ""
 									} ${isHighlighted ? "bg-primary/80 hover:bg-primary/70" : ""}`}
 									onClick={() => onDayClick(day)}
 								>

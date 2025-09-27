@@ -134,7 +134,7 @@ const SummaryCard: FC<SummaryCardProps> = ({ portfolioSummary }) => {
 	}, [portfolioSummary]);
 
 	return (
-		<Card className="col-span-4 rounded-lg xl:col-span-1">
+		<Card className="rounded-lg xl:col-span-1">
 			<CardHeader>
 				<CardTitle className="font-bold sm:text-xl">Общая информация по портфелю</CardTitle>
 			</CardHeader>

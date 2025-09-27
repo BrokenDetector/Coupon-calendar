@@ -28,16 +28,10 @@ export function DataTableContent<TData extends { SECID: string }, TValue>({
 
 	return (
 		<div className="rounded-md border bg-background/20">
-			<Table
-				divClassname={cn("overflow-auto", className)}
-				parentRef={tableContainerRef}
-			>
+			<Table divClassname={cn("overflow-auto", className)} parentRef={tableContainerRef}>
 				<TableHeader className="sticky top-0 z-10 text-xs shadow-lg bg-card">
 					{table.getHeaderGroups().map((headerGroup) => (
-						<TableRow
-							key={headerGroup.id}
-							className="flex w-full border-b"
-						>
+						<TableRow key={headerGroup.id} className="flex w-full border-b">
 							{headerGroup.headers.map((header) => (
 								<TableHead
 									key={header.id}
@@ -56,7 +50,7 @@ export function DataTableContent<TData extends { SECID: string }, TValue>({
 												}),
 												"text-xs text-center px-0 flex flex-row justify-center items-center whitespace-normal leading-tight",
 												!header.column.getCanSort() &&
-													"cursor-default hover:bg-inherit hover:text-inherits"
+													"cursor-default hover:bg-inherit hover:text-inherits",
 											)}
 											onClick={() => {
 												if (header.column.getCanSort()) {

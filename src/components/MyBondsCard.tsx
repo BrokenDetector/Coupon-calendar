@@ -24,7 +24,7 @@ const MyBondsCard = ({
 	handleQuantityChange,
 	handlePriceChange,
 }: MyBondsCardProps) => {
-	const tableData = bonds.map((bond: Bond) => ({
+	const tableData = bonds.map((bond) => ({
 		...bond,
 		handleBondRemove,
 		handlePriceBlur,
@@ -34,31 +34,18 @@ const MyBondsCard = ({
 	}));
 
 	return (
-		<Card className="col-span-5 rounded-lg xl:col-span-4">
+		<Card className="rounded-lg xl:col-span-4">
 			<CardHeader className="flex flex-col justify-between sm:flex-row sm:items-center">
 				<CardTitle className="text-xl font-bold">Мои облигации</CardTitle>
 				<div>
-					<SelectList
-						options={allBonds}
-						onBondUpdate={handleBondAdd}
-						bonds={bonds}
-					/>
-					<Button
-						variant="link"
-						asChild
-						className="p-0 ml-4 text-xs text-foreground"
-					>
+					<SelectList options={allBonds} onBondUpdate={handleBondAdd} bonds={bonds} />
+					<Button variant="link" asChild className="p-0 ml-4 text-xs text-foreground">
 						<Link href="/bonds">Список всех облигаций</Link>
 					</Button>
 				</div>
 			</CardHeader>
 			<CardContent>
-				<DataTable
-					data={tableData}
-					columns={columns}
-					className="h-[320px]"
-					placeholder="Поиск по портфелю"
-				/>
+				<DataTable data={tableData} columns={columns} className="h-[320px]" placeholder="Поиск по портфелю" />
 			</CardContent>
 		</Card>
 	);

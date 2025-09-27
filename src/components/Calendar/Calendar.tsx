@@ -103,7 +103,7 @@ const CouponCalendar: FC<CouponCalendarProps> = ({ bonds }) => {
 			bucket: Record<string, Record<string, number>>,
 			key: string,
 			currency: string,
-			value: number
+			value: number,
 		) => {
 			if (!bucket[key]) bucket[key] = {};
 			if (!bucket[key][currency]) bucket[key][currency] = 0;
@@ -153,7 +153,7 @@ const CouponCalendar: FC<CouponCalendarProps> = ({ bonds }) => {
 
 	const months = useMemo(
 		() => Array.from({ length: 12 }, (_, i) => addMonths(startOfYear(new Date(currentYear, 0)), i)),
-		[currentYear]
+		[currentYear],
 	);
 
 	const handleDayClick = useCallback(
@@ -167,7 +167,7 @@ const CouponCalendar: FC<CouponCalendarProps> = ({ bonds }) => {
 			setTotalCouponsByCurrency(totalsByCurrency);
 			setIsModalOpen(true);
 		},
-		[dayIndex, dayCurrencyTotals]
+		[dayIndex, dayCurrencyTotals],
 	);
 
 	const changeYear = useCallback((increment: number) => {
@@ -179,7 +179,7 @@ const CouponCalendar: FC<CouponCalendarProps> = ({ bonds }) => {
 			const monthKey = format(month, "yyyy-MM");
 			return monthCurrencyTotals[monthKey] || {};
 		},
-		[monthCurrencyTotals]
+		[monthCurrencyTotals],
 	);
 
 	useGSAP(() => {
@@ -187,7 +187,7 @@ const CouponCalendar: FC<CouponCalendarProps> = ({ bonds }) => {
 			gsap.fromTo(
 				yearTitleRef.current,
 				{ opacity: 0, y: -10 },
-				{ opacity: 1, y: 0, duration: 0.5, ease: "power2.out" }
+				{ opacity: 1, y: 0, duration: 0.5, ease: "power2.out" },
 			);
 		}
 	}, [currentYear]);
@@ -205,24 +205,18 @@ const CouponCalendar: FC<CouponCalendarProps> = ({ bonds }) => {
 					stagger: 0.05,
 					ease: "back.out(1.7)",
 					delay: 0.2,
-				}
+				},
 			);
 		}
 	}, [currentYear]);
 
 	return (
-		<div
-			className="col-span-3 p-4 rounded-lg border bg-card/30"
-			ref={calendarRef}
-		>
+		<div className="col-span-3 p-4 rounded-lg border bg-card/30" ref={calendarRef}>
 			<div className="flex justify-between items-center mb-6">
 				<Button onClick={() => changeYear(-1)}>
 					<ChevronLeft className="size-4" />
 				</Button>
-				<h1
-					ref={yearTitleRef}
-					className="text-xl font-bold text-center"
-				>
+				<h1 ref={yearTitleRef} className="text-lg font-bold text-center sm:text-xl">
 					Календарь на {currentYear}
 				</h1>
 				<Button onClick={() => changeYear(1)}>
@@ -232,7 +226,7 @@ const CouponCalendar: FC<CouponCalendarProps> = ({ bonds }) => {
 
 			<div
 				ref={monthGridRef}
-				className="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-2 mb-6"
+				className="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-2 mb-6 max-w-[1780px]"
 			>
 				{months.map((month, index) => {
 					const monthlyTotals = calculateMonthlyTotal(month);
@@ -255,17 +249,11 @@ const CouponCalendar: FC<CouponCalendarProps> = ({ bonds }) => {
 					<div>
 						<p>
 							Хотите отслеживать выбранные облигации?{" "}
-							<Link
-								href="/auth?view=register"
-								className="underline"
-							>
+							<Link href="/auth?view=register" className="underline">
 								Войдите в аккаунт
 							</Link>{" "}
 							или{" "}
-							<Link
-								href="/auth?view=register"
-								className="underline"
-							>
+							<Link href="/auth?view=register" className="underline">
 								зарегистрируйтесь
 							</Link>
 							, чтобы сохранить их навсегда.{" "}

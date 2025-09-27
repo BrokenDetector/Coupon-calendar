@@ -16,7 +16,7 @@ const SkeletonCalendar = () => {
 					.map((_, i) => (
 						<div
 							key={i}
-							className="flex flex-col gap-4 justify-between items-center rounded-lg border"
+							className="flex flex-col gap-4 justify-between items-center rounded-lg border max-w-[350px] justify-self-center w-full"
 						>
 							{/* Month header */}
 							<Card className="w-full">
