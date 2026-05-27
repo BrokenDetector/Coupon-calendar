@@ -32,7 +32,7 @@ const AuthPage = () => {
 	useEffect(() => {
 		if (error === "EmailInUse") {
 			customToast.error(
-				"Этот email уже зарегистрирован с паролем. Пожалуйста, войдите используя email и пароль."
+				"Этот email уже зарегистрирован с паролем. Пожалуйста, войдите используя email и пароль.",
 			);
 		}
 	}, [error]);
@@ -45,11 +45,7 @@ const AuthPage = () => {
 					<CardDescription>Войдите в аккаунт или создайте новый</CardDescription>
 				</CardHeader>
 				<CardContent>
-					<Tabs
-						value={type}
-						onValueChange={handleTabChange}
-						className="w-full"
-					>
+					<Tabs value={type} onValueChange={handleTabChange} className="w-full">
 						<TabsList className="grid w-full grid-cols-2">
 							<TabsTrigger value="login">Вход</TabsTrigger>
 							<TabsTrigger value="register">Регистрация</TabsTrigger>

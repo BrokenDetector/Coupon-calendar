@@ -74,14 +74,14 @@ const LocalPortfolioManager: FC<LocalPortfolioManagerProps> = ({ allBonds, curre
 		(secId: string, value: number) => {
 			setBonds((prev) => prev.map((b) => (b.SECID === secId ? { ...b, quantity: value } : b)));
 		},
-		[setBonds]
+		[setBonds],
 	);
 
 	const handlePriceChange = useCallback(
 		(secId: string, price: number) => {
 			setBonds((prev) => prev.map((b) => (b.SECID === secId ? { ...b, purchasePrice: price } : b)));
 		},
-		[setBonds]
+		[setBonds],
 	);
 
 	const handlePriceBlur = useCallback(
@@ -93,7 +93,7 @@ const LocalPortfolioManager: FC<LocalPortfolioManagerProps> = ({ allBonds, curre
 				setLocalData(currentBonds);
 			}
 		},
-		[getLocalData, setLocalData]
+		[getLocalData, setLocalData],
 	);
 
 	const handleBondAdd = useCallback(
@@ -108,17 +108,11 @@ const LocalPortfolioManager: FC<LocalPortfolioManagerProps> = ({ allBonds, curre
 					title: "Вы достигли предела облигаций!",
 					description: (
 						<p>
-							<Link
-								href="/auth?view=register"
-								className="font-bold underline"
-							>
+							<Link href="/auth?view=register" className="font-bold underline">
 								Зарегистрируйтесь
 							</Link>{" "}
 							или{" "}
-							<Link
-								href="/auth?view=login"
-								className="font-bold underline"
-							>
+							<Link href="/auth?view=login" className="font-bold underline">
 								войдите в аккаунт
 							</Link>{" "}
 							для увеличения лимита.
@@ -134,7 +128,7 @@ const LocalPortfolioManager: FC<LocalPortfolioManagerProps> = ({ allBonds, curre
 			setBonds((prevBonds) =>
 				alreadyExists
 					? prevBonds.map((bond) => (bond.SECID === SECID ? { ...bond, quantity } : bond))
-					: [...prevBonds, bondToAdd]
+					: [...prevBonds, bondToAdd],
 			);
 
 			const bondIndex = currentBonds.findIndex((item: Bond) => item.SECID === SECID);
@@ -145,7 +139,7 @@ const LocalPortfolioManager: FC<LocalPortfolioManagerProps> = ({ allBonds, curre
 			}
 			setLocalData(currentBonds);
 		},
-		[getLocalData, setLocalData, bonds]
+		[getLocalData, setLocalData, bonds],
 	);
 
 	const handleBondRemove = useCallback(
@@ -155,18 +149,15 @@ const LocalPortfolioManager: FC<LocalPortfolioManagerProps> = ({ allBonds, curre
 
 			setLocalData(updatedStorage);
 		},
-		[setLocalData, bonds]
+		[setLocalData, bonds],
 	);
 
 	if (error) {
 		return (
 			<div className="flex flex-col items-center justify-center min-h-[300px] text-red-600">
 				<p className="mb-2 text-lg font-semibold">Ошибка загрузки портфеля</p>
-				<p className="mb-4 max-w-lg text-center">{getErrorMessage(error)}</p>
-				<Button
-					onClick={() => window.location.reload()}
-					variant={"secondary"}
-				>
+				<p className="max-w-lg mb-4 text-center">{getErrorMessage(error)}</p>
+				<Button onClick={() => window.location.reload()} variant={"secondary"}>
 					Попробовать снова
 				</Button>
 			</div>
@@ -175,7 +166,7 @@ const LocalPortfolioManager: FC<LocalPortfolioManagerProps> = ({ allBonds, curre
 
 	return (
 		<div className="flex flex-col mx-10 space-y-4">
-			<div className="grid grid-cols-1 gap-3 xl:grid-cols-4">
+			<div className="grid grid-cols-1 gap-3 xl:grid-cols-5">
 				<SummaryCard portfolioSummary={portfolioSummary} />
 				<MyBondsCard
 					bonds={bonds}

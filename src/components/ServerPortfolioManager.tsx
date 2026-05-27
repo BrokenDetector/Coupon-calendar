@@ -60,14 +60,14 @@ const ServerPortfolioManager: FC<ServerPortfolioManagerProps> = ({
 		(secId: string, value: number) => {
 			setBonds((prev) => prev.map((b) => (b.SECID === secId ? { ...b, quantity: value } : b)));
 		},
-		[setBonds]
+		[setBonds],
 	);
 
 	const handlePriceChange = useCallback(
 		(secId: string, price: number) => {
 			setBonds((prev) => prev.map((b) => (b.SECID === secId ? { ...b, purchasePrice: price } : b)));
 		},
-		[setBonds]
+		[setBonds],
 	);
 
 	const handlePriceBlur = useCallback(
@@ -80,7 +80,7 @@ const ServerPortfolioManager: FC<ServerPortfolioManagerProps> = ({
 				customToast.error("Ошибка при обновлении цены покупки");
 			}
 		},
-		[portfolioId]
+		[portfolioId],
 	);
 
 	const handleBondAdd = useCallback(
@@ -99,7 +99,7 @@ const ServerPortfolioManager: FC<ServerPortfolioManagerProps> = ({
 				setBonds(prevBonds);
 			}
 		},
-		[portfolioId, bonds]
+		[portfolioId, bonds],
 	);
 
 	const handleBondRemove = useCallback(
@@ -113,18 +113,15 @@ const ServerPortfolioManager: FC<ServerPortfolioManagerProps> = ({
 				setBonds(prevBonds);
 			}
 		},
-		[portfolioId, bonds]
+		[portfolioId, bonds],
 	);
 
 	if (error) {
 		return (
 			<div className="flex flex-col items-center justify-center min-h-[300px] text-red-600">
 				<p className="mb-2 text-lg font-semibold">Ошибка загрузки портфеля</p>
-				<p className="mb-4 max-w-lg text-center">{getErrorMessage(error)}</p>
-				<Button
-					onClick={() => window.location.reload()}
-					variant={"secondary"}
-				>
+				<p className="max-w-lg mb-4 text-center">{getErrorMessage(error)}</p>
+				<Button onClick={() => window.location.reload()} variant={"secondary"}>
 					Попробовать снова
 				</Button>
 			</div>

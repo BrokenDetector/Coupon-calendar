@@ -25,19 +25,14 @@ export const OAuthButtons: FC = () => {
 	};
 
 	return (
-		<div className="flex flex-row gap-3 justify-between items-center">
+		<div className="grid items-center justify-between w-full grid-cols-2 gap-3">
 			<Button
 				variant="outline"
 				onClick={() => handleOAuthSignIn("google")}
 				disabled={isPending}
 				className="w-full"
 			>
-				<Image
-					src="/google.svg"
-					alt="Google"
-					width={25}
-					height={25}
-				/>
+				<Image src="/google.svg" alt="Google" width={25} height={25} />
 			</Button>
 
 			<Button
@@ -46,12 +41,7 @@ export const OAuthButtons: FC = () => {
 				disabled={isPending}
 				className="w-full"
 			>
-				<Image
-					src="/yandex.svg"
-					alt="Yandex"
-					width={30}
-					height={30}
-				/>
+				<Image src="/yandex.svg" alt="Yandex" width={20} height={20} />
 			</Button>
 		</div>
 	);
