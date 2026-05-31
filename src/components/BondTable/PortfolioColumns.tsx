@@ -4,6 +4,7 @@ import { getCurrencySymbol } from "@/helpers/getCurrencySymbol";
 import { cn } from "@/lib/utils";
 import { ColumnDef } from "@tanstack/react-table";
 import { Trash } from "lucide-react";
+import { useEffect, useState } from "react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
 
 interface ExtendedBond extends Bond {
@@ -27,6 +28,69 @@ const calculateYearsToMaturity = (maturityDate: string): number => {
 	return diffTime / (1000 * 60 * 60 * 24 * 365.25);
 };
 
+const isValidPriceInput = (value: string): boolean => /^$|^\d*[.,]?\d*$/.test(value);
+
+const parsePriceInput = (value: string): number | null => {
+	const parsedValue = parseFloat(value.replace(",", "."));
+	return Number.isNaN(parsedValue) ? null : parsedValue;
+};
+
+const normalizePriceInput = (value: string): string => {
+	if ((value.endsWith(".") || value.endsWith(",")) && /^\d+[.,]$/.test(value)) {
+		return value.slice(0, -1);
+	}
+
+	return value;
+};
+
+const PurchasePriceInput = ({ bond }: { bond: ExtendedBond }) => {
+	const [draftPrice, setDraftPrice] = useState(() => (bond.purchasePrice == null ? "" : String(bond.purchasePrice)));
+
+	useEffect(() => {
+		setDraftPrice(bond.purchasePrice == null ? "" : String(bond.purchasePrice));
+	}, [bond.purchasePrice]);
+
+	return (
+		<Input
+			type="text"
+			inputMode="decimal"
+			placeholder="Введите %"
+			value={draftPrice}
+			onBlur={(e) => {
+				const value = normalizePriceInput(e.target.value);
+				const numValue = value === "" ? 100 : parsePriceInput(value);
+
+				if (numValue !== null) {
+					setDraftPrice(String(numValue));
+					bond.handlePriceChange(bond.SECID, numValue);
+					bond.handlePriceBlur(bond, numValue);
+				}
+			}}
+			aria-label={`Цена покупки ${bond.SHORTNAME}`}
+			onChange={(e) => {
+				const value = e.target.value;
+
+				if (!isValidPriceInput(value)) {
+					return;
+				}
+
+				setDraftPrice(value);
+				const numValue = parsePriceInput(value);
+
+				if (numValue !== null) {
+					bond.handlePriceChange(bond.SECID, numValue);
+				}
+			}}
+			className="w-18"
+			onKeyDown={(e) => {
+				if (e.key === "Enter") {
+					(e.target as HTMLElement).blur();
+				}
+			}}
+		/>
+	);
+};
+
 export const columns: ColumnDef<ExtendedBond>[] = [
 	{
 		accessorKey: "SHORTNAME",
@@ -35,7 +99,7 @@ export const columns: ColumnDef<ExtendedBond>[] = [
 		cell: ({ row }) => {
 			const bond = row.original;
 			return (
-				<div className="flex flex-col justify-start items-start px-9 w-full text-left">
+				<div className="flex flex-col items-start justify-start w-full text-left px-9">
 					<span className="text-sm font-bold">{bond.SHORTNAME}</span>
 					<span className="text-xs text-muted-foreground">{bond.ISIN}</span>
 				</div>
@@ -87,37 +151,7 @@ export const columns: ColumnDef<ExtendedBond>[] = [
 		size: 100,
 		cell: ({ row }) => {
 			const bond = row.original;
-			return (
-				<Input
-					type="text"
-					placeholder="Введите %"
-					value={bond.purchasePrice || ""}
-					onBlur={(e) => {
-						let value = e.target.value;
-						if ((value.endsWith(".") || value.endsWith(",")) && /^\d+[.,]$/.test(value)) {
-							value = value.slice(0, -1);
-						}
-						const numValue = value === "" ? 100 : parseFloat(value.replace(",", "."));
-						if (!isNaN(numValue)) {
-							bond.handlePriceBlur(bond, numValue);
-						}
-					}}
-					aria-label={`Цена покупки ${bond.SHORTNAME}`}
-					onChange={(e) => {
-						const value = e.target.value;
-						// Allow numbers and single dot or comma
-						if (/^$|^\d*[.,]?\d*$/.test(value)) {
-							bond.handlePriceChange(bond.SECID, parseFloat(value.replace(",", ".")));
-						}
-					}}
-					className="w-18"
-					onKeyDown={(e) => {
-						if (e.key === "Enter") {
-							(e.target as HTMLElement).blur();
-						}
-					}}
-				/>
-			);
+			return <PurchasePriceInput bond={bond} />;
 		},
 		sortingFn: (rowA, rowB) => {
 			const priceA = rowA.original.purchasePrice || 100;
