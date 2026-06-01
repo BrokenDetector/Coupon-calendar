@@ -1,12 +1,12 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { getPortfolio } from "@/lib/db-helpers";
+import { getPortfolioById } from "@/lib/db-helpers";
 import { checkProtection } from "@/lib/protection";
 
 export async function addOrUpdateBond(
 	portfolioId: string,
-	bondToAdd: Bond
+	bondToAdd: Bond,
 ): Promise<APIResponse<{ success?: boolean }>> {
 	const protection = await checkProtection(true);
 	if (protection.error) {
@@ -14,7 +14,7 @@ export async function addOrUpdateBond(
 	}
 
 	try {
-		const portfolio = await getPortfolio(portfolioId);
+		const portfolio = await getPortfolioById(portfolioId);
 
 		if (!portfolio) {
 			return { error: "Портфель не найден." };
@@ -50,7 +50,7 @@ export async function addOrUpdateBond(
 
 export async function removeBondFromPortfolio(
 	portfolioId: string,
-	SECID: string
+	SECID: string,
 ): Promise<APIResponse<{ success?: boolean }>> {
 	const protection = await checkProtection();
 	if (protection.error) {
@@ -58,7 +58,7 @@ export async function removeBondFromPortfolio(
 	}
 
 	try {
-		const portfolio = await getPortfolio(portfolioId);
+		const portfolio = await getPortfolioById(portfolioId);
 
 		if (!portfolio) {
 			return { error: "Портфель не найден." };

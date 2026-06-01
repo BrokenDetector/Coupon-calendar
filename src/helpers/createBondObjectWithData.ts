@@ -1,7 +1,7 @@
 export type BondsWithData = {
 	securities: { columns: string[]; data: RawRow[] };
-	marketdata: { columns: string[]; data: RawRow[] };
-	marketdata_yields: { columns: string[]; data: RawRow[] };
+	marketdata?: { columns: string[]; data: RawRow[] };
+	marketdata_yields?: { columns: string[]; data: RawRow[] };
 };
 
 export type BondObjectWithCoupons = [
@@ -76,20 +76,22 @@ export const createBondsWithData = (data: BondsWithData): MOEXBondData[] => {
 	}
 
 	const securitiesColumns = mapColumns(data.securities.columns);
-	const marketDataColumns = mapColumns(data.marketdata.columns);
-	const yieldDataColumns = mapColumns(data.marketdata_yields.columns);
+	const marketData = data.marketdata ?? { columns: [], data: [] };
+	const yieldData = data.marketdata_yields ?? { columns: [], data: [] };
+	const marketDataColumns = mapColumns(marketData.columns);
+	const yieldDataColumns = mapColumns(yieldData.columns);
 
 	const yieldDataMap = new Map<string, RawRow>();
-	data.marketdata_yields.data.forEach((yieldData) => {
-		const secid = getStringAt(yieldData, yieldDataColumns["SECID"]);
+	yieldData.data.forEach((yieldRow) => {
+		const secid = getStringAt(yieldRow, yieldDataColumns["SECID"]);
 		if (secid) {
-			yieldDataMap.set(secid, yieldData);
+			yieldDataMap.set(secid, yieldRow);
 		}
 	});
 
 	return data.securities.data.map((bondData) => {
 		const secid = getStringAt(bondData, securitiesColumns["SECID"]);
-		const marketData = data.marketdata.data.find((md) => getStringAt(md, marketDataColumns["SECID"]) === secid);
+		const marketRow = marketData.data.find((md) => getStringAt(md, marketDataColumns["SECID"]) === secid);
 		const yieldData = yieldDataMap.get(secid);
 
 		const bond = {
@@ -106,8 +108,8 @@ export const createBondsWithData = (data: BondsWithData): MOEXBondData[] => {
 			FACEUNIT: getStringAt(bondData, securitiesColumns["FACEUNIT"]),
 			COUPONPERCENT: getNumberAt(bondData, securitiesColumns["COUPONPERCENT"]),
 			PREVPRICE: getNumberAt(bondData, securitiesColumns["PREVPRICE"]),
-			LAST: getNumberAt(marketData, marketDataColumns["LAST"]),
-			DURATION: getNumberAt(marketData, marketDataColumns["DURATION"]),
+			LAST: getNumberAt(marketRow, marketDataColumns["LAST"]),
+			DURATION: getNumberAt(marketRow, marketDataColumns["DURATION"]),
 			EFFECTIVEYIELD: getNumberAt(yieldData, yieldDataColumns["EFFECTIVEYIELD"]),
 			DURATIONWAPRICE: getNumberAt(yieldData, yieldDataColumns["DURATIONWAPRICE"]),
 			TYPE: getTypeName(getStringAt(bondData, securitiesColumns["SECTYPE"])),

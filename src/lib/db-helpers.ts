@@ -56,3 +56,20 @@ export const getPortfolio = async (id: string) => {
 		return null;
 	}
 };
+
+export const getPortfolioById = async (id: string) => {
+	if (!id || !isValidObjectId(id)) return null;
+	try {
+		return await db.portfolio.findUnique({
+			where: {
+				id,
+			},
+			select: {
+				id: true,
+			},
+		});
+	} catch (error) {
+		console.error(error instanceof Error ? error.stack : "Unknown error");
+		return null;
+	}
+};

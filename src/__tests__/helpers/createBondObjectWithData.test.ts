@@ -50,11 +50,11 @@ describe("Bond Data Helper Functions", () => {
 					],
 				},
 				marketdata: {
-					columns: ["SECID", "LAST", "DURATION"],
+					columns: ["SECID"],
 					data: [], // Missing market data
 				},
 				marketdata_yields: {
-					columns: ["SECID", "EFFECTIVEYIELD", "DURATIONWAPRICE"],
+					columns: ["SECID"],
 					data: [], // Missing yield data
 				},
 			};

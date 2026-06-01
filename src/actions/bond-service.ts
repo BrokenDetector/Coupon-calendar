@@ -11,6 +11,20 @@ type FetchBondsOptions = {
 };
 
 const BASE_MOEX_URL = "https://iss.moex.com/iss/engines/stock/markets/bonds";
+const ALL_BONDS_BASIC_COLUMNS = "SECID,SHORTNAME,ISIN,FACEUNIT";
+const SECURITY_COLUMNS =
+	"SECID,SECNAME,SHORTNAME,ISIN,FACEVALUE,NEXTCOUPON,COUPONVALUE,COUPONPERIOD,MATDATE,ACCRUEDINT,FACEUNIT,COUPONPERCENT,PREVPRICE,SECTYPE";
+const MARKETDATA_COLUMNS = "SECID,LAST,DURATION";
+const YIELD_COLUMNS = "SECID,EFFECTIVEYIELD,DURATIONWAPRICE";
+
+const buildMoexUrl = (path: string, params: Record<string, string>) => {
+	const searchParams = new URLSearchParams({
+		"iss.meta": "off",
+		...params,
+	});
+
+	return `${BASE_MOEX_URL}${path}?${searchParams.toString()}`;
+};
 
 /**
  * Unified bond data fetching service
@@ -34,7 +48,7 @@ const BASE_MOEX_URL = "https://iss.moex.com/iss/engines/stock/markets/bonds";
  */
 export const fetchBonds = async (
 	input: BondRequestInput[] | "all",
-	options: FetchBondsOptions = { detailLevel: "full", includeCoupons: false, checkAuth: true }
+	options: FetchBondsOptions = { detailLevel: "full", includeCoupons: false, checkAuth: true },
 ): Promise<APIResponse<Bond[] | MOEXBondData[]>> => {
 	try {
 		if (options.checkAuth) {
@@ -58,9 +72,13 @@ export const fetchBonds = async (
  */
 const fetchAllBonds = async (detailLevel: "basic" | "full"): Promise<MOEXBondData[]> => {
 	const response = await fetch(
-		`${BASE_MOEX_URL}/securities.json?marketprice_board=1&iss.meta=off${
-			detailLevel === "basic" ? "&securities.columns=SECID,SHORTNAME,ISIN,FACEUNIT" : ""
-		}`
+		buildMoexUrl("/securities.json", {
+			marketprice_board: "1",
+			"iss.only": "securities,marketdata,marketdata_yields",
+			"securities.columns": detailLevel === "basic" ? ALL_BONDS_BASIC_COLUMNS : SECURITY_COLUMNS,
+			"marketdata.columns": detailLevel === "basic" ? "SECID" : MARKETDATA_COLUMNS,
+			"marketdata_yields.columns": detailLevel === "basic" ? "SECID" : YIELD_COLUMNS,
+		}),
 	);
 
 	if (!response.ok) {
@@ -95,10 +113,15 @@ const fetchPortfolioBonds = async (bonds: BondRequestInput[], options: FetchBond
 
 const fetchMarketData = async (secids: string[]): Promise<MOEXBondData[]> => {
 	const response = await fetch(
-		`${BASE_MOEX_URL}/securities.json?marketprice_board=1&iss.meta=off&iss.only=securities,marketdata,marketdata_yields&securities=${secids.join(
-			","
-		)}`,
-		{ next: { revalidate: 3600 } }
+		buildMoexUrl("/securities.json", {
+			marketprice_board: "1",
+			"iss.only": "securities,marketdata,marketdata_yields",
+			securities: secids.join(","),
+			"securities.columns": SECURITY_COLUMNS,
+			"marketdata.columns": MARKETDATA_COLUMNS,
+			"marketdata_yields.columns": YIELD_COLUMNS,
+		}),
+		{ next: { revalidate: 3600 } },
 	);
 	if (!response.ok) throw new Error(`[MOEX ERROR] Failed to fetch data for bonds: ${secids.join(",")}`);
 	return createBondsWithData(await response.json());
@@ -107,7 +130,7 @@ const fetchMarketData = async (secids: string[]): Promise<MOEXBondData[]> => {
 const fetchCouponData = async (secid: string): Promise<MOEXBondCoupons & { SECID: string }> => {
 	const response = await fetch(
 		`https://iss.moex.com/iss/securities/${secid}/bondization.json?iss.json=extended&iss.meta=off&limit=off`,
-		{ next: { revalidate: 3600 } }
+		{ next: { revalidate: 3600 } },
 	);
 	if (!response.ok) throw new Error(`[MOEX ERROR] Failed to fetch coupons for ${secid}`);
 	return createBondObjectWithCoupons(await response.json());
